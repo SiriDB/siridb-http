@@ -132,7 +132,6 @@
     };
 
     var queryViewCallback = function () {
-
         app.applyCode();
 
         $('#contentholder .name-holder').html(app.db.who_am_i);
@@ -157,6 +156,7 @@
                 insertInto(this, '', ')', 1);
             }
         });
+
         $('#query').select().focus().keydown(function (event) {
             var popup = $('#autocomplete-popup');
             var isPopup = popup.is(':visible');
@@ -212,59 +212,23 @@
         });
     };
 
-    var loadAuthView = function () {
-        $('#view').html($('#auth-view').html());
-        $('#username-input,#password-input,#database-selection').keydown(function (event) {
-            if (event.keyCode == 10 || event.keyCode == 13) {
-                app.signIn(app.nextView, app.nextCallback);
-            } else {
-                $('#auth-message-container').fadeOut(100);
-            }
-        });
-        $('#username-input').select().focus();
-    };
-
     app.render = function (view, callback) {
-        $(window).off('resize');
-        if (app.user && app.db) {
+        if (app.db) {
+            $(window).off('resize');
             var $view = $(view);
             if ($view.length) {
                 $('#view').html($view.html());
             }
             $('.navbar-nav li').removeClass('active');
             $('.navbar-nav li[data-target="' + view + '"]').addClass('active');
-            app.licenseWarning();
             if (callback) { callback(); }
-        } else if (app.user) {
-            $.get('/database-info', function (data) {
-                app.db = data;
-                app.render(view, callback);
-            }, 'json').error(function (xhr) {
-                loadAuthView();
-                app.handleSignInError(xhr);
-            });
         } else {
-            $.post('/sign-in', function (user) {
-                app.user = user;
+            $.getJSON('/db-info', function (db) {
+                app.db = db;
                 app.render(view, callback);
-            }).error(function () {
-                app.nextView = view;
-                app.nextCallback = callback;
-                loadAuthView();
             });
         }
-    };
 
-    app.authView = function () {
-        $.post('/sign-out');
-        app.history = [];
-        app.historyPos = 0;
-        app.addToHistory = false;
-        app.db = null;
-        app.user = null;
-        app.nextView = '#query-view';
-        app.nextCallback = queryViewCallback;
-        loadAuthView();
     };
 
     app.insertSpace = function () {
@@ -316,7 +280,7 @@
             $('#insert-csv-flat').val('"series-001",' + Math.floor(moment() * factor) + ',' + Math.floor((Math.random() * 100) + 1) + '\n');
             $('#insert-csv-table,#insert-csv-flat').keydown(function (event) {
                 if (event.ctrlKey && (event.keyCode == 10 || event.keyCode == 13)) {
-                    app.runInsert('csv', $(event.target).parent().parent().find('button').first());
+                    app.runInsert('text/csv', $(event.target).parent().parent().find('button').first());
                 }
             });
             $('#insert-json-array').val('[\n\t{\n\t\t"name": "series-001",\n\t\t"points": [\n\t\t\t[' + Math.floor(moment() * factor) + ', ' + Math.floor((Math.random() * 100) + 1) + ']\n\t\t]\n\t}\n]');
@@ -326,7 +290,7 @@
                 var value = $this.val();
 
                 if (event.ctrlKey && (event.keyCode == 10 || event.keyCode == 13)) {
-                    app.runInsert('json', event.target);
+                    app.runInsert('application/json', event.target);
                 }
                 if (event.which == 9) {
                     event.preventDefault();
@@ -358,7 +322,6 @@
         '': function () { app.queryView(); },
         'query': function () { app.queryView(); },
         'insert': function () { app.insertView(); },
-        'auth': function () { app.authView(); },
         '*': function () { app.render('#page-not-found-view'); }
     });
 

@@ -20,6 +20,7 @@ import argparse
 import re
 import setproctitle
 from siridb.connector import SiriDBClient
+from prompt_toolkit import prompt
 from lib.version import __version__
 from lib.version import __maintainer__
 from lib.version import __email__
@@ -38,22 +39,21 @@ if __name__ == '__main__':
         '-u',
         '--user',
         type=str,
-        required=True,
-        help='User for login.')
+        help='User for login. If user is not given it\'s asked from the tty.')
 
     parser.add_argument(
         '-p',
         '--password',
         type=str,
-        required=True,
-        help='Password to use when connecting to server.')
+        help='Password to use when connecting to server. If password is '
+        'not given it\'s asked from the tty.')
 
     parser.add_argument(
         '-d',
         '--dbname',
         type=str,
-        required=True,
-        help='Database name to connect to.')
+        help='Database name to connect to. If dbname is '
+        'not given it\'s asked from the tty.')
 
     parser.add_argument(
         '-s',
@@ -126,6 +126,18 @@ Home-page: http://siridb.net
                            email=__email__))
 
     try:
+        while not args.user:
+            args.user = prompt('Username: ')
+
+        while not args.password:
+            args.password = prompt('Password: ', is_password=True)
+
+        while not args.dbname:
+            args.dbname = prompt('Database name: ')
+    except KeyboardInterrupt:
+        signal_handler()
+
+    try:
         hostlist = [(server.strip(), int(port))
                     for server, port
                     in [s.split(':')
@@ -141,7 +153,7 @@ Home-page: http://siridb.net
         hostlist=hostlist,
         keepalive=True)
 
-    app = App(port=args.port, siri=siri, debug=args.debug)
+    app = App(port=args.port, siri=siri, debug_mode=args.debug)
     app.start()
     # bye
     exit(0)

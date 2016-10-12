@@ -40,11 +40,9 @@
             <ul class="nav navbar-nav navbar-right">
                 <li id="nav-query" data-target="#query-view"><a href="#query">Query</a></li>
                 <li id="nav-insert" data-target="#insert-view"><a href="#insert">Insert</a></li>
-                <li id="nav-insert" data-target="#auth-view"><a href="#auth">Sign out</a></li>
             </ul>
         </div>
     </div>
-    <div class="alert alert-warning" id="license-warning-container"></div>
 </nav>
 
 <div id="siridb-modal" class="modal fade" tabindex="-1">
@@ -56,68 +54,13 @@
         <dl class="dl-horizontal">
             <dt>Database:</dt><dd id="modal-database"></dd>
             <dt>SiriDB:</dt><dd id="modal-version"></dd>
-            <dt>License:</dt><dd id="modal-license"></dd>
-            <dt></dt><dd><a data-keyboard="true" data-dismiss="modal" data-toggle="modal" data-target="#license-modal" onclick="app.licenseModal()">change license</a></dd>
         </dl>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-
-<div id="license-modal" class="modal fade" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-body">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">x</span></button>
-        <div class="siridb-logo-container"><span class="siridb-logo-large"></span></div>
-        <form role="form" id="license-form">
-            <div id="license-message-container"></div>
-            <div id="insert-license-code-group" class="form-group">
-                <label for="license-code">Enter your license code</label>
-                <textarea type="text" class="form-control" id="license-code" spellcheck="false" rows="8"></textarea>
-            </div>
-            <button type="button" class="btn btn-default" id="btn-close-license-modal" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-default" id="btn-change-license" onclick="app.changeLicense()">Submit</button>
-        </form>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
 #end
-
-<script id="auth-view" type="text/html">
-    <div class="container container-main">
-        <span class="siridb-logo-large"></span>
-        #if @databases:
-        <div id="auth-form" class="form" role="form">
-            <div id="auth-message-container"></div>
-            <div class="col-xs-12 col-sm-offset-3 col-sm-6 form-group">
-                <input type="text" class="form-control" id="username-input" placeholder="Username" spellcheck="false" maxlength="60" />
-            </div>
-            <div class="col-xs-12 col-sm-offset-3 col-sm-6 form-group">
-                <input type="password" class="form-control" id="password-input" placeholder="Password" spellcheck="false" maxlength="128" />
-            </div>
-            <div class="col-xs-12 col-sm-offset-3 col-sm-6 form-group">
-                <select id="database-selection" class="form-control siri-select">
-                #for @dbname in @databases:
-                    <option value="@dbname">@dbname</option>
-                #end
-                </select>
-            </div>
-            <div class="col-xs-12 col-sm-offset-3 col-sm-6 form-group">
-                <button class="btn btn-default" type="button" id="btn-sign-in" onclick="app.signIn(app.nextView, app.nextCallback)">Sign in</button>
-            </div>
-        </div>
-        #else
-        <div class="alert alert-warning">
-        There's no database found on this server. First join or create a database using 'siridb-manage' and next refresh the browser.
-        </div>
-        #end
-    </div>
-    <div id="messageholder"></div>
-    <div id="contentholder"></div>
-</script>
 
 <script id="query-view" type="text/html">
     <div class="container">
@@ -134,7 +77,7 @@
             </div>
         </div>
         <div id="messageholder"></div>
-        <div id="contentholder">Welcome <span class="name-holder"></span>! type <code>help</code> for help</div>
+        <div id="contentholder">Type <code>help</code> for help</div>
     </div>
 </script>
 
@@ -163,28 +106,28 @@
                 <label for="insert-json-object">Enter json data</label>
                 <textarea type="text" class="form-control" id="insert-json-object" spellcheck="false"></textarea>
             </div>
-            <button type="button" class="btn btn-default" id="btn-insert-json" onclick="app.runInsert('json', this)">Submit</button>
+            <button type="button" class="btn btn-default" id="btn-insert-json" onclick="app.runInsert('application/json', this)">Submit</button>
         </form>
         <form id="insert-form-json-array" role="form">
             <div id="insert-group-json-array" class="form-group">
                 <label for="insert-json-array">Enter json data</label>
                 <textarea type="text" class="form-control" id="insert-json-array" spellcheck="false"></textarea>
             </div>
-            <button type="button" class="btn btn-default" id="btn-insert-json" onclick="app.runInsert('json', this)">Submit</button>
+            <button type="button" class="btn btn-default" id="btn-insert-json" onclick="app.runInsert('application/json', this)">Submit</button>
         </form>
         <form id="insert-form-csv-flat" role="form">
             <div id="insert-group-csv-flat" class="form-group">
                 <label for="insert-csv-flat">Enter csv data</label>
                 <textarea type="text" class="form-control" id="insert-csv-flat" spellcheck="false"></textarea>
             </div>
-            <button type="button" class="btn btn-default" id="btn-insert-csv-flat" onclick="app.runInsert('csv', this)">Submit</button>
+            <button type="button" class="btn btn-default" id="btn-insert-csv-flat" onclick="app.runInsert('text/csv', this)">Submit</button>
         </form>
         <form id="insert-form-csv-table" role="form">
             <div id="insert-group-csv-table" class="form-group">
                 <label for="insert-csv-table">Enter csv data</label>
                 <textarea type="text" class="form-control" id="insert-csv-table" spellcheck="false"></textarea>
             </div>
-            <button type="button" class="btn btn-default" id="btn-insert-csv-table" onclick="app.runInsert('csv', this)">Submit</button>
+            <button type="button" class="btn btn-default" id="btn-insert-csv-table" onclick="app.runInsert('text/csv', this)">Submit</button>
         </form>
     </div>
 </script>
@@ -214,7 +157,6 @@
 <script src="static/js/grammar.js"></script>
 <script src="static/js/app.js"></script>
 <script src="static/js/router.js"></script>
-
 #else
 <script src="static/js/lib/jsleri-1.0.8.min.js"></script>
 <script src="static/js/lib/jquery-2.1.4.min.js"></script>

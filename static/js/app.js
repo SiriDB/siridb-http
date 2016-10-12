@@ -44,108 +44,6 @@ $(document).ready(function () {
     app.openModal = function () {
         $('#modal-database').html(app.db.dbname);
         $('#modal-version').html(app.db.version);
-        $('#modal-license').html(app.db.license.replace(' (expires', '<br />(expires'));
-    };
-
-    app.licenseModal = function () {
-        $('#license-message-container,#btn-close-license-modal').hide();
-        $('#insert-license-code-group,#btn-change-license').show();
-        $('#btn-change-license,#license-code').prop('disabled', false);
-        $('#license-code').val('').off().keydown(function (event) {
-            if (event.ctrlKey && (event.keyCode == 10 || event.keyCode == 13)) {
-                app.changeLicense();
-            }
-            $('#license-message-container').fadeOut(100);
-        });
-        $('#license-modal').off('shown.bs.modal').on('shown.bs.modal', function () {
-            $('#license-code').focus();
-        });
-    };
-
-    app.handleChangeLicenseError = function (xhr) {
-        if (xhr.status == 422) {
-            window.location.hash = '#auth';
-        } else {
-            try {
-                var data = JSON.parse(xhr.responseText);
-                if (data.hasOwnProperty('error_msg')) {
-                    $('#license-message-container').fadeOut(100, function () {
-                        $('#license-message-container').html([
-                            '<div class="alert alert-warning">',
-                                '<a href="#" class="close" data-dismiss="alert">&times;</a>',
-                                '<strong>Error!</strong> ' + data.error_msg,
-                            '</div>'
-                        ].join('')).fadeIn(200);
-                    });
-                }
-            } catch (e) {
-                $('#license-message-container').html('<div class="alert alert-danger">Some error occurred, please see the console for more details.</div>').fadeIn(100);
-            }
-        }
-        $('#btn-change-license,#license-code').prop('disabled', false);
-    };
-
-    app.changeLicense = function () {
-        $('#btn-change-license,#license-code').prop('disabled', true);
-        $('#license-message-container').html([
-            '<div class="alert alert-info">',
-                'Please wait while we send the new license code to database <strong>' + app.db.dbname + '</strong>...',
-            '</div>'
-        ].join('')).fadeIn(200);
-        $.post('/query', { q: 'alter database set license "' + $('#license-code').val() + '"' }, function () {
-            $.post('/query', { q: 'show license' }, function (data) {
-                app.db.license = data.data[0].value;
-                $('#insert-license-code-group,#btn-change-license').hide();
-                $('#license-message-container').fadeOut(100, function () {
-                    $('#license-message-container').html([
-                        '<div class="alert alert-success">',
-                            'Succesful changed license for database <strong>' + app.db.dbname + '</strong>!',
-                        '</div>'
-                    ].join('')).fadeIn(200);
-                    app.licenseWarning();
-                    $('#btn-close-license-modal').show();
-                });
-            }, 'json');
-        }).error(app.handleChangeLicenseError);
-    };
-
-    app.handleSignInError = function (xhr) {
-        try {
-            var data = JSON.parse(xhr.responseText);
-            if (data.hasOwnProperty('error_msg')) {
-                $('#auth-message-container').html([
-                    '<div class="alert alert-warning">',
-                        '<a href="#" class="close" data-dismiss="alert">&times;</a>',
-                        '<strong>Error!</strong> ' + data.error_msg,
-                    '</div>'
-                ].join('')).fadeIn(200);
-            }
-        } catch (e) {
-            $('#auth-message-container').html('<div class="alert alert-danger">Some error occurred, please see the console for more details.</div>').fadeIn(100);
-        }
-    };
-
-    app.licenseWarning = function () {
-        if (app.db.license.toLowerCase().indexOf('registered') == -1) {
-            $('#license-warning-container').html('<strong>Warning!</strong> ' + app.db.license + '. Click <a href="#" data-toggle="modal" data-target="#license-modal" onclick="app.licenseModal()">here</a> to enter a license code.').fadeIn(200);
-        } else {
-            $('#license-warning-container').hide();
-        }
-    };
-
-    app.signIn = function (view, callback) {
-        var username = $('#username-input').val(),
-            password = $('#password-input').val(),
-            dbname = $('#database-selection').val();
-
-        $.post('/sign-in', { u: username, p: password, d: dbname }, function () {
-            app.user = username;
-            if (window.location.hash === '#auth') {
-                window.location.hash = '#query';
-            } else {
-                app.render(view, callback);
-            }
-        }).error(app.handleSignInError);
     };
 
     app.setSeriesQuery = function (seriesName) {
@@ -332,21 +230,6 @@ $(document).ready(function () {
                                     (typeof row[column] !== 'string') ) {
                             s += '<td>' + oz.formatSize(row[column]*1024*1024) + '</td>';
 
-                        } else if (((tipe == 'show' && row.name == 'queries_timeout' && column == 'value') ||
-                                    (tipe == 'servers' && column == 'queries_timeout')) &&
-                                    (typeof row[column] !== 'string') ) {
-                            s += '<td>' + row[column] + ((row[column] === 1) ? ' second' : ' seconds') + '</td>';
-
-                        } else if (((tipe == 'show' && row.name == 'max_open_files' && column == 'value') ||
-                                    (tipe == 'servers' && column == 'max_open_files')) &&
-                                    (typeof row[column] !== 'string') ) {
-                            s += '<td>' + 'Set: ' + row[column][0] + ' Actual: ' + row[column][1] + '</td>';
-
-                        } else if (((tipe == 'show' && row.name == 'manhole' && column == 'value') ||
-                                    (tipe == 'servers' && column == 'manhole')) &&
-                                    (typeof row[column] === 'string') ) {
-                            s += '<td>' + row[column] + ((row[column].indexOf('not installed') > -1) ? '' : ', example usage: socat - unix-connect:' + row[column]) + '</td>';
-
                         } else if (tipe == 'show' && row.name == 'drop_threshold' && column == 'value') {
                             s += '<td>' + row[column] + ' (' + (parseInt(row[column] * 100).toString()) + '%)' + '</td>';
 
@@ -403,9 +286,9 @@ $(document).ready(function () {
             var infoBox = $('<div class="alert alert-info">');
 
             if (nPoints) {
-                infoBox.text('Got ' + nPoints.toString() + ' ' + items + (nPoints > 1 ? 's' : '') + ' in ' + data.__timeit__[0].time.toFixed(3) + ' seconds');
+                infoBox.text('Got ' + nPoints.toString() + ' ' + items + (nPoints > 1 ? 's' : '') + ' in ' + data.__timeit__[data.__timeit__.length-1].time.toFixed(3) + ' seconds');
             } else {
-                infoBox.text('Query time: ' + data.__timeit__[0].time.toFixed(3) + ' seconds');
+                infoBox.text('Query time: ' + data.__timeit__[data.__timeit__.length-1].time.toFixed(3) + ' seconds');
             }
 
             infoBox.append([
@@ -614,7 +497,12 @@ $(document).ready(function () {
             return nPoints;
         };
 
-        $.post('/query', { q: query, t: app.db.time_precision }, function (data) {
+        $.ajax({
+            url: '/query',
+            method: 'POST',
+            data: query,
+            contentType: 'application/json; charset=UTF-8'
+        }).done(function (data) {
             resetView();
             var nPoints = countPoints(data),
                 showPlots = nPoints < 10000;
@@ -629,9 +517,9 @@ $(document).ready(function () {
             }
             renderData(data, showPlots, nPoints);
 
-        }, 'json').error(function (xhr) {
+        }).error(function (xhr) {
             if (xhr.status == 422) {
-                window.location.hash = '#auth';
+                window.location.hash = '#no-connection';
             } else {
                 resetView();
                 try {
@@ -662,7 +550,16 @@ $(document).ready(function () {
     app.runInsert = function (insertType, target) {
         var data = $(target).parent().find('textarea').first().val().trim();
 
-        $.post('/insert-' + insertType, data, function (data) {
+        $.ajax({
+            url: '/insert',
+            method: 'POST',
+            data: data,
+            contentType: insertType + '; charset=UTF-8'
+        }).done(function (data) {
+            if (insertType == 'text/csv' && data.indexOf('success') != -1) {
+                data = {'success_msg': data};
+            }
+
             if (data.hasOwnProperty('success_msg')) {
                 $('#insert-message-container').html([
                     '<div class="alert alert-success">',
@@ -673,9 +570,9 @@ $(document).ready(function () {
             } else {
                 window.console.error(data);
             }
-        }, 'json').error(function (xhr) {
+        }).error(function (xhr) {
             if (xhr.status == 422) {
-                window.location.hash = '#auth';
+                window.location.hash = '#no-connection';
             } else {
                 try {
                     var data = JSON.parse(xhr.responseText);
