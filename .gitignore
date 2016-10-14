@@ -90,3 +90,6 @@ ENV/
 
 # dummy scripts
 test.py
+
+
+test/
