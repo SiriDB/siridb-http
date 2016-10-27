@@ -5,25 +5,25 @@
  * should be used with the jsleri JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2016-10-21 15:54:17
+ * Created at: 2016-10-25 17:23:57
  */
 
 'use strict';
 
 (function (
-            Token,
-            Keyword,
-            Rule,
+            Repeat,
             Choice,
             Prio,
-            List,
-            Regex,
-            Repeat,
-            Tokens,
+            Sequence,
             THIS,
-            Grammar,
             Optional,
-            Sequence
+            Grammar,
+            Keyword,
+            Token,
+            Rule,
+            Regex,
+            List,
+            Tokens
         ) {
     var r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
     var r_integer = Regex('^[-+]?[0-9]+');
@@ -145,7 +145,7 @@
     var k_true = Keyword('true');
     var k_type = Keyword('type');
     var k_union = Choice(
-        Tokens('{}'),
+        Tokens(', |'),
         Keyword('union')
     );
     var k_uptime = Keyword('uptime');
@@ -199,7 +199,7 @@
         ),
         Sequence(
             THIS,
-            Tokens('{}'),
+            Tokens('+ - * % /'),
             THIS
         )
     );
@@ -219,7 +219,7 @@
         ),
         Sequence(
             THIS,
-            Tokens('{}'),
+            Tokens('+ - * % /'),
             THIS
         )
     );
@@ -281,9 +281,9 @@
         k_series
     );
     var pool_columns = List(pool_props, Token(','), 1, undefined, false);
-    var bool_operator = Tokens('{}');
-    var int_operator = Tokens('{}');
-    var str_operator = Tokens('{}');
+    var bool_operator = Tokens('== !=');
+    var int_operator = Tokens('== != <= >= < >');
+    var str_operator = Tokens('== != <= >= !~ < > ~');
     var where_group = Sequence(
         k_where,
         Prio(
@@ -847,14 +847,8 @@
     );
     var drop_series = Sequence(
         k_series,
-        Choice(
-            series_match,
-            where_series,
-            Sequence(
-                series_match,
-                where_series
-            )
-        ),
+        Optional(series_match),
+        Optional(where_series),
         Optional(set_ignore_threshold)
     );
     var drop_shards = Sequence(
@@ -1026,119 +1020,103 @@
         ), Token(','), 0, undefined, false)
     );
     var timeit_stmt = Repeat(k_timeit, 1, 1);
-    var help_continue = Keyword('continue');
+    var help_select = Keyword('select');
+    var help_alter_group = Keyword('group');
+    var help_alter_database = Keyword('database');
+    var help_alter_user = Keyword('user');
+    var help_alter_server = Keyword('server');
+    var help_alter = Sequence(
+        k_alter,
+        Optional(Choice(
+            help_alter_group,
+            help_alter_database,
+            help_alter_user,
+            help_alter_server
+        ))
+    );
     var help_functions = Keyword('functions');
-    var help_revoke = Keyword('revoke');
-    var help_create_group = Keyword('group');
     var help_create_user = Keyword('user');
-    var help_create_network = Keyword('network');
+    var help_create_group = Keyword('group');
     var help_create = Sequence(
         k_create,
         Optional(Choice(
-            help_create_group,
             help_create_user,
-            help_create_network
+            help_create_group
         ))
     );
+    var help_count_groups = Keyword('groups');
+    var help_count_series = Keyword('series');
+    var help_count_shards = Keyword('shards');
     var help_count_servers = Keyword('servers');
     var help_count_pools = Keyword('pools');
-    var help_count_shards = Keyword('shards');
-    var help_count_series = Keyword('series');
-    var help_count_groups = Keyword('groups');
-    var help_count_networks = Keyword('networks');
     var help_count_users = Keyword('users');
     var help_count = Sequence(
         k_count,
         Optional(Choice(
+            help_count_groups,
+            help_count_series,
+            help_count_shards,
             help_count_servers,
             help_count_pools,
-            help_count_shards,
-            help_count_series,
-            help_count_groups,
-            help_count_networks,
             help_count_users
         ))
     );
-    var help_noaccess = Keyword('noaccess');
     var help_show = Keyword('show');
-    var help_pause = Keyword('pause');
-    var help_select = Keyword('select');
+    var help_revoke = Keyword('revoke');
     var help_access = Keyword('access');
-    var help_grant = Keyword('grant');
-    var help_list_servers = Keyword('servers');
-    var help_list_shards = Keyword('shards');
-    var help_list_users = Keyword('users');
-    var help_list_groups = Keyword('groups');
+    var help_timeit = Keyword('timeit');
     var help_list_series = Keyword('series');
-    var help_list_networks = Keyword('networks');
+    var help_list_shards = Keyword('shards');
+    var help_list_groups = Keyword('groups');
+    var help_list_users = Keyword('users');
+    var help_list_servers = Keyword('servers');
     var help_list_pools = Keyword('pools');
     var help_list = Sequence(
         k_list,
         Optional(Choice(
-            help_list_servers,
-            help_list_shards,
-            help_list_users,
-            help_list_groups,
             help_list_series,
-            help_list_networks,
+            help_list_shards,
+            help_list_groups,
+            help_list_users,
+            help_list_servers,
             help_list_pools
         ))
     );
-    var help_timeit = Keyword('timeit');
+    var help_timezones = Keyword('timezones');
     var help_drop_server = Keyword('server');
     var help_drop_group = Keyword('group');
     var help_drop_series = Keyword('series');
+    var help_drop_shards = Keyword('shards');
     var help_drop_user = Keyword('user');
-    var help_drop_shard = Keyword('shard');
-    var help_drop_network = Keyword('network');
     var help_drop = Sequence(
         k_drop,
         Optional(Choice(
             help_drop_server,
             help_drop_group,
             help_drop_series,
-            help_drop_user,
-            help_drop_shard,
-            help_drop_network
+            help_drop_shards,
+            help_drop_user
         ))
     );
-    var help_timezones = Keyword('timezones');
-    var help_alter_database = Keyword('database');
-    var help_alter_network = Keyword('network');
-    var help_alter_server = Keyword('server');
-    var help_alter_group = Keyword('group');
-    var help_alter_series = Keyword('series');
-    var help_alter_user = Keyword('user');
-    var help_alter = Sequence(
-        k_alter,
-        Optional(Choice(
-            help_alter_database,
-            help_alter_network,
-            help_alter_server,
-            help_alter_group,
-            help_alter_series,
-            help_alter_user
-        ))
-    );
+    var help_noaccess = Keyword('noaccess');
+    var help_grant = Keyword('grant');
     var help = Sequence(
         k_help,
         Optional(Choice(
-            help_continue,
+            help_select,
+            help_alter,
             help_functions,
-            help_revoke,
             help_create,
             help_count,
-            help_noaccess,
             help_show,
-            help_pause,
-            help_select,
+            help_revoke,
             help_access,
-            help_grant,
-            help_list,
             help_timeit,
-            help_drop,
+            help_list,
             help_timezones,
-            help_alter
+            help_drop,
+            help_noaccess,
+            help_grant
         ))
     );
     var START = Sequence(
@@ -1162,17 +1140,17 @@
     window.SiriGrammar = Grammar(START, '[a-z_]+');
 
 })(
-    window.jsleri.Token,
-    window.jsleri.Keyword,
-    window.jsleri.Rule,
+    window.jsleri.Repeat,
     window.jsleri.Choice,
     window.jsleri.Prio,
-    window.jsleri.List,
-    window.jsleri.Regex,
-    window.jsleri.Repeat,
-    window.jsleri.Tokens,
+    window.jsleri.Sequence,
     window.jsleri.THIS,
-    window.jsleri.Grammar,
     window.jsleri.Optional,
-    window.jsleri.Sequence
+    window.jsleri.Grammar,
+    window.jsleri.Keyword,
+    window.jsleri.Token,
+    window.jsleri.Rule,
+    window.jsleri.Regex,
+    window.jsleri.List,
+    window.jsleri.Tokens
 );
