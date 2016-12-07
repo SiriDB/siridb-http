@@ -27,8 +27,6 @@ from lib.version import __email__
 from lib.logger import setup_logger
 from lib.app import App
 
-async def on_prepare(request, response):
-    print('dag dag')
 
 if __name__ == '__main__':
     setproctitle.setproctitle('siridb-http')

@@ -42,9 +42,7 @@ class Handlers:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        route = aiohttp.web.StaticRoute(None, '/static/', 'static')
-
-        self.router.register_route(route)
+        static = self.router.add_static('/static/', 'static')
 
         self.router.add_route('GET', '/', self.handle_main)
         self.router.add_route('GET', '/db-info', self.handle_db_info)
@@ -53,7 +51,7 @@ class Handlers:
         self.router.add_route(
             'GET',
             '/favicon.ico',
-            static_factory(route, 'favicon.ico'))
+            static_factory(static, 'favicon.ico'))
 
         setup_template_loader('./templates')
 
