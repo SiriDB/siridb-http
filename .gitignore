@@ -91,5 +91,7 @@ ENV/
 # dummy scripts
 test.py
 
-
 test/
+
+app.min.js
+style.min.css
