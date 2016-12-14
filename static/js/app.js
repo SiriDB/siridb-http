@@ -556,7 +556,7 @@ $(document).ready(function () {
             data: data,
             contentType: insertType + '; charset=UTF-8'
         }).done(function (data) {
-            if (insertType == 'text/csv' && data.indexOf('success') != -1) {
+            if (insertType == 'text/csv' && data.indexOf('Successfully') != -1) {
                 data = {'success_msg': data};
             }
 
