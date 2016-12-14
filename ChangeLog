@@ -1,3 +1,11 @@
+siridb-http (0.0.2) xenial; urgency=medium
+
+  * Fixed loading HTTP Server from relative path.
+
+  * Fixed pressing CTRL+break while providing credentials to SiriDB HTTP.
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  Wed, 14 Dec 2016 09:59:04 +0000
+
 siridb-http (0.0.1) yakkety; urgency=medium
 
   * Initial version
