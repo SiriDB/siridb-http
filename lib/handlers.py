@@ -1,3 +1,4 @@
+import os
 import aiohttp
 import json
 import msgpack
@@ -12,6 +13,7 @@ from siridb.connector.lib.exceptions import PoolError
 from siridb.connector.lib.exceptions import UserAuthError
 from siridb.connector.lib.exceptions import AuthenticationError
 from . import csvhandler
+from . import utils
 
 def static_factory(route, path):
     async def handle_static_file(request):
@@ -42,7 +44,10 @@ class Handlers:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        static = self.router.add_static('/static/', 'static')
+        static_path = os.path.join(utils.get_path(), 'static')
+        templates_path = os.path.join(utils.get_path(), 'templates')
+
+        static = self.router.add_static('/static/', static_path)
 
         self.router.add_route('GET', '/', self.handle_main)
         self.router.add_route('GET', '/db-info', self.handle_db_info)
@@ -53,7 +58,7 @@ class Handlers:
             '/favicon.ico',
             static_factory(static, 'favicon.ico'))
 
-        setup_template_loader('./templates')
+        setup_template_loader(templates_path)
 
     @template('base.html')
     async def handle_main(self, request):

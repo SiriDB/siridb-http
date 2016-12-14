@@ -29,6 +29,9 @@ from lib.logger import setup_logger
 from lib.app import App
 
 
+
+
+
 if __name__ == '__main__':
     setproctitle.setproctitle('siridb-http')
 
@@ -134,7 +137,7 @@ Home-page: http://siridb.net
         while not args.dbname:
             args.dbname = prompt('Database name: ')
     except KeyboardInterrupt:
-        signal_handler()
+        sys.exit(0)
 
     try:
         hostlist = [(server.strip(), int(port))

@@ -27,6 +27,11 @@ def _get_distribution():
 
 
 if __name__ == '__main__':
+
+    if not os.path.exists('static/js/app.min.js'):
+        raise IOError(
+            'Missing minified files do not exist, please run build.py')
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
