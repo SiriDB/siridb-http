@@ -1,6 +1,8 @@
 SiriDB HTTP
 ===========
 
+Deb package:
+wget https://storage.googleapis.com/siridb/http/siridb-http_0.0.2_amd64.deb
 
 The SiriDB HTTP Server uses minified JavaScript and CSS files if not running in debug mode.
 
