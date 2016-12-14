@@ -1,6 +1,8 @@
 SiriDB HTTP
 ===========
 
+Deb package:
+wget https://storage.googleapis.com/siridb/http/siridb-http_0.0.2_amd64.deb
 
 The SiriDB HTTP Server uses minified JavaScript and CSS files if not running in debug mode.
 
@@ -20,10 +22,26 @@ This will start
 
 
 
+Curl:
 
+```
+curl -X POST -d '{"series-001": [[1481124760, 18]]}' -H "Content-Type:application/json" http://localhost:8080/insert
+```
+
+
+Misschien timestamps in ms in bash: `echo $(($(date +%s%N)/1000000))`
 
 Copied from siridb-http.py --help:
 
+```
+usage: siridb-http [-h] [-u USER] [-p PASSWORD] [-d DBNAME] [-s SERVERS] [-v]
+                   [-o PORT] [-l {debug,info,warning,error}]
+                   [--log-file-max-size LOG_FILE_MAX_SIZE]
+                   [--log-file-num-backups LOG_FILE_NUM_BACKUPS]
+                   [--log-file-prefix LOG_FILE_PREFIX] [--log-colorized]
+                   [--debug]
+
+optional arguments:
   -h, --help            show this help message and exit
   -u USER, --user USER  User for login. If user is not given it's asked from
                         the tty.
@@ -38,9 +56,9 @@ Copied from siridb-http.py --help:
                         <hostname_or_ip>:<port> Multiple hosts can be provided
                         and should be separated with comma's or spaces.
   -v, --version         print version information and exit
-  -o PORT, --port PORT  specify alternate port
+  -o PORT, --port PORT  specify alternate port (default: 8080)
   -l {debug,info,warning,error}, --log-level {debug,info,warning,error}
-                        set the log level
+                        set the log level (default: info)
   --log-file-max-size LOG_FILE_MAX_SIZE
                         max size of log files before rollover (--log-file-
                         prefix must be set)
@@ -52,3 +70,5 @@ Copied from siridb-http.py --help:
                         the output to the console)
   --log-colorized       use colorized logging
   --debug               enable debug mode
+
+```
