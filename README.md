@@ -29,7 +29,7 @@ curl -X POST -d '{"series-001": [[1481124760, 18]]}' -H "Content-Type:applicatio
 ```
 
 
-Misschien timestamps in ms in bash: `date +%s000`
+Misschien timestamps in ms in bash: `echo $(($(date +%s%N)/1000000))`
 
 Copied from siridb-http.py --help:
 
