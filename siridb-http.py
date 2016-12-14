@@ -18,6 +18,7 @@ SiriDB Repo:
 import logging
 import argparse
 import re
+import sys
 import setproctitle
 from siridb.connector import SiriDBClient
 from prompt_toolkit import prompt
@@ -70,13 +71,13 @@ if __name__ == '__main__':
     parser.add_argument(
         '-o', '--port',
         default=8080,
-        help='specify alternate port',
+        help='specify alternate port (default: 8080)',
         type=int)
 
     parser.add_argument(
         '-l', '--log-level',
         default='info',
-        help='set the log level',
+        help='set the log level (default: info)',
         choices=['debug', 'info', 'warning', 'error'])
 
     parser.add_argument(
@@ -115,7 +116,7 @@ if __name__ == '__main__':
 
     # respond to --version argument
     if args.version:
-        exit('''
+        sys.exit('''
 SiriDB HTTP Server {version}
 Maintainer: {maintainer} <{email}>
 Home-page: http://siridb.net
@@ -154,4 +155,4 @@ Home-page: http://siridb.net
     app = App(port=args.port, siri=siri, debug_mode=args.debug)
     app.start()
     # bye
-    exit(0)
+    sys.exit(0)
