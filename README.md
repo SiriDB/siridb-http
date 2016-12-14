@@ -21,6 +21,11 @@ This will start
 
 
 
+Curl:
+
+```
+curl -X POST -d '{"series-001": [[1481124760, 18]]}' -H "Content-Type:application/json" http://localhost:8080/insert
+```
 
 
 
