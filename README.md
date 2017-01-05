@@ -2,7 +2,8 @@ SiriDB HTTP
 ===========
 
 Deb package:
-wget https://storage.googleapis.com/siridb/http/siridb-http_0.0.2_amd64.deb
+The latest deb package can be found [here](https://github.com/transceptor-technology/siridb-http/releases/latest)
+
 
 The SiriDB HTTP Server uses minified JavaScript and CSS files if not running in debug mode.
 
