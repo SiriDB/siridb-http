@@ -4,6 +4,7 @@ import json
 import msgpack
 import qpack
 import logging
+import re
 from trender.aiohttp_template import setup_template_loader
 from trender.aiohttp_template import template
 from siridb.connector.lib.exceptions import InsertError
@@ -42,6 +43,8 @@ class Handlers:
         PoolError: 503,
         UserAuthError: 401,
         AuthenticationError: 422}
+
+    _SECRET_RX = re.compile('^Secret ([^\s]+)$', re.IGNORECASE)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -229,4 +232,8 @@ class Handlers:
                 return self._response_text(str(resp))
 
     async def handle_get_token(self, request):
-        content = await request.json()
+        authorization = _SECRET_RX.match(request.headers['Authorization'])
+        if not authorization:
+            resp = Exception('Missing "Secret" in headers')
+        else:
+            ct = request.content_type.lower().split(';')[0]
