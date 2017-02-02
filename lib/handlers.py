@@ -15,6 +15,7 @@ from siridb.connector.lib.exceptions import AuthenticationError
 from . import csvhandler
 from . import utils
 
+
 def static_factory(route, path):
     async def handle_static_file(request):
         request.match_info['filename'] = path
@@ -30,6 +31,7 @@ def pack_exception(fun):
             status = self._MAP_ERORR_STATUS.get(exc.__class__, 500)
         return fun(self, data, status)
     return wrapper
+
 
 class Handlers:
 
@@ -53,6 +55,11 @@ class Handlers:
         self.router.add_route('GET', '/db-info', self.handle_db_info)
         self.router.add_route('POST', '/insert', self.handle_insert)
         self.router.add_route('POST', '/query', self.handle_query)
+        self.router.add_route('POST', '/get-token', self.handle_get_token)
+        self.router.add_route(
+            'POST',
+            '/refresh-token',
+            self.handle_refresh_token)
         self.router.add_route(
             'GET',
             '/favicon.ico',
@@ -106,7 +113,6 @@ class Handlers:
             content_type='application/x-qpack',
             status=status)
 
-
     async def _handle_insert_json(self, request):
         try:
             data = await request.json()
@@ -155,7 +161,6 @@ class Handlers:
         finally:
             return self._response_qpack(resp)
 
-
     async def _handle_insert_csv(self, request):
         content = await request.read()
         try:
@@ -193,6 +198,7 @@ class Handlers:
                 TypeError('Unssupported content type: {}'.format(ct)))
 
     async def handle_query(self, request):
+        print(request.headers)
         ct = request.content_type.lower().split(';')[0]
         content = await request.read()
         try:
@@ -206,7 +212,7 @@ class Handlers:
             resp = QueryError(
                 'Error while reading query: {}'.format(str(e)))
         else:
-            print(query)
+            logging.debug(query)
             try:
                 resp = await self.siri.query(query)
             except Exception as e:
@@ -221,3 +227,6 @@ class Handlers:
                 return self._response_qpack(resp)
             else:
                 return self._response_text(str(resp))
+
+    async def handle_get_token(self, request):
+        content = await request.json()

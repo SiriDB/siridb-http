@@ -4,11 +4,19 @@ import functools
 import logging
 from .handlers import Handlers
 from aiohttp.web import Application
+from .auth import Auth
+from .secret import get_secret
 
 
 class App(Handlers, Application):
 
-    def __init__(self, *args, port=8080, siri=None, debug_mode=False, **kwargs):
+    def __init__(
+            self,
+            *args,
+            port=8080,
+            siri=None,
+            debug_mode=False,
+            **kwargs):
         super().__init__(*args, **kwargs)
         self.port = port
         self.siri = siri
@@ -18,6 +26,7 @@ class App(Handlers, Application):
             'version': None,
             'time_precision': None
         }
+        self.auth = Auth(get_secret())
 
     def start(self):
         logging.info('Start SiriDB HTTP Server')
@@ -67,7 +76,6 @@ class App(Handlers, Application):
 
         self.loop.close()
         logging.info('Bye!')
-
 
     def stop(self, signame):
         logging.warning(

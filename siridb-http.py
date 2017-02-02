@@ -29,9 +29,6 @@ from lib.logger import setup_logger
 from lib.app import App
 
 
-
-
-
 if __name__ == '__main__':
     setproctitle.setproctitle('siridb-http')
 

@@ -501,7 +501,10 @@ $(document).ready(function () {
             url: '/query',
             method: 'POST',
             data: query,
-            contentType: 'application/json; charset=UTF-8'
+            headers: {
+                'Authorization': 'Token ',
+                'Content-Type': 'application/json'
+            }
         }).done(function (data) {
             resetView();
             var nPoints = countPoints(data),
