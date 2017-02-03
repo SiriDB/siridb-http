@@ -94,3 +94,6 @@ test/
 
 app.min.js
 style.min.css
+
+# Compiled React
+/src/node_modules/

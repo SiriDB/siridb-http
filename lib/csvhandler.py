@@ -78,3 +78,8 @@ def loads(content):
 def load(fo):
     '''Load CSV data from File Object.'''
     return loads(fo.read())
+
+
+if __name__ == '__main__':
+    q = csvloader.loads('"select * from blabla"')
+    print(q)

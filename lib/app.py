@@ -10,15 +10,9 @@ from .secret import get_secret
 
 class App(Handlers, Application):
 
-    def __init__(
-            self,
-            *args,
-            port=8080,
-            siri=None,
-            debug_mode=False,
-            **kwargs):
-        super().__init__(*args, **kwargs)
-        self.port = port
+    def __init__(self, config, siri, debug_mode=False):
+        self.config = config
+        self.port = self.config.get('Configuration', 'port')
         self.siri = siri
         self.debug_mode = debug_mode
         self.db = {
@@ -26,7 +20,10 @@ class App(Handlers, Application):
             'version': None,
             'time_precision': None
         }
-        self.auth = Auth(get_secret())
+        self.auth = get_secret() if self.config.getboolean(
+            'Configuration',
+            'enable_authentication') else None
+        super().__init__()
 
     def start(self):
         logging.info('Start SiriDB HTTP Server')

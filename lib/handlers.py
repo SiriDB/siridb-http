@@ -5,6 +5,7 @@ import msgpack
 import qpack
 import logging
 import re
+import csvloader
 from trender.aiohttp_template import setup_template_loader
 from trender.aiohttp_template import template
 from siridb.connector.lib.exceptions import InsertError
@@ -15,6 +16,9 @@ from siridb.connector.lib.exceptions import UserAuthError
 from siridb.connector.lib.exceptions import AuthenticationError
 from . import csvhandler
 from . import utils
+
+
+_UNSUPPORTED, _MSGPACK, _QPACK, _JSON, _CSV = range(5)
 
 
 def static_factory(route, path):
@@ -45,30 +49,52 @@ class Handlers:
         AuthenticationError: 422}
 
     _SECRET_RX = re.compile('^Secret ([^\s]+)$', re.IGNORECASE)
+    _TOKEN_RX = re.compile('^Token ([^\s]+)$', re.IGNORECASE)
+    _QUERY_MAP = {
+        _MSGPACK: lambda content:
+            msgpack.unpackb(content, use_list=False, encoding='utf-8'),
+        _CSV: lambda content: csvloader.loads(content)[0][0],
+        _JSON: json.loads,
+        _QPACK: qpack.unpackb
+    }
+    _INSERT_MAP = {
+        _MSGPACK: lambda content:
+            msgpack.unpackb(content, use_list=False, encoding='utf-8'),
+        _CSV: csvhandler,
+        _JSON: json.loads,
+        _QPACK: qpack.unpackb
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        static_path = os.path.join(utils.get_path(), 'static')
-        templates_path = os.path.join(utils.get_path(), 'templates')
-
-        static = self.router.add_static('/static/', static_path)
-
-        self.router.add_route('GET', '/', self.handle_main)
         self.router.add_route('GET', '/db-info', self.handle_db_info)
         self.router.add_route('POST', '/insert', self.handle_insert)
         self.router.add_route('POST', '/query', self.handle_query)
-        self.router.add_route('POST', '/get-token', self.handle_get_token)
-        self.router.add_route(
-            'POST',
-            '/refresh-token',
-            self.handle_refresh_token)
-        self.router.add_route(
-            'GET',
-            '/favicon.ico',
-            static_factory(static, 'favicon.ico'))
 
-        setup_template_loader(templates_path)
+        if self.config.getboolean('Configuration', 'enable_web'):
+            # Read static and template paths
+            static_path = os.path.join(utils.get_path(), 'static')
+            templates_path = os.path.join(utils.get_path(), 'templates')
+
+            # Setup static route
+            static = self.router.add_static('/static/', static_path)
+
+            self.router.add_route('GET', '/', self.handle_main)
+            self.router.add_route(
+                'GET',
+                '/favicon.ico',
+                static_factory(static, 'favicon.ico'))
+
+            # Setup templates
+            setup_template_loader(templates_path)
+
+        if self.auth is not None:
+            self.router.add_route('POST', '/get-token', self.handle_get_token)
+            self.router.add_route(
+                'POST',
+                '/refresh-token',
+                self.handle_refresh_token)
 
     @template('base.html')
     async def handle_main(self, request):
@@ -87,6 +113,15 @@ class Handlers:
             body=text.encode('utf-8'),
             charset='UTF-8',
             content_type='text/plain',
+            status=status)
+
+    @pack_exception
+    def _response_csv(self, text, status=200):
+        return aiohttp.web.Response(
+            headers={'ACCESS-CONTROL-ALLOW-ORIGIN': '*'},
+            body=csvdump(data),
+            charset='UTF-8',
+            content_type='application/csv',
             status=status)
 
     @pack_exception
@@ -116,101 +151,43 @@ class Handlers:
             content_type='application/x-qpack',
             status=status)
 
-    async def _handle_insert_json(self, request):
-        try:
-            data = await request.json()
-        except ValueError:
-            resp = InsertError(
-                'Error while parsing data, check if the body contains '
-                'valid JSON data.')
-        else:
-            try:
-                resp = await self.siri.insert(data)
-            except Exception as e:
-                logging.error(e)
-                resp = e
-        finally:
-            return self._response_json(resp)
-
-    async def _handle_insert_msgpack(self, request):
-        content = await request.read()
-        try:
-            data = msgpack.unpackb(content, use_list=False, encoding='utf-8')
-        except Exception as e:
-            resp = InsertError(
-                'Error while unpacking msgpack data: {}'.format(str(e)))
-        else:
-            try:
-                resp = await self.siri.insert(data)
-            except Exception as e:
-                logging.error(e)
-                resp = e
-        finally:
-            return self._response_msgpack(resp)
-
-    async def _handle_insert_qpack(self, request):
-        content = await request.read()
-        try:
-            data = qpack.unpackb(content)
-        except Exception as e:
-            resp = InsertError(
-                'Error while unpacking qpack data: {}'.format(str(e)))
-        else:
-            try:
-                resp = await self.siri.insert(data)
-            except Exception as e:
-                logging.error(e)
-                resp = e
-        finally:
-            return self._response_qpack(resp)
-
-    async def _handle_insert_csv(self, request):
-        content = await request.read()
-        try:
-            data = csvhandler.loads(content.decode('utf-8'))
-        except (ValueError, TypeError, IndexError) as e:
-            resp = InsertError(
-                'Error while unpacking csv data: {}'.format(str(e)))
-        else:
-            try:
-                resp = await self.siri.insert(data)
-            except Exception as e:
-                logging.error(e)
-                resp = e
-            else:
-                try:
-                    resp = resp.get('success_msg')
-                except:
-                    logging.error('Unexpected response: {}'.format(resp))
-                    resp = RuntimeError('Unexpected response: {}'.format(resp))
-        finally:
-            return self._response_text(resp)
-
     async def handle_insert(self, request):
+        content = await request.read()
+        ct = _UNSUPPORTED
+        try:
+            ct = self._get_content_type(request)
+            data = self._INSERT_MAP[ct](content)
+        except Exception as e:
+            resp = InsertError(
+                'Error while reading data: {}'.format(str(e)))
+        else:
+            try:
+                resp = await self.siri.insert(data)
+            except Exception as e:
+                logging.error(e)
+                resp = e
+        finally:
+            return _RESPONSE_MAP[ct](self, resp)
+
+    @staticmethod
+    def _get_content_type(request):
         ct = request.content_type.lower().split(';')[0]
         if ct.endswith('x-msgpack'):
-            return await self._handle_insert_msgpack(request)
-        elif ct.endswith('json'):
-            return await self._handle_insert_json(request)
-        elif ct.endswith('x-qpack'):
-            return await self._handle_insert_qpack(request)
-        elif ct.endswith('csv'):
-            return await self._handle_insert_csv(request)
-        else:
-            return self._response_text(
-                TypeError('Unssupported content type: {}'.format(ct)))
+            return _MSGPACK
+        if ct.endswith('json'):
+            return _JSON
+        if ct.endswith('x-qpack'):
+            return _QPACK
+        if ct.endswith('csv'):
+            return _CSV
+        raise TypeError('Unsupported content type: {}'.format(ct))
 
     async def handle_query(self, request):
-        print(request.headers)
-        ct = request.content_type.lower().split(';')[0]
         content = await request.read()
+        ct = _UNSUPPORTED
         try:
-            if ct.endswith('x-msgpack'):
-                query = msgpack.unpackb(content, encoding='utf-8')
-            elif ct.endswith('x-qpack'):
-                query = qpack.unpackb(content)
-            else:
-                query = content
+            ct = self._get_content_type(request)
+            query = self._QUERY_MAP[ct](content)
         except Exception as e:
             resp = QueryError(
                 'Error while reading query: {}'.format(str(e)))
@@ -222,18 +199,22 @@ class Handlers:
                 logging.error(e)
                 resp = e
         finally:
-            if ct.endswith('x-msgpack'):
-                return self._response_msgpack(resp)
-            elif ct.endswith('json'):
-                return self._response_json(resp)
-            elif ct.endswith('x-qpack'):
-                return self._response_qpack(resp)
-            else:
-                return self._response_text(str(resp))
+            return _RESPONSE_MAP[ct](self, resp)
 
     async def handle_get_token(self, request):
-        authorization = _SECRET_RX.match(request.headers['Authorization'])
+        authorization = self._SECRET_RX.match(request.headers['Authorization'])
         if not authorization:
             resp = Exception('Missing "Secret" in headers')
         else:
             ct = request.content_type.lower().split(';')[0]
+
+    async def handle_refresh_token(self, request):
+        authorization = self._TOKEN_RX.match(request.headers['Authorization'])
+
+    _RESPONSE_MAP = {
+        _MSGPACK: _response_msgpack,
+        _CSV: _response_csv,
+        _QPACK: _response_qpack,
+        _JSON: _response_json,
+        _UNSUPPORTED: _response_text
+    }

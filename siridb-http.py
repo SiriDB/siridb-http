@@ -20,8 +20,8 @@ import argparse
 import re
 import sys
 import setproctitle
+import configparser
 from siridb.connector import SiriDBClient
-from prompt_toolkit import prompt
 from lib.version import __version__
 from lib.version import __maintainer__
 from lib.version import __email__
@@ -35,44 +35,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-u',
-        '--user',
+        '-c',
+        '--config',
         type=str,
-        help='User for login. If user is not given it\'s asked from the tty.')
-
-    parser.add_argument(
-        '-p',
-        '--password',
-        type=str,
-        help='Password to use when connecting to server. If password is '
-        'not given it\'s asked from the tty.')
-
-    parser.add_argument(
-        '-d',
-        '--dbname',
-        type=str,
-        help='Database name to connect to. If dbname is '
-        'not given it\'s asked from the tty.')
-
-    parser.add_argument(
-        '-s',
-        '--servers',
-        type=str,
-        default='localhost:9000',
-        help='Servers to connect to. A host should be entered like '
-        '<hostname_or_ip>:<port> Multiple hosts can be provided and should be '
-        'separated with comma\'s or spaces.')
+        default='/etc/siridb/siridb-http.conf',
+        help='Configuration file.')
 
     parser.add_argument(
         '-v', '--version',
         action='store_true',
         help='print version information and exit')
-
-    parser.add_argument(
-        '-o', '--port',
-        default=8080,
-        help='specify alternate port (default: 8080)',
-        type=int)
 
     parser.add_argument(
         '-l', '--log-level',
@@ -124,35 +96,34 @@ Home-page: http://siridb.net
                            maintainer=__maintainer__,
                            email=__email__))
 
-    try:
-        while not args.user:
-            args.user = prompt('Username: ')
+    config = configparser.RawConfigParser()
 
-        while not args.password:
-            args.password = prompt('Password: ', is_password=True)
-
-        while not args.dbname:
-            args.dbname = prompt('Database name: ')
-    except KeyboardInterrupt:
-        sys.exit(0)
+    with open(args.config, 'r', encoding='utf-8') as f:
+        config.read_file(f)
 
     try:
-        hostlist = [(server.strip(), int(port))
-                    for server, port
-                    in [s.split(':')
-                        for s in re.split(r'\s+|\s*,\s*', args.servers)]]
+        hostlist = [
+            (server.strip(), int(port))
+            for server, port in [
+                s.split(':')
+                for s in re.split(
+                    r'\s+|\s*,\s*',
+                    config.get('Database', 'servers'))]]
+
     except ValueError:
-        sys.exit('Invalid servers, expecting something like: '
-                 'server1.local:9000,server2.local:9000 ...')
+        sys.exit('Invalid servers in configuration file "{}", '
+                 'expecting something like: '
+                 'server1.local:9000,server2.local:9000 ...'
+                 .format(args.config))
 
     siri = SiriDBClient(
-        username=args.user,
-        password=args.password,
-        dbname=args.dbname,
+        username=config.get('Database', 'user'),
+        password=config.get('Database', 'password'),
+        dbname=config.get('Database', 'dbname'),
         hostlist=hostlist,
         keepalive=True)
 
-    app = App(port=args.port, siri=siri, debug_mode=args.debug)
+    app = App(config=config, siri=siri, debug_mode=args.debug)
     app.start()
     # bye
     sys.exit(0)
