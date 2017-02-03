@@ -38,6 +38,38 @@ def pack_exception(fun):
     return wrapper
 
 
+def authentication(fun):
+    def wrapper(self, request):
+        if self.auth is not None:
+            try:
+                authorization = \
+                    self._TOKEN_RX.match(request.headers['Authorization'])
+                if not authorization:
+                    if not self.token_required:
+                        authorization = self._SECRET_RX.match(
+                            request.headers['Authorization'])
+                        if not authorization:
+                            raise ValueError(
+                                'Missing "Token" or "Secret" in headers')
+                        secret = authorization.group(1)
+                        self.auth.validate_secret(secret)
+                    else:
+                        raise ValueError('Missing "Token" in headers')
+                else:
+                    token = authorization.group(1)
+                    self.auth.validate_token(token)
+            except Exception as resp:
+                try:
+                    ct = self._get_content_type(request)
+                except Exception as e:
+                    logging.error(e)
+                    ct = _UNSUPPORTED
+                finally:
+                    return self._RESPONSE_MAP[ct](self, resp)
+        return fun(self, request)
+    return wrapper
+
+
 class Handlers:
 
     _MAP_ERORR_STATUS = {
@@ -50,17 +82,18 @@ class Handlers:
 
     _SECRET_RX = re.compile('^Secret ([^\s]+)$', re.IGNORECASE)
     _TOKEN_RX = re.compile('^Token ([^\s]+)$', re.IGNORECASE)
+    _REFRESH_RX = re.compile('^Refresh ([^\s]+)$', re.IGNORECASE)
     _QUERY_MAP = {
         _MSGPACK: lambda content:
             msgpack.unpackb(content, use_list=False, encoding='utf-8'),
-        _CSV: lambda content: csvloader.loads(content)[0][0],
-        _JSON: json.loads,
+        _CSV: lambda content: csvhandler.loads(content, is_query=True),
+        _JSON: lambda content: json.loads(content.decode('utf-8')),
         _QPACK: qpack.unpackb
     }
     _INSERT_MAP = {
         _MSGPACK: lambda content:
             msgpack.unpackb(content, use_list=False, encoding='utf-8'),
-        _CSV: csvhandler,
+        _CSV: csvhandler.loads,
         _JSON: json.loads,
         _QPACK: qpack.unpackb
     }
@@ -73,6 +106,7 @@ class Handlers:
         self.router.add_route('POST', '/query', self.handle_query)
 
         if self.config.getboolean('Configuration', 'enable_web'):
+            logging.info('Enable Web Server routes')
             # Read static and template paths
             static_path = os.path.join(utils.get_path(), 'static')
             templates_path = os.path.join(utils.get_path(), 'templates')
@@ -90,9 +124,10 @@ class Handlers:
             setup_template_loader(templates_path)
 
         if self.auth is not None:
-            self.router.add_route('POST', '/get-token', self.handle_get_token)
+            logging.info('Enable Authentication routes')
+            self.router.add_route('GET', '/get-token', self.handle_get_token)
             self.router.add_route(
-                'POST',
+                'GET',
                 '/refresh-token',
                 self.handle_refresh_token)
 
@@ -151,6 +186,7 @@ class Handlers:
             content_type='application/x-qpack',
             status=status)
 
+    @authentication
     async def handle_insert(self, request):
         content = await request.read()
         ct = _UNSUPPORTED
@@ -167,7 +203,7 @@ class Handlers:
                 logging.error(e)
                 resp = e
         finally:
-            return _RESPONSE_MAP[ct](self, resp)
+            return self._RESPONSE_MAP[ct](self, resp)
 
     @staticmethod
     def _get_content_type(request):
@@ -182,34 +218,61 @@ class Handlers:
             return _CSV
         raise TypeError('Unsupported content type: {}'.format(ct))
 
+    @authentication
     async def handle_query(self, request):
         content = await request.read()
         ct = _UNSUPPORTED
         try:
             ct = self._get_content_type(request)
             query = self._QUERY_MAP[ct](content)
+            if isinstance(query, dict):
+                query = query['query']
         except Exception as e:
+            logging.error(e)
             resp = QueryError(
                 'Error while reading query: {}'.format(str(e)))
         else:
-            logging.debug(query)
+            logging.debug('Process query: {}'.format(query))
             try:
                 resp = await self.siri.query(query)
             except Exception as e:
                 logging.error(e)
                 resp = e
         finally:
-            return _RESPONSE_MAP[ct](self, resp)
+            return self._RESPONSE_MAP[ct](self, resp)
 
     async def handle_get_token(self, request):
         authorization = self._SECRET_RX.match(request.headers['Authorization'])
-        if not authorization:
-            resp = Exception('Missing "Secret" in headers')
+        ct = _UNSUPPORTED
+        try:
+            if not authorization:
+                raise ValueError('Missing "Secret" in headers')
+            secret = authorization.group(1)
+            ct = self._get_content_type(request)
+        except Exception as e:
+            resp = e
         else:
-            ct = request.content_type.lower().split(';')[0]
+            resp = self.auth.get_token(secret)
+        finally:
+            return self._RESPONSE_MAP[ct](self, resp)
 
     async def handle_refresh_token(self, request):
-        authorization = self._TOKEN_RX.match(request.headers['Authorization'])
+        authorization = self._REFRESH_RX.match(request.headers['Authorization'])
+        ct = _UNSUPPORTED
+        try:
+            if not authorization:
+                raise ValueError('Missing "Refresh" in headers')
+            refresh = authorization.group(1)
+            ct = self._get_content_type(request)
+        except Exception as e:
+            resp = e
+        else:
+            try:
+                resp = self.auth.refresh_token(refresh)
+            except Exception as e:
+                resp = e
+        finally:
+            return self._RESPONSE_MAP[ct](self, resp)
 
     _RESPONSE_MAP = {
         _MSGPACK: _response_msgpack,

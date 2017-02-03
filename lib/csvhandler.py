@@ -64,10 +64,23 @@ def _from_flat_csv(grid):
     return series
 
 
-def loads(content):
+def _from_query(grid):
+    if not grid or not grid[0]:
+        return ''
+
+    col = int(grid[0][0] == 'query')
+
+    return {'query': grid[0][col]}
+
+
+def loads(content, is_query=False):
     '''Load CSV data from string into a dictionary representing series with
     points.'''
+
     grid = csvloader.loads(content.strip('\n'))
+    if is_query:
+        return _from_query(grid)
+
     if not grid or not grid[0]:
         return []
 

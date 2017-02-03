@@ -20,9 +20,14 @@ class App(Handlers, Application):
             'version': None,
             'time_precision': None
         }
-        self.auth = get_secret() if self.config.getboolean(
-            'Configuration',
-            'enable_authentication') else None
+        if self.config.getboolean('Configuration', 'enable_authentication'):
+            self.auth = Auth(
+                secret=get_secret(),
+                expiration_time=self.config.getint('Token', 'expiration_time'))
+            self.token_required = \
+                self.config.getboolean('Token', 'is_required')
+        else:
+            self.auth = None
         super().__init__()
 
     def start(self):
@@ -41,7 +46,7 @@ class App(Handlers, Application):
         except Exception as e:
             logging.error('Cannot start server: {}'.format(e))
             return
-
+        logging.info('Start listening on port {}'.format(self.port))
         self.loop.run_until_complete(self.siri.connect())
 
         try:
