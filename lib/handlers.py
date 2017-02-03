@@ -125,9 +125,9 @@ class Handlers:
 
         if self.auth is not None:
             logging.info('Enable Authentication routes')
-            self.router.add_route('GET', '/get-token', self.handle_get_token)
+            self.router.add_route('POST', '/get-token', self.handle_get_token)
             self.router.add_route(
-                'GET',
+                'POST',
                 '/refresh-token',
                 self.handle_refresh_token)
 
@@ -242,9 +242,10 @@ class Handlers:
             return self._RESPONSE_MAP[ct](self, resp)
 
     async def handle_get_token(self, request):
-        authorization = self._SECRET_RX.match(request.headers['Authorization'])
         ct = _UNSUPPORTED
         try:
+            authorization = \
+                self._SECRET_RX.match(request.headers['Authorization'])
             if not authorization:
                 raise ValueError('Missing "Secret" in headers')
             secret = authorization.group(1)
@@ -257,9 +258,10 @@ class Handlers:
             return self._RESPONSE_MAP[ct](self, resp)
 
     async def handle_refresh_token(self, request):
-        authorization = self._REFRESH_RX.match(request.headers['Authorization'])
         ct = _UNSUPPORTED
         try:
+            authorization = \
+                self._REFRESH_RX.match(request.headers['Authorization'])
             if not authorization:
                 raise ValueError('Missing "Refresh" in headers')
             refresh = authorization.group(1)
