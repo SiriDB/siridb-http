@@ -1,0 +1,45 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google" content="notranslate" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Language" content="en" />
+    <title>SiriDB - Login</title>
+    #if @debug:
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/font-awesome.css">
+    <link rel="stylesheet/less" type="text/css" href="/static/css/layout.less">
+    <script type="text/javascript" src="/static/js/libs/less.min.js"></script>
+    #else:
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/layout.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/font-awesome.min.css">
+    #end
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <img id="logo" src="/static/img/siridb-medium.png" alt="SiriDB Logo" />
+        </div>
+        <div class="row">
+            <form action="/login/secret" method="post">
+                <div class="form-group">
+                    <div class="input-group input-group-sm">
+                        <input type="password" class="form-control" placeholder="Authenticate using secret" id="secret" name="secret" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group input-group-sm">
+                       <button type="submit" class="btn btn-default btn-md">Sign in</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

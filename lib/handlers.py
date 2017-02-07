@@ -16,6 +16,7 @@ from siridb.connector.lib.exceptions import UserAuthError
 from siridb.connector.lib.exceptions import AuthenticationError
 from . import csvhandler
 from . import utils
+from aiohttp_session import get_session
 
 
 _UNSUPPORTED, _MSGPACK, _QPACK, _JSON, _CSV = range(5)
@@ -24,7 +25,7 @@ _UNSUPPORTED, _MSGPACK, _QPACK, _JSON, _CSV = range(5)
 def static_factory(route, path):
     async def handle_static_file(request):
         request.match_info['filename'] = path
-        return await route.handle(request)
+        return await route._handle(request)
     return handle_static_file
 
 
@@ -39,7 +40,7 @@ def pack_exception(fun):
 
 
 def authentication(fun):
-    def wrapper(self, request):
+    async def wrapper(self, request):
         if self.auth is not None:
             try:
                 authorization = \
@@ -58,6 +59,7 @@ def authentication(fun):
                 else:
                     token = authorization.group(1)
                     self.auth.validate_token(token)
+                siri = self.siri
             except Exception as resp:
                 try:
                     ct = self._get_content_type(request)
@@ -66,7 +68,7 @@ def authentication(fun):
                     ct = _UNSUPPORTED
                 finally:
                     return self._RESPONSE_MAP[ct](self, resp)
-        return fun(self, request)
+        return await fun(self, request, siri)
     return wrapper
 
 
@@ -116,6 +118,19 @@ class Handlers:
 
             self.router.add_route('GET', '/', self.handle_main)
             self.router.add_route(
+                'POST',
+                '/auth/secret',
+                self.handle_auth_secret)
+            self.router.add_route(
+                'GET',
+                '/auth/fetch',
+                self.handle_auth_fetch)
+            self.router.add_route(
+                'GET',
+                '/auth/logoff',
+                self.handle_auth_logoff)
+            self.router.add_route('GET', '/temp', self.handle_temp)
+            self.router.add_route(
                 'GET',
                 '/favicon.ico',
                 static_factory(static, 'favicon.ico'))
@@ -131,8 +146,28 @@ class Handlers:
                 '/refresh-token',
                 self.handle_refresh_token)
 
-    @template('base.html')
+    async def handle_auth_secret(self, request):
+        secret = (await request.json())['secret']
+        self.auth.validate_secret(secret)
+        session = await get_session(request)
+        session['user'] = self.config.get('Database', 'user')
+        return self._response_json({'user': session['user']})
+
+    async def handle_auth_fetch(self, request):
+        session = await get_session(request)
+        return self._response_json({'user': session.get('user')})
+
+    async def handle_auth_logoff(self, request):
+        session = await get_session(request)
+        del session['user']
+        return self._response_json({'user': session.get('user')})
+
+    @template('main.html')
     async def handle_main(self, request):
+        return {'debug': self.debug_mode}
+
+    @template('base.html')
+    async def handle_temp(self, request):
         return {'debug': self.debug_mode}
 
     async def handle_db_info(self, request):
@@ -187,7 +222,7 @@ class Handlers:
             status=status)
 
     @authentication
-    async def handle_insert(self, request):
+    async def handle_insert(self, request, siri):
         content = await request.read()
         ct = _UNSUPPORTED
         try:
@@ -198,7 +233,7 @@ class Handlers:
                 'Error while reading data: {}'.format(str(e)))
         else:
             try:
-                resp = await self.siri.insert(data)
+                resp = await siri.insert(data)
             except Exception as e:
                 logging.error(e)
                 resp = e
@@ -219,7 +254,7 @@ class Handlers:
         raise TypeError('Unsupported content type: {}'.format(ct))
 
     @authentication
-    async def handle_query(self, request):
+    async def handle_query(self, request, siri):
         content = await request.read()
         ct = _UNSUPPORTED
         try:
@@ -234,7 +269,7 @@ class Handlers:
         else:
             logging.debug('Process query: {}'.format(query))
             try:
-                resp = await self.siri.query(query)
+                resp = await siri.query(query)
             except Exception as e:
                 logging.error(e)
                 resp = e

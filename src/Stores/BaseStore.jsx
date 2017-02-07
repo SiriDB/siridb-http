@@ -1,0 +1,21 @@
+import Reflux from 'reflux-edge';
+import * as d3 from 'd3';
+import JsonRequest from '../Utils/JsonRequest.jsx';
+
+class BaseStore extends Reflux.Store {
+
+    constructor() {
+        super();
+        this.serverUrl = '';
+    }
+
+    fetch(url) {
+        return new JsonRequest('GET', `${this.serverUrl}${url}`);
+    }
+
+    post(url, data) {
+        return new JsonRequest('POST', `${this.serverUrl}${url}`, data);
+    }
+}
+
+export default BaseStore;

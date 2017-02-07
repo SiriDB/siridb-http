@@ -31,6 +31,7 @@ _MAP_LOGLEVELS = {
     'CRITICAL': logging.CRITICAL
 }
 
+
 def setup_logger(args):
     '''Setup logger.
 

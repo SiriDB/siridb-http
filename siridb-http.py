@@ -102,7 +102,7 @@ Home-page: http://siridb.net
         config.read_file(f)
 
     try:
-        hostlist = [
+        config.hostlist = [
             (server.strip(), int(port))
             for server, port in [
                 s.split(':')
@@ -120,7 +120,7 @@ Home-page: http://siridb.net
         username=config.get('Database', 'user'),
         password=config.get('Database', 'password'),
         dbname=config.get('Database', 'dbname'),
-        hostlist=hostlist,
+        hostlist=config.hostlist,
         keepalive=True)
 
     app = App(config=config, siri=siri, debug_mode=args.debug)

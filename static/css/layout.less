@@ -1,0 +1,173 @@
+body {
+    font-size: 12px;
+    font-family: 'Lucida Console', Monaco, monospace;
+    background-color: #32444d;
+    color: #fff;
+}
+
+input {
+    font-family: 'Lucida Console', Monaco, monospace;
+    font-size: 10px;
+}
+
+input[type="password"] {
+    background-color: #d4d8da;
+}
+
+a {
+    cursor: pointer;
+}
+
+.navbar-default {
+    background-color: inherit;
+    border: none;
+    .navbar-nav > li > a {
+        text-transform: uppercase;
+    }
+    .navbar-nav {
+        >.active {
+            >a, >a:hover, >a:focus {
+                color: #fff;
+                background-color: #7996a2;
+            }
+        }
+        >li {
+            >a {
+                color: #fff;
+            }
+            > a:hover, a:focus {
+                color: #fff;
+                background-color: #425760;
+            }
+        }
+    }
+}
+
+
+.form-control {
+    font-size: 12px;
+    border-radius: 0;
+    border: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    -webkit-transition: none;
+    transition: none;
+    background-color: #f7f7f7;
+    &:focus {
+        outline: 0;
+        -webkit-box-shadow: inset 0 0 3px rgba(0,0,0,.055), 0 0 0 rgba(202, 202, 202, .6);
+                box-shadow: inset 0 0 3px rgba(0,0,0,.055), 0 0 0 rgba(202, 202, 202, .6);
+    }
+}
+
+.input-group-sm {
+    >.form-control,
+    >.input-group-addon,
+    >.input-group-btn > .btn {
+        border-radius: 0;
+    }
+}
+
+.btn-default.disabled,
+.btn-default[disabled],
+fieldset[disabled] .btn-default,
+.btn-default.disabled:hover,
+.btn-default[disabled]:hover,
+fieldset[disabled] .btn-default:hover,
+.btn-default.disabled:focus,
+.btn-default[disabled]:focus,
+fieldset[disabled] .btn-default:focus,
+.btn-default.disabled.focus,
+.btn-default.focus[disabled],
+fieldset[disabled] .btn-default.focus,
+.btn-default.disabled:active,
+.btn-default[disabled]:active,
+fieldset[disabled] .btn-default:active,
+.btn-default.disabled.active,
+.btn-default.active[disabled],
+fieldset[disabled] .btn-default.active {
+    background-color: #425760;
+    color: #777;
+}
+
+.btn-group {
+    margin-bottom: 10px;
+}
+.btn-group > .btn-default {
+    background-color: rgba(113, 133, 142, 0.27);
+    font-size: 12px;
+}
+.btn-group > label.active {
+    background-color: #7996A2;
+}
+
+.btn-default {
+    color: #fff;
+    background-color: #7996a2;
+    border: none;
+    >i {
+        font-size: 16px;
+    }
+}
+
+.btn-default:hover,
+.btn-default:focus,
+.btn-default.focus,
+.btn-default:active,
+.btn-default.active,
+.open > .dropdown-toggle.btn-default {
+    color: #fff;
+    background-color: #88A4B1;
+    border: none;
+}
+
+.alert {
+    border-radius: 0;
+
+    &.alert-animation-enter {
+      opacity: 0.01;
+    }
+
+    &.alert-animation-enter.alert-animation-enter-active {
+      opacity: 1;
+      transition: opacity 300ms ease-in;
+    }
+
+    &.alert-animation-leave {
+      opacity: 1;
+    }
+
+    &.alert-animation-leave.alert-animation-leave-active {
+      opacity: 0.01;
+      transition: opacity 500ms ease-in;
+    }
+
+    &.alert-warning {
+        color: #785313;
+        background-color: #FEF1B0;
+    }
+
+    &.alert-info {
+        color: #334B57;
+        background-color: #B2BBC5;
+    }
+}
+
+.modal-content {
+    background-color: #28353a;
+    border-radius: 0px;
+}
+
+.modal-header {
+    border-bottom: 0px;
+}
+
+.modal-body {
+    >img {
+        width: 100%;
+        padding: 0 60px;
+    }
+    >dl {
+        margin-top: 25px;
+    }
+}

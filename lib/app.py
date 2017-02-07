@@ -6,14 +6,21 @@ from .handlers import Handlers
 from aiohttp.web import Application
 from .auth import Auth
 from .secret import get_secret
+from .encryptedcookiestorage import EncryptedCookieStorage
+from aiohttp_session import session_middleware
+from aiohttp.web_exceptions import HTTPException
 
 
 class App(Handlers, Application):
 
     def __init__(self, config, siri, debug_mode=False):
+
         self.config = config
         self.port = self.config.get('Configuration', 'port')
         self.siri = siri
+        self.siri_connections = {
+            self.config.get('Database', 'user'): [self.siri, None]
+        }
         self.debug_mode = debug_mode
         self.db = {
             'dbname': None,
@@ -28,7 +35,12 @@ class App(Handlers, Application):
                 self.config.getboolean('Token', 'is_required')
         else:
             self.auth = None
-        super().__init__()
+        middlewares = [
+            self.error_middleware,
+            session_middleware(EncryptedCookieStorage(
+                max_age=self.config.getint('Web', 'cookie_max_age')))
+        ]
+        super().__init__(middlewares=middlewares)
 
     def start(self):
         logging.info('Start SiriDB HTTP Server')
@@ -68,8 +80,8 @@ class App(Handlers, Application):
             # cleanup signal handlers
             for signame in ('SIGINT', 'SIGTERM'):
                 self.loop.remove_signal_handler(getattr(signal, signame))
-
-            self.siri.close()
+            for siri in self.siri_connections.values():
+                siri.close()
             srv.close()
             self.loop.run_until_complete(srv.wait_closed())
             self.loop.run_until_complete(self.shutdown())
@@ -85,3 +97,17 @@ class App(Handlers, Application):
             .format(signame))
 
         self.loop.stop()
+
+    async def error_middleware(self, app, handler):
+        async def middleware_handler(request):
+            try:
+                return await handler(request)
+            except HTTPException as e:
+                raise e
+            except Exception as e:
+                logging.error(e)
+                return self._response_json(
+                    data={'error': str(e)},
+                    status=500)
+
+        return middleware_handler
