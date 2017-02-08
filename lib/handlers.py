@@ -54,20 +54,36 @@ def authentication(fun):
                                 'Missing "Token" or "Secret" in headers')
                         secret = authorization.group(1)
                         self.auth.validate_secret(secret)
+                        siri = self.siri
                     else:
                         raise ValueError('Missing "Token" in headers')
                 else:
                     token = authorization.group(1)
                     self.auth.validate_token(token)
-                siri = self.siri
+                    siri = self.siri
             except Exception as resp:
                 try:
-                    ct = self._get_content_type(request)
-                except Exception as e:
-                    logging.error(e)
-                    ct = _UNSUPPORTED
-                finally:
-                    return self._RESPONSE_MAP[ct](self, resp)
+                    session = await get_session(request)
+                    if session.new:
+                        raise resp
+                    else:
+                        user = session.get('user')
+                        if user is None:
+                            raise ValueError('Invalid session request.')
+
+                        siri = self.siri_connections.get(user)
+                        if siri is None:
+                            raise ValueError(
+                                'No SiriDB connection is found for user "{}"'
+                                .format(user))
+                except Exception as resp:
+                    try:
+                        ct = self._get_content_type(request)
+                    except Exception as e:
+                        logging.error(e)
+                        ct = _UNSUPPORTED
+                    finally:
+                        return self._RESPONSE_MAP[ct](self, resp)
         return await fun(self, request, siri)
     return wrapper
 
@@ -122,6 +138,10 @@ class Handlers:
                 '/auth/secret',
                 self.handle_auth_secret)
             self.router.add_route(
+                'POST',
+                '/auth/login',
+                self.handle_auth_login)
+            self.router.add_route(
                 'GET',
                 '/auth/fetch',
                 self.handle_auth_fetch)
@@ -153,13 +173,21 @@ class Handlers:
         session['user'] = self.config.get('Database', 'user')
         return self._response_json({'user': session['user']})
 
+    async def handle_auth_login(self, request):
+        if self.auth is None:
+            return self._response_json({'user': session['user']})
+        content = await request.json()
+
     async def handle_auth_fetch(self, request):
         session = await get_session(request)
-        return self._response_json({'user': session.get('user')})
+        return self._response_json({
+            'user': session.get('user'),
+            'authRequired': self.auth is not None
+        })
 
     async def handle_auth_logoff(self, request):
         session = await get_session(request)
-        del session['user']
+        session.clear()
         return self._response_json({'user': session.get('user')})
 
     @template('main.html')

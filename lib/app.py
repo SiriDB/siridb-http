@@ -19,7 +19,7 @@ class App(Handlers, Application):
         self.port = self.config.get('Configuration', 'port')
         self.siri = siri
         self.siri_connections = {
-            self.config.get('Database', 'user'): [self.siri, None]
+            self.config.get('Database', 'user'): self.siri
         }
         self.debug_mode = debug_mode
         self.db = {
@@ -33,13 +33,14 @@ class App(Handlers, Application):
                 expiration_time=self.config.getint('Token', 'expiration_time'))
             self.token_required = \
                 self.config.getboolean('Token', 'is_required')
+            middlewares = [
+                self.error_middleware,
+                session_middleware(EncryptedCookieStorage(
+                    max_age=self.config.getint('Session', 'cookie_max_age')))]
         else:
             self.auth = None
-        middlewares = [
-            self.error_middleware,
-            session_middleware(EncryptedCookieStorage(
-                max_age=self.config.getint('Web', 'cookie_max_age')))
-        ]
+            middlewares = ()
+
         super().__init__(middlewares=middlewares)
 
     def start(self):

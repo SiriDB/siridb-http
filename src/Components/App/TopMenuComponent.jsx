@@ -7,6 +7,7 @@ class TopMenuComponent extends React.Component {
 
     static propTypes = {
         onLogoClick: React.PropTypes.func.isRequired,
+        showLogoff: React.PropTypes.boolean.isRequired
     };
 
     constructor(props) {

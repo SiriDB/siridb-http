@@ -10,6 +10,7 @@ class AuthStore extends BaseStore {
         this.listenables = AuthActions;
         this.state = {
             user: null,
+            authRequired: true,
             authError: null
         };
         AuthActions.fetch();
@@ -26,7 +27,7 @@ class AuthStore extends BaseStore {
     onFetch() {
         this.fetch('/auth/fetch')
         .done((data) => {
-            this.setState({user: data['user']});
+            this.setState(data);
         })
     }
 
@@ -44,7 +45,7 @@ class AuthStore extends BaseStore {
             console.log(secret);
             this.post('/auth/secret', {secret: secret})
             .done((data) => {
-                this.setState({user: data['user']});
+                this.setState(date);
             })
             .fail((error, data) => {
                 AuthActions.setAuthError(data.error || 'Unknown error occurred');

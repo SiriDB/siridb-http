@@ -49,3 +49,5 @@ class EncryptedCookieStorage(AbstractStorage):
 
         self.save_cookie(response, self._cipher.encrypt(
             self._get_session_data(session)).decode('utf-8'))
+
+
