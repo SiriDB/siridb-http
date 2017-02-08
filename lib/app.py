@@ -43,6 +43,30 @@ class App(Handlers, Application):
 
         super().__init__(middlewares=middlewares)
 
+    async def _init_siridb(self):
+        await self.siri.connect()
+        try_again_in = 30
+        while True:
+            try:
+                response = await self.siri.query(
+                    'show dbname, version, time_precision')
+            except Exception as e:
+                logging.error(
+                    'Cannot read properties from SiriDB: {}, '
+                    'trying again in {} seconds...'
+                    .format(e, try_again_in))
+                await asyncio.sleep(try_again_in)
+            else:
+                break
+
+        self.db['dbname'] = response['data'][0]['value']
+        self.db['version'] = response['data'][1]['value']
+        self.db['time_precision'] = response['data'][2]['value']
+
+        logging.info(
+            'Connection made with database: {}'
+            .format(self.db['dbname']))
+
     def start(self):
         logging.info('Start SiriDB HTTP Server')
         # add signal handlers
@@ -60,18 +84,7 @@ class App(Handlers, Application):
             logging.error('Cannot start server: {}'.format(e))
             return
         logging.info('Start listening on port {}'.format(self.port))
-        self.loop.run_until_complete(self.siri.connect())
-
-        try:
-            response = self.loop.run_until_complete(
-                self.siri.query('show dbname, version, time_precision'))
-        except Exception as e:
-            logging.error('Cannot read properties from SiriDB: {}'.format(e))
-            return
-
-        self.db['dbname'] = response['data'][0]['value']
-        self.db['version'] = response['data'][1]['value']
-        self.db['time_precision'] = response['data'][2]['value']
+        self.loop.run_until_complete(self._init_siridb())
 
         try:
             self.loop.run_forever()
