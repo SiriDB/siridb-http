@@ -39,6 +39,14 @@ def pack_exception(fun):
     return wrapper
 
 
+def checksiri(fun):
+    async def wrapper(self, request):
+        if self.db['dbname'] is None:
+            return await self.handle_waiting(request)
+        return await fun(self, request)
+    return wrapper
+
+
 def authentication(fun):
     async def wrapper(self, request):
         if self.auth is not None:
@@ -174,15 +182,26 @@ class Handlers:
         return self._response_json({'user': session['user']})
 
     async def handle_auth_login(self, request):
-        if self.auth is None:
-            return self._response_json({'user': session['user']})
-        content = await request.json()
+        login = await request.json()
+        if login['username'] == self.config.get('Database', 'user'):
+            if login['password'] != self.config.get('Database', 'password'):
+                resp = AuthenticationError('Username or password incorrect')
+            else:
+                resp = {'user': self.config.get('Database', 'user')}
+        else:
+            resp = AuthenticationError('Multiple user login is not allowed')
+        return self._response_json(resp)
 
     async def handle_auth_fetch(self, request):
+        if self.auth is None:
+            return self._response_json({
+                'user': self.config.get('Database', 'user'),
+                'authRequired': False
+            })
         session = await get_session(request)
         return self._response_json({
             'user': session.get('user'),
-            'authRequired': self.auth is not None
+            'authRequired': True
         })
 
     async def handle_auth_logoff(self, request):
@@ -190,6 +209,11 @@ class Handlers:
         session.clear()
         return self._response_json({'user': session.get('user')})
 
+    @template('waiting.html')
+    async def handle_waiting(self, request):
+        return {'debug': self.debug_mode}
+
+    @checksiri
     @template('main.html')
     async def handle_main(self, request):
         return {'debug': self.debug_mode}

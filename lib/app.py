@@ -25,7 +25,7 @@ class App(Handlers, Application):
         self.db = {
             'dbname': None,
             'version': None,
-            'time_precision': None
+            'timePrecision': None
         }
         if self.config.getboolean('Configuration', 'enable_authentication'):
             self.auth = Auth(
@@ -61,7 +61,7 @@ class App(Handlers, Application):
 
         self.db['dbname'] = response['data'][0]['value']
         self.db['version'] = response['data'][1]['value']
-        self.db['time_precision'] = response['data'][2]['value']
+        self.db['timePrecision'] = response['data'][2]['value']
 
         logging.info(
             'Connection made with database: {}'
@@ -121,7 +121,7 @@ class App(Handlers, Application):
             except Exception as e:
                 logging.error(e)
                 return self._response_json(
-                    data={'error': str(e)},
+                    data={'error_msg': str(e)},
                     status=500)
 
         return middleware_handler

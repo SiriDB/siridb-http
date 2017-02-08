@@ -123,18 +123,19 @@ fieldset[disabled] .btn-default.active {
 
 .alert {
     border-radius: 0;
+    opacity: 0.8;
 
     &.alert-animation-enter {
       opacity: 0.01;
     }
 
     &.alert-animation-enter.alert-animation-enter-active {
-      opacity: 1;
+      opacity: 0.8;
       transition: opacity 300ms ease-in;
     }
 
     &.alert-animation-leave {
-      opacity: 1;
+      opacity: 0.8;
     }
 
     &.alert-animation-leave.alert-animation-leave-active {
@@ -154,7 +155,7 @@ fieldset[disabled] .btn-default.active {
 }
 
 .modal-content {
-    background-color: #28353a;
+    background-color: #253842;
     border-radius: 0px;
 }
 
@@ -169,5 +170,25 @@ fieldset[disabled] .btn-default.active {
     }
     >dl {
         margin-top: 25px;
+    }
+}
+
+.container-start {
+    max-width: 450px;
+    border: 1px solid #465156;
+    background-color: #253842;
+    margin-top: 50px;
+    padding-bottom: 20px;
+    img {
+        padding: 30px;
+        width: 100%;
+    }
+    .input-group {
+        padding: 0 60px;
+        width: 100%;
+    }
+    .alert-wrapper {
+        padding: 0 15px;
+        height: 0;
     }
 }

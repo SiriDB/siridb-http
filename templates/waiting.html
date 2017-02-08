@@ -6,7 +6,7 @@
     <meta name="google" content="notranslate" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Language" content="en" />
-    <title>SiriDB - Login</title>
+    <title>SiriDB - Loading...</title>
     #if @debug:
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/static/css/font-awesome.css">
@@ -26,20 +26,11 @@
             <img id="logo" src="/static/img/siridb-medium.png" alt="SiriDB Logo" />
         </div>
         <div class="row">
-            <form action="/login/secret" method="post">
-                <div class="form-group">
-                    <div class="input-group input-group-sm">
-                        <input type="password" class="form-control" placeholder="Authenticate using secret" id="secret" name="secret" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="input-group input-group-sm">
-                       <button type="submit" class="btn btn-default btn-md">Sign in</button>
-                    </div>
-                </div>
-            </form>
+            <span>Waiting for a connection to SiriDB...</span>
         </div>
     </div>
 </body>
-
+<script>
+    window.setTimeout(function() { window.location.reload(); }, 5000);
+</script>
 </html>

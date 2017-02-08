@@ -10,7 +10,7 @@ class AuthStore extends BaseStore {
         this.listenables = AuthActions;
         this.state = {
             user: null,
-            authRequired: true,
+            authRequired: null,
             authError: null
         };
         AuthActions.fetch();
@@ -38,17 +38,18 @@ class AuthStore extends BaseStore {
         })
     }
 
-    onLoginSecret(secret) {
-        if (!secret) {
-            AuthActions.setAuthError('Secret is required');
+    onLogin(username, password) {
+        if (!username) {
+            AuthActions.setAuthError('Username is required');
+        } else if (!password) {
+            AuthActions.setAuthError('Password is required');
         } else {
-            console.log(secret);
-            this.post('/auth/secret', {secret: secret})
+            this.post('/auth/login', {username: username, password: password})
             .done((data) => {
-                this.setState(date);
+                this.setState(data);
             })
             .fail((error, data) => {
-                AuthActions.setAuthError(data.error || 'Unknown error occurred');
+                AuthActions.setAuthError(data.error_msg || 'Unknown error occurred');
             });
         }
     }

@@ -7,7 +7,7 @@ class TopMenuComponent extends React.Component {
 
     static propTypes = {
         onLogoClick: React.PropTypes.func.isRequired,
-        showLogoff: React.PropTypes.boolean.isRequired
+        showLogoff: React.PropTypes.bool.isRequired
     };
 
     constructor(props) {
@@ -15,6 +15,11 @@ class TopMenuComponent extends React.Component {
     }
 
     render() {
+        let logoff = (this.props.showLogoff) ?
+            <li>
+                <Link onClick={AuthActions.logoff} activeClassName="active">Logoff</Link>
+            </li> : null;
+
         return (
             <nav className="navbar navbar-default">
                 <div className="container-fluid">
@@ -34,7 +39,7 @@ class TopMenuComponent extends React.Component {
                         <ul className="nav navbar-nav navbar-right">
                             <li><Link to="/query" activeClassName="active">Query</Link></li>
                             <li><Link to="/insert" activeClassName="active">Insert</Link></li>
-                            <li><Link onClick={AuthActions.logoff} activeClassName="active">Logoff</Link></li>
+                            {logoff}
                         </ul>
                     </div>
                 </div>

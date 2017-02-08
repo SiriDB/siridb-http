@@ -12,22 +12,33 @@ class Auth extends Reflux.Component {
         super(props);
         this.store = AuthStore;
         this.state = {
-            secret: '',
+            username: '',
+            password: ''
         };
     }
 
-    onLoginSecret() {
-        console.log(this.state.secret);
-        AuthActions.loginSecret(this.state.secret);
+    onLogin() {
+        AuthActions.login(this.state.username, this.state.password);
     }
 
-    onSecretChange(event) {
-        if (this.state.authError !== null) {
-            AuthActions.clearAuthError();
-        }
+    onUsernameChange(event) {
+        AuthActions.clearAuthError();
         this.setState({
-            secret: event.target.value
+            username: event.target.value
         });
+    }
+
+    onPasswordChange(event) {
+        AuthActions.clearAuthError();
+        this.setState({
+            password: event.target.value
+        });
+    }
+
+    onKeyPress(event) {
+        if (event.key == 'Enter') {
+            this.onLogin();
+        }
     }
 
     render() {
@@ -36,22 +47,38 @@ class Auth extends Reflux.Component {
         ) : null;
 
         return (
-            <div className="container">
+            <div className="container container-start">
                 <div className="row">
-                    <img id="logo" src="/static/img/siridb-medium.png" alt="SiriDB Logo" />
+                    <img src="/static/img/siridb-large.png" alt="SiriDB Logo" />
                 </div>
                 <div className="row">
                     <div className="form">
                         <div className="form-group">
                             <div className="input-group input-group-sm">
                                 <input
+                                    autoFocus
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="your username..."
+                                    value={this.state.username}
+                                    onKeyPress={this.onKeyPress.bind(this)}
+                                    onChange={this.onUsernameChange.bind(this)} />
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <div className="input-group input-group-sm">
+                                <input
                                     type="password"
                                     className="form-control"
-                                    placeholder="Authenticate using secret"
-                                    value={this.state.secret}
-                                    onChange={this.onSecretChange.bind(this)} />
+                                    placeholder="your password..."
+                                    value={this.state.password}
+                                    onKeyPress={this.onKeyPress.bind(this)}
+                                    onChange={this.onPasswordChange.bind(this)} />
                                 <span className="input-group-btn">
-                                    <button className="btn btn-default" type="button" onClick={this.onLoginSecret.bind(this)}>
+                                    <button
+                                        className="btn btn-default"
+                                        type="button"
+                                        onClick={this.onLogin.bind(this)}>
                                         <i className="fa fa-sign-in"></i>
                                     </button>
                                 </span>
@@ -59,11 +86,11 @@ class Auth extends Reflux.Component {
                         </div>
                     </div>
                     <ReactCSSTransitionGroup
-                            component="div"
-                            className=""
-                            transitionName="alert-animation"
-                            transitionEnterTimeout={300}
-                            transitionLeaveTimeout={500}>
+                        component="div"
+                        className="alert-wrapper"
+                        transitionName="alert-animation"
+                        transitionEnterTimeout={300}
+                        transitionLeaveTimeout={500}>
                         {error}
                     </ReactCSSTransitionGroup>
                 </div>

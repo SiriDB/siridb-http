@@ -26,9 +26,9 @@ class InfoModal extends Reflux.Component {
                     <img src="/static/img/siridb-large.png" alt="SiriDB Logo" />
                     <dl className="dl-horizontal">
                         <dt>Database:</dt>
-                        <dd>dbtest</dd>
+                        <dd>{this.state.dbname}</dd>
                         <dt>SiriDB:</dt>
-                        <dd>2.0.11</dd>
+                        <dd>{this.state.version}</dd>
                     </dl>
                 </Modal.Body>
             </Modal>

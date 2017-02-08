@@ -19,28 +19,30 @@ class App extends Reflux.Component {
     }
 
     onShowInfoModal() {
-        this.setState({showInfoModal: true});
+        this.setState({ showInfoModal: true });
     }
 
     onHideInfoModal() {
-        this.setState({showInfoModal: false});
+        this.setState({ showInfoModal: false });
     }
 
     render() {
 
-        return  (this.state.appError !== null) ? (
-            <div>{this.state.error}</div>
-        ) : (this.state.user) ? (
-            <div className="container">
-                <TopMenuComponent onLogoClick={this.onShowInfoModal.bind(this)} />
-                <InfoModal show={this.state.showInfoModal} onHide={this.onHideInfoModal.bind(this)} />
+        return (this.state.appError !== null) ?
+            <div>{this.state.appError}</div>
+            : (this.state.user !== null) ?
                 <div className="container">
-                    {this.props.children}
+                    <TopMenuComponent
+                        onLogoClick={this.onShowInfoModal.bind(this)}
+                        showLogoff={this.state.authRequired} />
+                    <InfoModal
+                        show={this.state.showInfoModal}
+                        onHide={this.onHideInfoModal.bind(this)} />
+                    <div className="container">
+                        {this.props.children}
+                    </div>
                 </div>
-            </div>
-        ) : (
-            <Auth />
-        )
+                : (this.state.authRequired === true) ? <Auth /> : null
     }
 }
 

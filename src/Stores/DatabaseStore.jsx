@@ -9,16 +9,17 @@ class DatabaseStore extends BaseStore {
         super();
         this.listenables = DatabaseActions;
         this.state = {
-            version: false,
+            version: null,
+            dbname: null,
+            timePrecision: null
         };
+        DatabaseActions.fetch();
     }
 
     onFetch() {
         this.fetch('/db-info')
         .done((data) => {
-            this.setState({
-                containers: data,
-            });
+            this.setState(data);
         })
         .fail((error, data) => {
             AppActions.setError('Oops, an error occurred while loading database info...');
