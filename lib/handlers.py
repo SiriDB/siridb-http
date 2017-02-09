@@ -181,13 +181,20 @@ class Handlers:
         session['user'] = self.config.get('Database', 'user')
         return self._response_json({'user': session['user']})
 
+    async def _save_session(self, request, user):
+        session = await get_session(request)
+        session['user'] = user
+        return {'user': user}
+
     async def handle_auth_login(self, request):
         login = await request.json()
         if login['username'] == self.config.get('Database', 'user'):
             if login['password'] != self.config.get('Database', 'password'):
                 resp = AuthenticationError('Username or password incorrect')
             else:
-                resp = {'user': self.config.get('Database', 'user')}
+                resp = await self._save_session(
+                    request,
+                    self.config.get('Database', 'user'))
         else:
             resp = AuthenticationError('Multiple user login is not allowed')
         return self._response_json(resp)

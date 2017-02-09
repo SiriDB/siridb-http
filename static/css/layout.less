@@ -21,21 +21,25 @@ a {
 .navbar-default {
     background-color: inherit;
     border: none;
+    margin: 0 -15px 20px -15px;
     .navbar-nav > li > a {
         text-transform: uppercase;
     }
     .navbar-nav {
-        >.active {
-            >a, >a:hover, >a:focus {
-                color: #fff;
-                background-color: #7996a2;
-            }
-        }
+
         >li {
             >a {
+                &.active {
+                    color: #fff;
+                    background-color: #7996a2;
+                }
                 color: #fff;
             }
             > a:hover, a:focus {
+                &.active {
+                    color: #fff;
+                    background-color: #7996a2;
+                }
                 color: #fff;
                 background-color: #425760;
             }
@@ -173,13 +177,17 @@ fieldset[disabled] .btn-default.active {
     }
 }
 
+.center {
+    text-align: center;
+}
+
 .container-start {
     max-width: 450px;
     border: 1px solid #465156;
     background-color: #253842;
     margin-top: 50px;
     padding-bottom: 20px;
-    img {
+    >.logo >img {
         padding: 30px;
         width: 100%;
     }

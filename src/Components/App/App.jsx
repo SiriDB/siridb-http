@@ -38,9 +38,7 @@ class App extends Reflux.Component {
                     <InfoModal
                         show={this.state.showInfoModal}
                         onHide={this.onHideInfoModal.bind(this)} />
-                    <div className="container">
-                        {this.props.children}
-                    </div>
+                    {this.props.children}
                 </div>
                 : (this.state.authRequired === true) ? <Auth /> : null
     }

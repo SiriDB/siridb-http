@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { Link } from 'react-router';
+import { Link, IndexLink } from 'react-router';
 import AuthActions from '../../Actions/AuthActions.jsx';
 
 class TopMenuComponent extends React.Component {
@@ -37,7 +37,7 @@ class TopMenuComponent extends React.Component {
 
                     <div className="collapse navbar-collapse">
                         <ul className="nav navbar-nav navbar-right">
-                            <li><Link to="/query" activeClassName="active">Query</Link></li>
+                            <li><Link to="/" activeClassName="active">Query</Link></li>
                             <li><Link to="/insert" activeClassName="active">Insert</Link></li>
                             {logoff}
                         </ul>
