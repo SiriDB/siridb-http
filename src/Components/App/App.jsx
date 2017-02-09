@@ -1,7 +1,7 @@
 import React from 'react';
 import Reflux from 'reflux-edge';
 import { render } from 'react-dom';
-import TopMenuComponent from './TopMenuComponent.jsx';
+import TopMenu from './TopMenu.jsx';
 import AppStore from '../../Stores/AppStore.jsx';
 import AuthStore from '../../Stores/AuthStore.jsx';
 import DatabaseStore from '../../Stores/DatabaseStore.jsx';
@@ -32,7 +32,7 @@ class App extends Reflux.Component {
             <div>{this.state.appError}</div>
             : (this.state.user !== null) ?
                 <div className="container">
-                    <TopMenuComponent
+                    <TopMenu
                         onLogoClick={this.onShowInfoModal.bind(this)}
                         showLogoff={this.state.authRequired} />
                     <InfoModal

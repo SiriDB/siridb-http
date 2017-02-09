@@ -11,7 +11,7 @@ class JsonRequest {
         this.alwaysCb = function (xhr, data) { };
 
         d3.request(url)
-            .mimeType('application/json')
+            .header('Content-Type', 'application/json')
             .on('error', (error) => {
                 let data = this._onResponse(error.target);
                 this.failCb(error.target, data);

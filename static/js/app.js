@@ -496,13 +496,12 @@ $(document).ready(function () {
             }
             return nPoints;
         };
-
         $.ajax({
             url: '/query',
             method: 'POST',
-            data: query,
+            data: JSON.stringify({query: query}),
             headers: {
-                'Authorization': 'Token ',
+                'Authorization': 'Secret secret',
                 'Content-Type': 'application/json'
             }
         }).done(function (data) {

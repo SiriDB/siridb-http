@@ -1,29 +1,45 @@
 import React from 'react';
-import DatabaseActions from '../Actions/DatabaseActions.jsx';
+import QueryActions from '../Actions/QueryActions.jsx';
 import BaseStore from './BaseStore.jsx';
-import AppActions from '../Actions/AppActions.jsx';
+
+
+const unexpected_msg = 'Oops, some unexpected error has occurred. Please check the console for more details.';
 
 class DatabaseStore extends BaseStore {
 
     constructor() {
         super();
-        this.listenables = DatabaseActions;
+        this.listenables = QueryActions;
         this.state = {
             alert: null,
-            result: null
+            result: null,
+            sending: false
         };
     }
 
-    onQuery() {
-        this.fetch('/query')
-        .done((data) => {
-            this.setState(data);
-        })
-        .fail((error, data) => {
-            AppActions.setError('Oops, an error occurred while loading database info...');
-        });
+    onQuery(query) {
+        this.setState({ sending: true });
+        this.post('/query', { query: query })
+            .always((xhr, data) => {
+                this.setState({ sending: false });
+            })
+            .done((data) => {
+                this.setState(data);
+            })
+            .fail((error, data) => {
+                console.log(error);
+                this.setState({
+                    alert: {
+                        severity: (data.error_msg) ? 'warning' : 'error',
+                        message: data.error_msg || unexpected_msg
+                    }
+                });
+            });
     }
 
+    onClearAlert() {
+        this.setState({ alert: null });
+    }
 }
 
 export default DatabaseStore;
