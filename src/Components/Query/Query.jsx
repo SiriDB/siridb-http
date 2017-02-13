@@ -6,7 +6,7 @@ import localstorage from 'react-localstorage';
 import QueryStore from '../../Stores/QueryStore.jsx';
 import QueryActions from '../../Actions/QueryActions.jsx';
 import AutoCompletePopup from './AutoCompletePopup.jsx';
-
+import ParseError from './ParseError.jsx';
 
 const LAST_CHARS = /[a-z_]+$/;
 const FIRST_CHARS = /^[a-z_]+/;
@@ -18,25 +18,117 @@ class Auth extends Reflux.Component {
         this.store = QueryStore;
         this.state = {
             query: '',
-            queries: []
+            queries: [],
+
+            /* Auto Completion */
+            keywords: [],
+            xpos: 0,
+            wpos: 0,
+            selected: 0,
+            show: false,
+
+            /* Error Popup */
+            parseRes: null
         };
+        this.cursorPos = null;
     }
 
     onKeyPress(event) {
-        console.log(event.key);
         if (event.key == 'Enter') {
-            this.onQuery();
+            if (this.state.show) {
+                this.onAutoCompleteSelect(this.state.selected);
+            } else {
+                this.onQuery();
+            }
         }
     }
 
+    hideAutoComplete() {
+        this.setState({ show: false, parseRes: null });
+    }
+
+    onAutoCompleteSelect(selected) {
+        let text = this.state.keywords[selected].substring(this.state.wpos);
+        let pos = this.refs.inp.selectionStart;
+        let s = this.state.query;
+        this.setState({
+            show: false,
+            parseRes: null,
+            query: s.slice(0, pos) + text + s.slice(pos),
+        });
+        this.cursorPos = pos + text.length;
+    }
+
     onKeyDown(event) {
-        console.log(event.key);
         if (this.state.alert !== null) {
             QueryActions.clearAlert();
         }
-        if (event.key == 'Tab') {
-            this.onTabPress(event);
+
+        if (this.state.parseRes) {
+            this.setState({parseRes: null});
         }
+
+        let n = this.state.keywords.length;
+
+        if (this.state.show) {
+            switch (event.key) {
+                case 'ArrowUp':
+                    event.preventDefault();
+                    this.setState({
+                        selected: ((--this.state.selected % n) + n) % n
+                    });
+                    break;
+                case 'ArrowDown':
+                    event.preventDefault();
+                    this.setState({
+                        selected: (++this.state.selected) % n
+                    });
+                    break;
+                case 'Tab':
+                    event.preventDefault();
+                case 'Enter':
+                    break;
+                default:
+                    this.setState({ show: false, parseRes: null });
+            }
+        } else {
+            if (event.key == 'Tab') {
+                this.onTabPress(event);
+            }
+            if (event.key == 'ArrowUp') {
+                if (this.state.show) {
+                    event.preventDefault();
+                    this.setState({
+                        selected: Math.abs(--this.state.selected % n)
+                    });
+                }
+            }
+            if (event.key == 'ArrowDown') {
+                if (this.state.show) {
+                    event.preventDefault();
+                    this.setState({
+                        selected: (++this.state.selected) % n
+                    });
+                }
+            }
+        }
+    }
+
+    _getWpos(keywords) {
+        let wpos;
+        for (wpos = 0; true; wpos++) {
+            let j, p = keywords[0][wpos];
+            for (j = 1; j < keywords.length; j++) {
+                if (p !== keywords[j][wpos] || j > keywords[j].length) {
+                    j = 0;
+                    break;
+                }
+            }
+            if (j !== keywords.length) {
+                break;
+            }
+        }
+        return wpos
     }
 
     onTabPress(event) {
@@ -47,63 +139,59 @@ class Auth extends Reflux.Component {
         let lm = left.match(LAST_CHARS);
         let check = (lm) ? lm[0] : '';
         let rest = (check && (rest = right.match(FIRST_CHARS))) ? rest[0] : '';
-        if (lm === null) lm = { index: pos };
         let parseResult = SiriGrammar.parse(left);
-        console.log(parseResult)
-        if (!parseResult.isValid && parseResult.pos === lm.index) {
+        if (lm === null) {
+            lm = { index: pos };
+        }
+        if (parseResult.pos === lm.index) {
+            let statement;
             let keywords = parseResult.expecting.filter((element) =>
                 element instanceof jsleri.Keyword &&
-                element.keyword.indexOf(check) === 0).map((kw) => kw.keyword);
-            keywords.sort();
-            console.log(keywords);
-            // l = keywords.length;
-            // if (l == 1) {
-            //     statement = keywords[0].substring(check.length);
-            //     $inp.val(query.slice(0, pos) + statement + query.slice(pos));
-            //     pos += statement.length;
-            //     inp.selectionStart = pos;
-            //     inp.selectionEnd = pos;
-            //     app.insertSpace();
-            // } else if (l > 1) {
-            //     for (i=0; true; i++) {
-            //         p = keywords[0][i];
-            //         for (j=1; j < l; j++) {
-            //             if (p !== keywords[j][i] || j > keywords[j].length ) {
-            //                 j = 0;
-            //                 break;
-            //             }
-            //         }
-            //         if (j !== l) {
-            //             break;
-            //         }
-            //     }
-            //     statement = keywords[0].substring(0, i);
-            //     $inp.val(query.slice(0, pos) + statement.slice(check.length) + query.slice(pos + rest.length));
-            //     pos += (statement.length - check.length);
-            //     inp.selectionStart = pos;
-            //     inp.selectionEnd = pos;
-            //     autoCompletionIndex = -1;
-            //     autoCompletionLength = l;
-            //     $('#autocomplete-popup').css('left', Math.min(14 + (pos*7), $inp.width())).show().children('ul').html(function (stmts, l, pos) {
-            //         var s = '';
-            //         for (var i=0; i < l; i++) {
-            //             s +=
-            //                 '<li data-index="' + i + '" onclick="app.insertText(\'' + keywords[i].substring(pos)  + '\', 0)">' +
-            //                     '<span class="grey">' + keywords[i].substring(0, pos) + '</span>' +
-            //                     keywords[i].substring(pos) +
-            //                 '</li>';
-            //         }
-            //         return s;
-            //     }(keywords, l, i)).children('li').hover(function () {
-            //         $('#autocomplete-popup ul').children('li').removeClass('selected-auto-complete');
-            //         autoCompletionIndex = $(this).addClass('selected-auto-complete').data('index');
-            //     });
-            // }
+                element.keyword.indexOf(check) === 0
+            ).map((kw) => kw.keyword);
+            if (keywords.length === 1) {
+                statement = keywords[0].substring(check.length);
+                this.setState({
+                    query: this.state.query.slice(0, pos) + statement + this.state.query.slice(pos + rest.length)
+                });
+                this.cursorPos = pos + statement.length;
+                return;
+            }
+
+            if (keywords.length > 1) {
+                keywords.sort();
+                let wpos = this._getWpos(keywords);
+                statement = keywords[0].substring(0, wpos);
+                this.cursorPos = pos + statement.length - check.length;
+                this.setState({
+                    query: this.state.query.slice(0, pos) + statement.slice(check.length) + this.state.query.slice(pos + rest.length),
+                    keywords: keywords,
+                    xpos: this.cursorPos,
+                    wpos: wpos,
+                    show: true,
+                    selected: 0
+                });
+                return;
+            }
+        }
+        if (!parseResult.isValid && pos !== parseResult.pos) {
+            this.setState({parseRes: parseResult});
+        }
+    }
+
+    componentDidUpdate() {
+        if (this.cursorPos !== null) {
+            this.refs.inp.focus();
+            this.refs.inp.selectionStart = this.refs.inp.selectionEnd = this.cursorPos;
+            this.cursorPos = null;
         }
     }
 
     onInpChange(event) {
-        this.setState({ query: event.target.value });
+        this.setState({
+            query: event.target.value,
+            parseRes: null,
+            show: false });
     }
 
     onQuery() {
@@ -139,7 +227,14 @@ class Auth extends Reflux.Component {
                                 <i className="fa fa-play"></i>
                             </button>
                         </span>
-                        <AutoCompletePopup />
+                        <AutoCompletePopup
+                            keywords={this.state.keywords}
+                            xpos={this.state.xpos}
+                            wpos={this.state.wpos}
+                            selected={this.state.selected}
+                            show={this.state.show}
+                            onSelect={this.onAutoCompleteSelect.bind(this)} />
+                        {(this.state.parseRes !== null) ? <ParseError parseRes={this.state.parseRes} /> : null}
                     </div>
                 </div>
                 <ReactCSSTransitionGroup
