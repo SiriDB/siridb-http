@@ -24,10 +24,9 @@ class DatabaseStore extends BaseStore {
                 this.setState({ sending: false });
             })
             .done((data) => {
-                this.setState(data);
+                this.setState({ result: data });
             })
             .fail((error, data) => {
-                console.log(error);
                 this.setState({
                     alert: {
                         severity: (data.error_msg) ? 'warning' : 'error',

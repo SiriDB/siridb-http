@@ -7,6 +7,7 @@ import QueryStore from '../../Stores/QueryStore.jsx';
 import QueryActions from '../../Actions/QueryActions.jsx';
 import AutoCompletePopup from './AutoCompletePopup.jsx';
 import ParseError from './ParseError.jsx';
+import Result from './Result/Result.jsx';
 
 const LAST_CHARS = /[a-z_]+$/;
 const FIRST_CHARS = /^[a-z_]+/;
@@ -65,7 +66,7 @@ class Auth extends Reflux.Component {
         }
 
         if (this.state.parseRes) {
-            this.setState({parseRes: null});
+            this.setState({ parseRes: null });
         }
 
         let n = this.state.keywords.length;
@@ -175,7 +176,7 @@ class Auth extends Reflux.Component {
             }
         }
         if (!parseResult.isValid && pos !== parseResult.pos) {
-            this.setState({parseRes: parseResult});
+            this.setState({ parseRes: parseResult });
         }
     }
 
@@ -191,7 +192,8 @@ class Auth extends Reflux.Component {
         this.setState({
             query: event.target.value,
             parseRes: null,
-            show: false });
+            show: false
+        });
     }
 
     onQuery() {
@@ -204,47 +206,56 @@ class Auth extends Reflux.Component {
         ) : null;
 
         return (
-            <div className="form">
-                <div className="form-group">
-                    <div className="input-group input-group-sm">
-                        <input
-                            autoFocus
-                            readOnly={this.state.sending}
-                            type="text"
-                            ref="inp"
-                            className="form-control"
-                            placeholder="your query..."
-                            value={this.state.query}
-                            onKeyPress={this.onKeyPress.bind(this)}
-                            onKeyDown={this.onKeyDown.bind(this)}
-                            onChange={this.onInpChange.bind(this)} />
-                        <span className="input-group-btn">
-                            <button
-                                disabled={this.state.sending}
-                                className="btn btn-default"
-                                type="button"
-                                onClick={this.onQuery.bind(this)}>
-                                <i className="fa fa-play"></i>
-                            </button>
-                        </span>
-                        <AutoCompletePopup
-                            keywords={this.state.keywords}
-                            xpos={this.state.xpos}
-                            wpos={this.state.wpos}
-                            selected={this.state.selected}
-                            show={this.state.show}
-                            onSelect={this.onAutoCompleteSelect.bind(this)} />
-                        {(this.state.parseRes !== null) ? <ParseError parseRes={this.state.parseRes} /> : null}
+            <div>
+                <div className="form">
+                    <div className="form-group">
+                        <div className="input-group input-group-sm">
+                            <input
+                                autoFocus
+                                readOnly={this.state.sending}
+                                type="text"
+                                ref="inp"
+                                className="form-control"
+                                placeholder="your query..."
+                                value={this.state.query}
+                                onKeyPress={this.onKeyPress.bind(this)}
+                                onKeyDown={this.onKeyDown.bind(this)}
+                                onChange={this.onInpChange.bind(this)} />
+                            <span className="input-group-btn">
+                                <button
+                                    disabled={this.state.sending}
+                                    className="btn btn-default"
+                                    type="button"
+                                    onClick={this.onQuery.bind(this)}>
+                                    <i className="fa fa-play"></i>
+                                </button>
+                            </span>
+                            <AutoCompletePopup
+                                keywords={this.state.keywords}
+                                xpos={this.state.xpos}
+                                wpos={this.state.wpos}
+                                selected={this.state.selected}
+                                show={this.state.show}
+                                onSelect={this.onAutoCompleteSelect.bind(this)} />
+                            {(this.state.parseRes !== null) ? <ParseError parseRes={this.state.parseRes} /> : null}
+                        </div>
                     </div>
+                    <ReactCSSTransitionGroup
+                        component="div"
+                        className="alert-wrapper"
+                        transitionName="alert-animation"
+                        transitionEnterTimeout={300}
+                        transitionLeaveTimeout={500}>
+                        {alert}
+                    </ReactCSSTransitionGroup>
                 </div>
-                <ReactCSSTransitionGroup
-                    component="div"
-                    className="alert-wrapper"
-                    transitionName="alert-animation"
-                    transitionEnterTimeout={300}
-                    transitionLeaveTimeout={500}>
-                    {alert}
-                </ReactCSSTransitionGroup>
+                {
+                    (this.state.sending) ? (
+                        <img src="/static/img/loader.gif" alt="Loading bar" style={{ width: 20, height: 10 }} />
+                    ) : (this.state.result) ? (
+                        <Result result={this.state.result} />
+                    ) : null
+                }
             </div>
         )
     }

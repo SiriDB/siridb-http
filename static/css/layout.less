@@ -255,3 +255,24 @@ fieldset[disabled] .btn-default.active {
     width: 0;
 }
 
+/**** Table Result ****/
+.table-result {
+    font-size: 12px;
+    >thead >tr >th,
+    >tbody >tr >th,
+    >tfoot >tr >th,
+    >thead >tr >td,
+    >tbody >tr >td,
+    >tfoot >tr >td {
+        border-top: none;
+        color: #d4dee1;
+        white-space: pre;
+    }
+    >tbody >tr:nth-of-type(2n+1) {
+        background-color: #425760;
+    }
+    >thead >tr >th {
+        border-bottom: 2px solid #77888D;
+    }
+}
+

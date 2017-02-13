@@ -1,7 +1,5 @@
 import React from 'react';
 import { render } from 'react-dom';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-
 
 class ParseError extends React.Component {
 
@@ -23,7 +21,7 @@ class ParseError extends React.Component {
         }
         return (
             <div className="parse-error" style={style}>
-                Error at position {this.props.parseRes.pos}.
+                Error at position {this.props.parseRes.pos}
             </div>
         )
     }
