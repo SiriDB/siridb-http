@@ -12,8 +12,8 @@ class Table extends React.Component {
     };
 
     static defaultProps = {
-        caption: null,
-        formatters: {},
+        caption: null
+        // formatters: {},
     };
 
     constructor(props) {
@@ -24,6 +24,9 @@ class Table extends React.Component {
         let formatters = this.props.columns.map((column) => {
             return this.props.formatters[column] || ((val) => val);
         });
+
+        console.log(formatters);
+        console.log(this.props.formatters);
 
         return (
             <table className="table table-striped table-condensed table-result">
@@ -36,7 +39,7 @@ class Table extends React.Component {
                     {
                         this.props.data.map((row, r) =>
                             <tr key={r}>
-                                {row.map((column, n) => <td key={n}>{formatters[n](column)}</td>)}
+                                {row.map((val, n) => <td key={n}>{formatters[n](val)}</td>)}
                             </tr>
                         )
                     }

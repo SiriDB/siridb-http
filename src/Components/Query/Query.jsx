@@ -44,6 +44,10 @@ class Auth extends Reflux.Component {
         }
     }
 
+    setQuery(query) {
+        console.log(query);
+    }
+
     hideAutoComplete() {
         this.setState({ show: false, parseRes: null });
     }
@@ -253,7 +257,7 @@ class Auth extends Reflux.Component {
                     (this.state.sending) ? (
                         <img src="/static/img/loader.gif" alt="Loading bar" style={{ width: 20, height: 10 }} />
                     ) : (this.state.result) ? (
-                        <Result result={this.state.result} />
+                        <Result result={this.state.result} setQuery={this.setQuery.bind(this)} />
                     ) : null
                 }
             </div>

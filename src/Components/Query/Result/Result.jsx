@@ -3,10 +3,12 @@ import { render } from 'react-dom';
 import Table from './Table.jsx';
 
 
+
 class Result extends React.Component {
 
     static propTypes = {
-        result: React.PropTypes.object.isRequired
+        result: React.PropTypes.object.isRequired,
+        setQuery: React.PropTypes.func.isRequired
     };
 
     constructor(props) {
@@ -19,7 +21,7 @@ class Result extends React.Component {
         /**** List Statements ****/
         if (data.columns !== undefined && typeof data.columns[0] === 'string') {
             if (data.series !== undefined) {
-                return <Table columns={data.columns} data={data.series} />
+                return <Table columns={data.columns} data={data.series} formatters={this._fmt_series} />
             }
             return (
                 <div className="query-result">
@@ -28,6 +30,19 @@ class Result extends React.Component {
             )
         }
         return null;
+    }
+
+    _fmt_series = {
+        name: (val) => {
+            return (
+                <span>
+                    <a onClick={() => this.props.setQuery(`select * from "${val}" after now - 1h`)}>
+                        <i className="fa fa-copy"></i>
+                    </a>&nbsp;
+                    {val}
+                </span>
+            );
+        }
     }
 }
 
