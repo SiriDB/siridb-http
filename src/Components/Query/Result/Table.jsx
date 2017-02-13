@@ -11,11 +11,20 @@ class Table extends React.Component {
         formatters: React.PropTypes.object
     };
 
+    static defaultProps = {
+        caption: null,
+        formatters: {},
+    };
+
     constructor(props) {
         super(props);
     }
 
     render() {
+        let formatters = this.props.columns.map((column) => {
+            return this.props.formatters[column] || ((val) => val);
+        });
+
         return (
             <table className="table table-striped table-condensed table-result">
                 <thead>
@@ -24,6 +33,13 @@ class Table extends React.Component {
                     </tr>
                 </thead>
                 <tbody>
+                    {
+                        this.props.data.map((row, r) =>
+                            <tr key={r}>
+                                {row.map((column, n) => <td key={n}>{formatters[n](column)}</td>)}
+                            </tr>
+                        )
+                    }
                 </tbody>
             </table>
         )
