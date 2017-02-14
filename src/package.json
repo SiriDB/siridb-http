@@ -1,7 +1,7 @@
 {
-  "name": "reactjs",
+  "name": "SiriDB-HTTP",
   "version": "1.0.0",
-  "description": "",
+  "description": "SiriDB HTTP Server",
   "main": "index.js",
   "licenses": [
     { "license": "MIT"}
@@ -11,10 +11,10 @@
   },
   "author": "",
   "dependencies": {
-    "babel-core": ">=6.22.1",
-    "babel-loader": ">=6.2.10",
+    "babel-core": ">=6.23.1",
+    "babel-loader": ">=6.3.0",
     "babel-preset-es2015": ">=6.22.0",
-    "babel-preset-react": ">=6.16.0",
+    "babel-preset-react": ">=6.23.0",
     "es6-mixins": ">=1.0.2",
     "history": ">=4.5.1",
     "react": ">=15.4.2",
@@ -22,12 +22,12 @@
     "react-dom": ">=15.4.2",
     "react-router": ">=3.0.2",
     "react-addons-css-transition-group": ">=15.4.2",
-    "react-localstorage": ">=0.3.0",
     "reflux-edge": ">=0.5.0",
     "webpack": ">=2.2.0",
-    "d3": ">=4.4.4"
+    "d3": ">=4.4.4",
+    "moment": ">=2.17.1"
   },
   "devDependencies": {
-    "babel-plugin-transform-class-properties": ">=6.22.0"
+    "babel-plugin-transform-class-properties": ">=6.23.0"
   }
 }

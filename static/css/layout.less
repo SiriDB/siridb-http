@@ -14,9 +14,18 @@ input[type="password"] {
     background-color: #d4d8da;
 }
 
+/**** Links ****/
+
 a {
     cursor: pointer;
+    color: #7996a2;
+    &:hover, &:focus {
+        color: #a1b2bc;
+    }
+
 }
+
+/**** Navbar ****/
 
 .navbar-default {
     background-color: inherit;
@@ -47,6 +56,7 @@ a {
     }
 }
 
+/**** Forms ****/
 
 .form-control {
     font-size: 12px;
@@ -126,6 +136,7 @@ fieldset[disabled] .btn-default.active {
 }
 
 .alert {
+    border: none;
     border-radius: 0;
     opacity: 0.9;
 

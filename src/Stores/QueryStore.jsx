@@ -1,5 +1,6 @@
 import React from 'react';
 import QueryActions from '../Actions/QueryActions.jsx';
+import AuthActions from '../Actions/AuthActions.jsx';
 import BaseStore from './BaseStore.jsx';
 
 
@@ -17,6 +18,7 @@ class DatabaseStore extends BaseStore {
         };
     }
 
+
     onQuery(query) {
         this.setState({ sending: true });
         this.post('/query', { query: query })
@@ -27,12 +29,17 @@ class DatabaseStore extends BaseStore {
                 this.setState({ result: data });
             })
             .fail((error, data) => {
-                this.setState({
-                    alert: {
-                        severity: (data.error_msg) ? 'warning' : 'error',
-                        message: data.error_msg || unexpected_msg
-                    }
-                });
+                if (error.status === 422) {
+                    AuthActions.logoff();
+                } else {
+                    this.setState({
+                        result: null,
+                        alert: {
+                            severity: (data.error_msg) ? 'warning' : 'error',
+                            message: data.error_msg || unexpected_msg
+                        }
+                    });
+                }
             });
     }
 

@@ -32,6 +32,7 @@ class AuthStore extends BaseStore {
     }
 
     onLogoff() {
+        localStorage.clear();
         this.fetch('/auth/logoff')
         .done((data) => {
             this.setState({user: null});
@@ -46,6 +47,7 @@ class AuthStore extends BaseStore {
         } else {
             this.post('/auth/login', {username: username, password: password})
             .done((data) => {
+                localStorage.clear();
                 this.setState(data);
             })
             .fail((error, data) => {

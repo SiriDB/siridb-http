@@ -2,7 +2,6 @@ import React from 'react';
 import Reflux from 'reflux-edge';
 import { render } from 'react-dom';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import localstorage from 'react-localstorage';
 import QueryStore from '../../Stores/QueryStore.jsx';
 import QueryActions from '../../Actions/QueryActions.jsx';
 import AutoCompletePopup from './AutoCompletePopup.jsx';
@@ -11,8 +10,10 @@ import Result from './Result/Result.jsx';
 
 const LAST_CHARS = /[a-z_]+$/;
 const FIRST_CHARS = /^[a-z_]+/;
+const SELECT_ALL = -1;
+const HISTORY_SIZE = 100;
 
-class Auth extends Reflux.Component {
+class Query extends Reflux.Component {
 
     constructor(props) {
         super(props);
@@ -32,6 +33,8 @@ class Auth extends Reflux.Component {
             parseRes: null
         };
         this.cursorPos = null;
+        this.queries = JSON.parse(localStorage.getItem('queries')) || [];
+        this.idx = this.queries.length;
     }
 
     onKeyPress(event) {
@@ -45,7 +48,12 @@ class Auth extends Reflux.Component {
     }
 
     setQuery(query) {
-        console.log(query);
+        this.setState({
+            show: false,
+            parseRes: null,
+            query: query,
+        });
+        this.cursorPos = SELECT_ALL;
     }
 
     hideAutoComplete() {
@@ -100,21 +108,14 @@ class Auth extends Reflux.Component {
             if (event.key == 'Tab') {
                 this.onTabPress(event);
             }
-            if (event.key == 'ArrowUp') {
-                if (this.state.show) {
-                    event.preventDefault();
-                    this.setState({
-                        selected: Math.abs(--this.state.selected % n)
-                    });
-                }
+            if (event.key == 'ArrowUp' && this.idx > 0) {
+                event.preventDefault();
+                this.setQuery(this.queries[--this.idx]);
+
             }
-            if (event.key == 'ArrowDown') {
-                if (this.state.show) {
-                    event.preventDefault();
-                    this.setState({
-                        selected: (++this.state.selected) % n
-                    });
-                }
+            if (event.key == 'ArrowDown' && this.idx < this.queries.length) {
+                event.preventDefault();
+                this.setQuery(this.queries[++this.idx] || '');
             }
         }
     }
@@ -187,7 +188,11 @@ class Auth extends Reflux.Component {
     componentDidUpdate() {
         if (this.cursorPos !== null) {
             this.refs.inp.focus();
-            this.refs.inp.selectionStart = this.refs.inp.selectionEnd = this.cursorPos;
+            if (this.cursorPos === SELECT_ALL) {
+                this.refs.inp.selectionStart = 0;
+            } else {
+                this.refs.inp.selectionStart = this.refs.inp.selectionEnd = this.cursorPos;
+            }
             this.cursorPos = null;
         }
     }
@@ -201,6 +206,16 @@ class Auth extends Reflux.Component {
     }
 
     onQuery() {
+        if (this.state.query != this.queries[this.idx] &&
+            this.state.query != this.queries[this.queries.length - 1]) {
+            this.idx = this.queries.length;
+            this.queries.push(this.state.query);
+            if (this.queries.length > HISTORY_SIZE) {
+                this.queries.shift();
+                this.idx--;
+            }
+            localStorage.setItem('queries', JSON.stringify(this.queries));
+        }
         QueryActions.query(this.state.query);
     }
 
@@ -265,4 +280,4 @@ class Auth extends Reflux.Component {
     }
 }
 
-export default Auth;
+export default Query;

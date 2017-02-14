@@ -58,13 +58,13 @@ def authentication(fun):
                         authorization = self._SECRET_RX.match(
                             request.headers['Authorization'])
                         if not authorization:
-                            raise ValueError(
+                            raise AuthenticationError(
                                 'Missing "Token" or "Secret" in headers')
                         secret = authorization.group(1)
                         self.auth.validate_secret(secret)
                         siri = self.siri
                     else:
-                        raise ValueError('Missing "Token" in headers')
+                        raise AuthenticationError('Missing "Token" in headers')
                 else:
                     token = authorization.group(1)
                     self.auth.validate_token(token)
@@ -77,11 +77,11 @@ def authentication(fun):
                     else:
                         user = session.get('user')
                         if user is None:
-                            raise ValueError('Invalid session request.')
+                            raise AuthenticationError('Invalid session request.')
 
                         siri = self.siri_connections.get(user)
                         if siri is None:
-                            raise ValueError(
+                            raise AuthenticationError(
                                 'No SiriDB connection is found for user "{}"'
                                 .format(user))
                 except Exception as resp:
@@ -91,7 +91,9 @@ def authentication(fun):
                         logging.error(e)
                         ct = _UNSUPPORTED
                     finally:
-                        return self._RESPONSE_MAP[ct](self, resp)
+                        return self._RESPONSE_MAP[ct](
+                            self,
+                            AuthenticationError(resp))
         return await fun(self, request, siri)
     return wrapper
 
