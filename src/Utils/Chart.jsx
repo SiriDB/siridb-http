@@ -19,12 +19,13 @@ class Chart extends React.Component {
     };
 
     static defaultProps = {
-        color: '#a00',
-        textColor: '#0a0',
-        marginTop: 0,
+        color: '#a1b2bc',
+        textColor: '#fff',
+        axisColor: '#999',
+        marginTop: 14,
         marginRight: 0,
-        marginBottom: 0,
-        marginLeft: 0,
+        marginBottom: 20,
+        marginLeft: 80,
     }
 
     constructor(props) {
@@ -32,12 +33,19 @@ class Chart extends React.Component {
     }
 
     componentDidMount() {
-        console.log('did mount...');
+        this._init();
+    }
+
+    componentDidUpdate() {
+        this._init();
+    }
+
+    _init() {
         this.width = this.props.with || this.refs.chart.offsetWidth || 600;
         this.height = this.props.height || this.refs.chart.offsetHeight || 150;
         this._initChart();
         this._initBrush();
-        this._draw();
+        this._draw(true);
     }
 
     _getDomain(d, axis) {
@@ -46,10 +54,11 @@ class Chart extends React.Component {
             span[0]--;
             span[1]++;
         }
+
         return span;
     }
 
-    _draw() {
+    _draw(init) {
 
         this.svg.select('.xbrush')
             .call(this.brush);
@@ -65,11 +74,19 @@ class Chart extends React.Component {
         this.line.attr('d', this.lineFun);
 
         let dotsCircle = this.dots.selectAll('circle').data((d) => d);
-        console.log(dotsCircle);
-        dotsCircle.enter().append('circle').attr('r', 1.5);
-        dotsCircle
-            .attr('cx', (d) => this.xS(d[0]))
-            .attr('cy', (d) => this.yS(d[1]));
+
+        if (init) {
+            dotsCircle
+                .enter()
+                .append('circle')
+                .attr('r', 1.5)
+                .attr('cx', (d) => this.xS(d[0]))
+                .attr('cy', (d) => this.yS(d[1]));
+        } else {
+            dotsCircle
+                .attr('cx', (d) => this.xS(d[0]))
+                .attr('cy', (d) => this.yS(d[1]));
+        }
 
     }
 
@@ -77,12 +94,11 @@ class Chart extends React.Component {
         for (let i = t0 - t0 % val - 7200; i < t1 + 1; i += val) {
             let d = this.xS(i * 1000);
             if (d >= this.xS.range()[0]) {
-                console.log(d);
                 g.append('text')
                     .attr('x', d)
                     .attr('y', 16)
                     .attr('text-anchor', 'middle')
-                    .attr('fill', this.props.textcolor)
+                    .attr('fill', this.props.textColor)
                     .text(i % 86400 === 86400 - 7200 ? dFormat(new Date(i * 1000)) : hFormat(new Date(i * 1000)));
             }
         }
@@ -93,7 +109,14 @@ class Chart extends React.Component {
             .x((d) => d[0])
             .y((d) => d[1]);
 
-        g.html('').append('g').append('path').attr('d', lineX([[this.props.marginLeft, 0], [this.width - this.props.marginRight, 0]]));
+        g.html('')
+            .append('g')
+            .append('path')
+            .attr('d', lineX([
+                [this.props.marginLeft, 0],
+                [this.width - this.props.marginRight, 0]
+            ]))
+            .attr('stroke', this.props.axisColor);
 
         let tickSize = 60;
         let t0 = this.xS.domain()[0] / 1000;
@@ -106,7 +129,6 @@ class Chart extends React.Component {
             if (diff < d) {
                 this._xTicksFun(d, g, t0, t1, dFormat, hFormat);
             }
-            return diff < d;
         });
     }
 
@@ -118,8 +140,8 @@ class Chart extends React.Component {
                     .attr('x', -10)
                     .attr('y', d)
                     .attr('text-anchor', 'end')
-                    .attr('fill', this.props.textcolor)
-                    .text(val < 1 ? i.toPrecision(1) : i);
+                    .attr('fill', this.props.textColor)
+                    .text((i % 1) ? i.toFixed(5) : i);
             }
             this.nTicksReal++;
         }
@@ -130,7 +152,14 @@ class Chart extends React.Component {
             .x((d) => d[0])
             .y((d) => d[1]);
 
-        g.html('').append('g').append('path').attr('d', lineY([[0, this.props.marginTop], [0, this.height - this.props.marginBottom]]));
+        g.html('')
+            .append('g')
+            .append('path')
+            .attr('d', lineY([
+                [0, this.props.marginTop],
+                [0, this.height - this.props.marginBottom]
+            ]))
+            .attr('stroke', this.props.axisColor);
         let tickSize = 20;
 
         let t0 = this.yS.domain()[0];
@@ -150,7 +179,7 @@ class Chart extends React.Component {
             return;
         }
         g.selectAll('text').remove();
-        this._yTicksFun(Math.pow(10, exp) * 2), g, t0, t1;
+        this._yTicksFun(Math.pow(10, exp) * 2, g, t0, t1);
     }
 
     _initBrush() {
@@ -172,7 +201,7 @@ class Chart extends React.Component {
             zoomed = true;
             this.xS.domain(span);
             this.g.select('.xbrush').call(this.brush.move, null);
-            this._draw();
+            this._draw(false);
         }
 
         let zoomOut = () => {
@@ -182,7 +211,7 @@ class Chart extends React.Component {
             }
             zoomed = false;
             this.xS.domain(this._getDomain(this.props.points, X_AXIS));
-            this._draw();
+            this._draw(false);
         }
 
         this.brush = d3.brushX()
@@ -220,7 +249,7 @@ class Chart extends React.Component {
             .x((d) => this.xS(d[0]))
             .y((d) => this.yS(d[1]));
 
-        this.svg = d3.select(this.refs.chart).append('svg')
+        this.svg = d3.select(this.refs.chart).html('').append('svg')
             .attr('viewBox', `0 0 ${this.width} ${this.height}`)
             .datum(this.props.points);
         this.svg.append('rect')
@@ -269,9 +298,8 @@ class Chart extends React.Component {
     }
 
     render() {
-        console.log('render...');
         return (
-            <div ref="chart"></div>
+            <div className="chart" ref="chart"></div>
         )
     }
 }

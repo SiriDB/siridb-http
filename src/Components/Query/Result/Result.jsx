@@ -31,6 +31,10 @@ class Result extends Reflux.Component {
         this.utcFormat = d3.utcFormat("%Y-%m-%d %H:%M:%SZ");
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return (this.props.result !== nextProps.result);
+    }
+
     render() {
         this.initTime();
         let data = this.props.result;
@@ -102,11 +106,17 @@ class Result extends Reflux.Component {
             return <pre>{data.help}</pre>
         }
 
+        let npoints = 0;
+        Object.entries(data).forEach(([series, points]) => npoints += points.length);
+        console.log(npoints);
         return (
             <div>
                 {
                     Object.entries(data).map(([series, points]) =>
-                        <Chart key={series} name={series} points={points} options={{}} />
+                        <Chart
+                            key={series}
+                            name={series}
+                            points={points.map((point) => [point[0] * this.factor, point[1]])} />
                     )
                 }
             </div>
