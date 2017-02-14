@@ -45,6 +45,7 @@ class Chart extends React.Component {
         this.height = this.props.height || this.refs.chart.offsetHeight || 150;
         this._initChart();
         this._initBrush();
+        this._Tooltip();
         this._draw(true);
     }
 
@@ -224,7 +225,7 @@ class Chart extends React.Component {
 
         this.g.append('g')
             .attr('class', 'xbrush')
-            .attr('transform', 'translate(0 ' + this.props.marginTop + ')')
+            .attr('transform', 'translate(' + this.props.marginLeft + ' ' + this.props.marginTop + ')')
             .on("mousedown", () => { if (d3.event.button === 2) { d3.event.stopImmediatePropagation(); } })
             .call(this.brush)
             .selectAll('rect')
@@ -232,8 +233,6 @@ class Chart extends React.Component {
             .attr('opacity', 0.4)
             .attr('stroke', null)
             .on('contextmenu', zoomOut);
-
-
     }
 
     _initChart() {
@@ -295,6 +294,65 @@ class Chart extends React.Component {
             .attr('fill', this.props.color)
             .attr('display', 'none')
             .attr('opacity', 0.4);
+    }
+
+    _Tooltip() {
+        let tFormat = d3.timeFormat('%Y-%m-%d %H:%M:%S');
+
+        let ttOutFun = () => {
+            tt.attr('display', 'none');
+            this.svg.select('.ttdot').attr('display', 'none');
+        };
+        var self = this;
+        let ttMoveFun = function () {
+            var pos = d3.mouse(this);
+            pos[0] += self.props.marginLeft;
+            var inv = self.xS.invert(pos[0]);
+            var idx = self.props.points
+                .map((d) => Math.abs(d[0] - inv))
+                .reduce((minIdx, d, i, alist) => d < alist[minIdx] ? i : minIdx, 0);
+
+            var x = pos[0] - 170 > 0 ? pos[0] - 170 : pos[0] + 10;
+            var y = pos[1] - 50 > 0 ? pos[1] - 30 : pos[1] + 30;
+
+            var pt = self.props.points[idx];
+
+            tt
+                .attr('transform', 'translate(' + x + ' ' + y + ')')
+                .attr('display', 'inline');
+            ttime.text(tFormat((new Date(pt[0]))));
+            ttval.text(pt[1]);
+
+            self.svg.select('.ttdot')
+                .attr('cx', self.xS(pt[0]))
+                .attr('cy', self.yS(pt[1]))
+                .attr('display', 'inline');
+        };
+
+
+        var tt = this.svg.append('g')
+            .attr('class', 'tt')
+            .attr('display', 'none');
+
+        tt.append('rect')
+            .attr('class', 'ttbg')
+            .attr('width', 150)
+            .attr('height', 40);
+
+        var ttime = tt.append('text')
+            .attr('x', 4)
+            .attr('y', 14)
+            .attr('fill', this.props.textColor);
+
+        var ttval = tt.append('text')
+            .attr('class', 'ttval')
+            .attr('x', 4)
+            .attr('y', 30)
+            .attr('fill', this.props.textColor);
+
+        this.svg.select('.xbrush')
+            .on('mousemove', ttMoveFun)
+            .on('mouseout', ttOutFun);
     }
 
     render() {
