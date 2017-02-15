@@ -106,23 +106,30 @@ class Result extends Reflux.Component {
             return <pre>{data.help}</pre>
         }
 
+        /**** Message Of The Day (debug) ****/
+        if (data.motd !== undefined && typeof data.motd === 'string') {
+            return <div>{this._lineBreak(data.motd)}</div>
+        }
+
+        /**** Select Statement ****/
         let npoints = 0;
-        Object.entries(data).forEach(([series, points]) => npoints += points.length);
-        console.log(npoints);
-        return (
+        let nseries = 0;
+        let charts = (
             <div>
                 {
-                    Object.entries(data).map(([series, points]) =>
-                        <Chart
+                    Object.entries(data).map(([series, points]) => {
+                        npoints += points.length;
+                        nseries++;
+                        return <Chart
                             key={series}
                             name={series}
                             points={points.map((point) => [point[0] * this.factor, point[1]])} />
-                    )
+                    })
                 }
             </div>
         )
-
-        return null;
+        console.log(`Rendered ${nseries} series with a total of ${npoints} points`);
+        return charts;
     }
 
     _fmtSize(size) {
@@ -195,6 +202,13 @@ class Result extends Reflux.Component {
         series: this._fmtLongNumber,
         series_length: this._fmtLongNumber,
         shards_size: this._fmtSize,
+    }
+
+    _lineBreak(content) {
+        let regex = /(\n)/g;
+        return content.split(regex).map(
+            (line, index) => line.match(regex) ? <br key={"key_" + index} /> : line
+        );
     }
 }
 

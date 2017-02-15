@@ -1,7 +1,7 @@
 import React from 'react';
 import BaseStore from './BaseStore.jsx';
 import AuthActions from '../Actions/AuthActions.jsx';
-
+import QueryActions from '../Actions/QueryActions.jsx';
 
 class AuthStore extends BaseStore {
 
@@ -33,6 +33,7 @@ class AuthStore extends BaseStore {
 
     onLogoff() {
         localStorage.clear();
+        QueryActions.clearAll();
         this.fetch('/auth/logoff')
         .done((data) => {
             this.setState({user: null});
@@ -48,6 +49,7 @@ class AuthStore extends BaseStore {
             this.post('/auth/login', {username: username, password: password})
             .done((data) => {
                 localStorage.clear();
+                QueryActions.clearAll();
                 this.setState(data);
             })
             .fail((error, data) => {
@@ -55,8 +57,6 @@ class AuthStore extends BaseStore {
             });
         }
     }
-
-
 }
 
 export default AuthStore;

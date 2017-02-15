@@ -37,8 +37,8 @@ class TopMenu extends React.Component {
 
                     <div className="collapse navbar-collapse">
                         <ul className="nav navbar-nav navbar-right">
-                            <li><Link to="/" activeClassName="active">Query</Link></li>
-                            <li><Link to="/insert" activeClassName="active">Insert</Link></li>
+                            <li><IndexLink to="/" activeClassName="active">Query</IndexLink></li>
+                            <li><Link to="insert" activeClassName="active">Insert</Link></li>
                             {logoff}
                         </ul>
                     </div>

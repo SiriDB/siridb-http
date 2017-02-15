@@ -176,6 +176,9 @@ fieldset[disabled] .btn-default.active {
 
 .modal-header {
     border-bottom: 0px;
+    .close {
+        color: #fff;
+    }
 }
 
 .modal-body {
@@ -248,8 +251,10 @@ fieldset[disabled] .btn-default.active {
     z-index: 1000;
     position: absolute;
     left: 200px;
-    top: 34px;
-    background-color: rgba(120, 83, 19, 0.8);
+    top: 38px;
+    color: #785313;
+    background-color: #FEF1B0;
+    opacity: 0.8;
     padding: 4px;
 }
 
@@ -257,11 +262,11 @@ fieldset[disabled] .btn-default.active {
 .parse-error:after {
     content: "";
     position: absolute;
-    top: -8px; /* value = - border-top-width - border-bottom-width */
-    left: 4px; /* controls horizontal position */
-    border-width: 0 8px 8px; /* vary these values to change the angle of the vertex */
+    top: -6px; /* value = - border-top-width - border-bottom-width */
+    left: 5px; /* controls horizontal position */
+    border-width: 0 6px 6px; /* vary these values to change the angle of the vertex */
     border-style: solid;
-    border-color: rgba(120, 83, 19, 0.8) transparent;
+    border-color: #FEF1B0 transparent;
     display: block;
     width: 0;
 }
@@ -291,3 +296,21 @@ fieldset[disabled] .btn-default.active {
 .chart {
     margin-bottom: 20px;
 }
+
+/**** Insert Form ****/
+.form-insert {
+    .input-group {
+        width: 100%;
+        >textarea {
+            resize: vertical;
+            height: 300px;
+        }
+    }
+    &.has-error {
+        .form-control {
+            border-color: #843534;
+            box-shadow: inset 0px 0px 10px #843534;
+        }
+    }
+}
+

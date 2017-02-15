@@ -6,7 +6,7 @@ import BaseStore from './BaseStore.jsx';
 
 const unexpected_msg = 'Oops, some unexpected error has occurred. Please check the console for more details.';
 
-class DatabaseStore extends BaseStore {
+class QueryStore extends BaseStore {
 
     constructor() {
         super();
@@ -20,7 +20,7 @@ class DatabaseStore extends BaseStore {
 
 
     onQuery(query) {
-        this.setState({ sending: true });
+        this.setState({ sending: true, result: null });
         this.post('/query', { query: query })
             .always((xhr, data) => {
                 this.setState({ sending: false });
@@ -33,7 +33,6 @@ class DatabaseStore extends BaseStore {
                     AuthActions.logoff();
                 } else {
                     this.setState({
-                        result: null,
                         alert: {
                             severity: (data.error_msg) ? 'warning' : 'error',
                             message: data.error_msg || unexpected_msg
@@ -46,6 +45,14 @@ class DatabaseStore extends BaseStore {
     onClearAlert() {
         this.setState({ alert: null });
     }
+
+    onClearAll() {
+        this.setState({
+            alert: null,
+            result: null,
+            sending: false
+        });
+    }
 }
 
-export default DatabaseStore;
+export default QueryStore;

@@ -216,6 +216,7 @@ class Query extends Reflux.Component {
             }
             localStorage.setItem('queries', JSON.stringify(this.queries));
         }
+        this.cursorPos = SELECT_ALL;
         QueryActions.query(this.state.query);
     }
 

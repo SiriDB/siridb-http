@@ -189,13 +189,18 @@ class Chart extends React.Component {
         let brushFun = () => {
             this.svg.selectAll('.tt').attr('display', 'none');
             this.svg.selectAll('.ttdot').attr('display', 'none');
+            this.svg.selectAll('.ttline').attr('display', 'none');
         }
 
+
         let zoomIn = () => {
+
             if (!d3.event.selection) {
                 return;
             }
-            let span = d3.event.selection.map(this.xS.invert);
+
+            let span = d3.event.selection.map((v,i,a) => this.xS.invert(v + 80,i,a));
+
             if (this.xS(span[1]) - this.xS(span[0]) < 10) {
                 return;
             }
@@ -223,13 +228,15 @@ class Chart extends React.Component {
             .on('brush', brushFun)
             .on('end', zoomIn);
 
-        this.g.append('g')
+        let tmp = this.g.append('g')
             .attr('class', 'xbrush')
-            .attr('transform', 'translate(' + this.props.marginLeft + ' ' + this.props.marginTop + ')')
+            .attr('transform', 'translate(' + this.props.marginLeft + '  ' + this.props.marginTop + ')')
             .on("mousedown", () => { if (d3.event.button === 2) { d3.event.stopImmediatePropagation(); } })
-            .call(this.brush)
-            .selectAll('rect')
+            .call(this.brush);
+
+        tmp.selectAll('rect')
             .attr('height', this.height - this.props.marginTop - this.props.marginBottom)
+            // .attr('transform', 'translate(' + this.props.marginLeft + ' 0)')
             .attr('opacity', 0.4)
             .attr('stroke', null)
             .on('contextmenu', zoomOut);
@@ -294,6 +301,12 @@ class Chart extends React.Component {
             .attr('fill', this.props.color)
             .attr('display', 'none')
             .attr('opacity', 0.4);
+
+        this.dots.append('path')
+            .attr('class', 'ttline')
+            .attr('stroke', this.props.axisColor)
+            .attr('display', 'none')
+            .attr('opacity', 0.3);
     }
 
     _Tooltip() {
@@ -302,8 +315,14 @@ class Chart extends React.Component {
         let ttOutFun = () => {
             tt.attr('display', 'none');
             this.svg.select('.ttdot').attr('display', 'none');
+            this.svg.select('.ttline').attr('display', 'none');
         };
         var self = this;
+
+        let ttLine = d3.line()
+            .x((d) => d[0])
+            .y((d) => d[1]);
+
         let ttMoveFun = function () {
             var pos = d3.mouse(this);
             pos[0] += self.props.marginLeft;
@@ -312,7 +331,7 @@ class Chart extends React.Component {
                 .map((d) => Math.abs(d[0] - inv))
                 .reduce((minIdx, d, i, alist) => d < alist[minIdx] ? i : minIdx, 0);
 
-            var x = pos[0] - 170 > 0 ? pos[0] - 170 : pos[0] + 10;
+            var x = parseInt(pos[0] - 170 > 0 ? pos[0] - 170 : pos[0] + 10);
             var y = pos[1] - 50 > 0 ? pos[1] - 30 : pos[1] + 30;
 
             var pt = self.props.points[idx];
@@ -327,6 +346,13 @@ class Chart extends React.Component {
                 .attr('cx', self.xS(pt[0]))
                 .attr('cy', self.yS(pt[1]))
                 .attr('display', 'inline');
+
+            self.svg.select('.ttline')
+                .attr('d', ttLine([
+                    [self.xS(pt[0]), self.props.marginTop],
+                    [self.xS(pt[0]), self.height - self.props.marginBottom]
+                ]))
+                .attr('display', 'inline');
         };
 
 
@@ -336,7 +362,9 @@ class Chart extends React.Component {
 
         tt.append('rect')
             .attr('class', 'ttbg')
-            .attr('width', 150)
+            .style("opacity", .8)
+            .attr('fill', "#777")
+            .attr('width', 160)
             .attr('height', 40);
 
         var ttime = tt.append('text')

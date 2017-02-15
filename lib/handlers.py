@@ -8,6 +8,7 @@ import re
 import csvloader
 from trender.aiohttp_template import setup_template_loader
 from trender.aiohttp_template import template
+from siridb.connector import SiriDBClient
 from siridb.connector.lib.exceptions import InsertError
 from siridb.connector.lib.exceptions import QueryError
 from siridb.connector.lib.exceptions import ServerError
@@ -49,7 +50,9 @@ def checksiri(fun):
 
 def authentication(fun):
     async def wrapper(self, request):
-        if self.auth is not None:
+        if self.auth is None:
+            siri = self.siri
+        else:
             try:
                 authorization = \
                     self._TOKEN_RX.match(request.headers['Authorization'])
@@ -79,7 +82,7 @@ def authentication(fun):
                         if user is None:
                             raise AuthenticationError('Invalid session request.')
 
-                        siri = self.siri_connections.get(user)
+                        siri, _ = self.siri_connections.get(user, (None, None))
                         if siri is None:
                             raise AuthenticationError(
                                 'No SiriDB connection is found for user "{}"'
@@ -197,6 +200,29 @@ class Handlers:
                 resp = await self._save_session(
                     request,
                     self.config.get('Database', 'user'))
+        elif self.config.getboolean('Session', 'enable_multi_user'):
+            if login['username'] not in self.siri_connections:
+                siri = SiriDBClient(
+                    username=login['username'],
+                    password=login['password'],
+                    dbname=self.config.get('Database', 'dbname'),
+                    hostlist=self.config.hostlist,
+                    keepalive=True)
+                result = await siri.connect()
+                if any([not isinstance(r, Exception) for r in result]):
+                    self.siri_connections[login['username']] = \
+                        (siri, login['password'])
+                    resp = await self._save_session(request, login['username'])
+                else:
+                    resp = result[0]
+                    siri.close()
+            else:
+                _, password = self.siri_connections[login['username']]
+                if login['password'] != password:
+                    resp = \
+                        AuthenticationError('Username or password incorrect')
+                else:
+                    resp = await self._save_session(request, login['username'])
         else:
             resp = AuthenticationError('Multiple user login is not allowed')
         return self._response_json(resp)

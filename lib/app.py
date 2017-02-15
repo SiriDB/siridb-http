@@ -1,12 +1,15 @@
+import os
 import signal
 import asyncio
 import functools
 import logging
+import ssl
 from .handlers import Handlers
 from aiohttp.web import Application
 from .auth import Auth
 from .secret import get_secret
 from .encryptedcookiestorage import EncryptedCookieStorage
+from .utils import get_path
 from aiohttp_session import session_middleware
 from aiohttp.web_exceptions import HTTPException
 
@@ -19,7 +22,7 @@ class App(Handlers, Application):
         self.port = self.config.get('Configuration', 'port')
         self.siri = siri
         self.siri_connections = {
-            self.config.get('Database', 'user'): self.siri
+            self.config.get('Database', 'user'): (self.siri, None)
         }
         self.debug_mode = debug_mode
         self.db = {
@@ -40,7 +43,6 @@ class App(Handlers, Application):
         else:
             self.auth = None
             middlewares = ()
-
         super().__init__(middlewares=middlewares)
 
     async def _init_siridb(self):
@@ -77,9 +79,16 @@ class App(Handlers, Application):
 
         handler = self.make_handler()
 
+        sslcontext = self._get_ssl_context() \
+            if self.config.getboolean('Configuration', 'enable_ssl') else None
+
         try:
             srv = self.loop.run_until_complete(
-                self.loop.create_server(handler, '0.0.0.0', self.port))
+                self.loop.create_server(
+                    handler,
+                    host='0.0.0.0',
+                    port=self.port,
+                    ssl=sslcontext))
         except Exception as e:
             logging.error('Cannot start server: {}'.format(e))
             return
@@ -94,7 +103,7 @@ class App(Handlers, Application):
             # cleanup signal handlers
             for signame in ('SIGINT', 'SIGTERM'):
                 self.loop.remove_signal_handler(getattr(signal, signame))
-            for siri in self.siri_connections.values():
+            for siri, _ in self.siri_connections.values():
                 siri.close()
             srv.close()
             self.loop.run_until_complete(srv.wait_closed())
@@ -125,3 +134,24 @@ class App(Handlers, Application):
                     status=500)
 
         return middleware_handler
+
+    @staticmethod
+    def _real_fn(fn):
+        return fn if fn.startswith('/') else os.path.join(get_path(), fn)
+
+    def _get_ssl_context(self):
+        crt_file = self._real_fn(self.config.get('SSL', 'crt_file'))
+        key_file = self._real_fn(self.config.get('SSL', 'key_file'))
+
+        sslcontext = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        try:
+            sslcontext.load_cert_chain(crt_file, key_file)
+        except FileNotFoundError:
+            raise ValueError(
+                'Cannot find one or both certificate files: {}, {}'
+                .format(crt_file, key_file))
+        except ssl.SSLError:
+            raise ValueError(
+                'Cannot load one or both certificate files: {}, {}'
+                .format(crt_file, key_file))
+        return sslcontext
