@@ -125,7 +125,7 @@ class Handlers:
         _MSGPACK: lambda content:
             msgpack.unpackb(content, use_list=False, encoding='utf-8'),
         _CSV: csvhandler.loads,
-        _JSON: json.loads,
+        _JSON: lambda content: json.loads(content.decode('utf-8')),
         _QPACK: qpack.unpackb
     }
 
@@ -162,7 +162,6 @@ class Handlers:
                 'GET',
                 '/auth/logoff',
                 self.handle_auth_logoff)
-            self.router.add_route('GET', '/temp', self.handle_temp)
             self.router.add_route(
                 'GET',
                 '/favicon.ico',
@@ -253,10 +252,6 @@ class Handlers:
     async def handle_main(self, request):
         return {'debug': self.debug_mode}
 
-    @template('base.html')
-    async def handle_temp(self, request):
-        return {'debug': self.debug_mode}
-
     async def handle_db_info(self, request):
         return self._response_json(self.db)
 
@@ -320,6 +315,7 @@ class Handlers:
                 'Error while reading data: {}'.format(str(e)))
         else:
             try:
+                print(data)
                 resp = await siri.insert(data)
             except Exception as e:
                 logging.error(e)

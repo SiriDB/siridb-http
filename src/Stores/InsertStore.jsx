@@ -19,7 +19,7 @@ class InsertStore extends BaseStore {
 
     onInsert(data) {
         this.setState({ sending: true, alert: null });
-        this.post('/insert', { query: query })
+        this.post('/insert', data)
             .always((xhr, data) => {
                 this.setState({ sending: false });
             })
@@ -43,6 +43,10 @@ class InsertStore extends BaseStore {
                     });
                 }
             });
+    }
+
+    onClearAlert() {
+        this.setState({alert: null});
     }
 }
 

@@ -38,7 +38,7 @@ class Query extends Reflux.Component {
     }
 
     onKeyPress(event) {
-        if (event.key == 'Enter') {
+        if (event.key === 'Enter') {
             if (this.state.show) {
                 this.onAutoCompleteSelect(this.state.selected);
             } else {
@@ -105,15 +105,15 @@ class Query extends Reflux.Component {
                     this.setState({ show: false, parseRes: null });
             }
         } else {
-            if (event.key == 'Tab') {
+            if (event.key === 'Tab') {
                 this.onTabPress(event);
             }
-            if (event.key == 'ArrowUp' && this.idx > 0) {
+            if (event.key === 'ArrowUp' && this.idx > 0) {
                 event.preventDefault();
                 this.setQuery(this.queries[--this.idx]);
 
             }
-            if (event.key == 'ArrowDown' && this.idx < this.queries.length) {
+            if (event.key === 'ArrowDown' && this.idx < this.queries.length) {
                 event.preventDefault();
                 this.setQuery(this.queries[++this.idx] || '');
             }

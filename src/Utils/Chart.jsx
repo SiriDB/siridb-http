@@ -45,7 +45,16 @@ class Chart extends React.Component {
         this.height = this.props.height || this.refs.chart.offsetHeight || 150;
         this._initChart();
         this._initBrush();
-        this._Tooltip();
+        if (this.props.points.length) {
+            this._Tooltip();
+        } else {
+            this.g.append('text')
+                    .attr('x', parseInt(this.width / 2))
+                    .attr('y', parseInt(this.height / 2))
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', this.props.textColor)
+                    .text('no points found');
+        }
         this._draw(true);
     }
 
