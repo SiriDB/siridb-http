@@ -13,10 +13,12 @@ from lib.version import __version__
 
 CHANGELOG_FILE = 'ChangeLog'
 
+
 def _get_changelog(version):
     with open('ChangeLog-{}'.format(version), 'r') as f:
         content = f.read()
     return content
+
 
 def _get_distribution():
     '''Returns distribution code name. (Ubuntu)'''
@@ -28,7 +30,7 @@ def _get_distribution():
 
 if __name__ == '__main__':
 
-    if not os.path.exists('static/js/app.min.js'):
+    if not os.path.exists('static/js/bundle.min.js'):
         raise IOError(
             'Missing minified files do not exist, please run build.py')
 
@@ -102,8 +104,15 @@ if __name__ == '__main__':
     # Run setup.py to create executable
     subprocess.call(['pyinstaller', 'siridb-http.spec'])
 
+    POSTINST = open(
+        'deb/POSTINST', 'r').read().strip().format(**config)
+    SYSTEMD = open(
+        'deb/SYSTEMD', 'r').read().strip().format(**config)
+    PRERM = open(
+        'deb/PRERM', 'r').read().strip().format(**config)
     OVERRIDES = open(
         'deb/OVERRIDES', 'r').read().strip().format(**config)
+
     if changelog:
         CHANGELOG = open(
             'deb/CHANGELOG', 'r').read().strip().format(**config)
@@ -116,7 +125,6 @@ if __name__ == '__main__':
     RULES = open(
         'deb/RULES', 'r').read().strip()
 
-
     source_path = os.path.join('dist', 'siridb-http')
     if not os.path.isdir(source_path):
         sys.exit('ERROR: Cannot find path: {}'.format(source_path))
@@ -128,8 +136,9 @@ if __name__ == '__main__':
     if os.path.exists(dest_deb):
         os.unlink(dest_deb)
 
-    pkg_path = os.path.join('build', '{}-{}'.format(config['package'],
-                                                      config['version']))
+    pkg_path = os.path.join(
+        'build',
+        '{}-{}'.format(config['package'], config['version']))
     debian_path = os.path.join(pkg_path, 'debian')
 
     pkg_src_path = os.path.join(pkg_path, 'src')
@@ -140,6 +149,22 @@ if __name__ == '__main__':
 
     os.makedirs(debian_source_path)
     shutil.copytree(source_path, target_path)
+
+    cfg_path = os.path.join(pkg_src_path, 'etc', 'siridb')
+    os.makedirs(cfg_path)
+    shutil.copy('siridb-http.conf', cfg_path)
+
+    systemd_path = os.path.join(target_path, 'systemd')
+    os.makedirs(systemd_path)
+    with open(os.path.join(
+            systemd_path, '{package}.service'.format(**config)), 'w') as f:
+        f.write(SYSTEMD)
+
+    with open(os.path.join(debian_path, 'postinst'), 'w') as f:
+        f.write(POSTINST)
+
+    with open(os.path.join(debian_path, 'prerm'), 'w') as f:
+        f.write(PRERM)
 
     with open(os.path.join(debian_path, 'source', 'format'), 'w') as f:
         f.write('3.0 (quilt)')

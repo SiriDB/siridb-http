@@ -1,41 +1,25 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import os
-import slimit
-import csscompressor
-import argparse
-
-CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-STATIC_DIR = os.path.join(CURRENT_DIR, 'static')
-
-def min_js():
-    #################################################
-    # Minify app js
-    #################################################
-
-    content = []
-
-    for name in ('app.js',
-                 'grammar.js',
-                 'router.js'):
-        with open(os.path.join(STATIC_DIR, 'js', name), 'r') as f:
-            content.append(f.read())
-
-    with open(os.path.join(STATIC_DIR, 'js', 'app.min.js'), 'w') as f:
-        f.write(slimit.minify(''.join(content), mangle=True, mangle_toplevel=True))
-
-
-def min_css():
-    #################################################
-    # Minify css
-    #################################################
-
-    with open(os.path.join(STATIC_DIR, 'css', 'style.css'), 'r') as f:
-        content = f.read()
-
-    with open(os.path.join(STATIC_DIR, 'css', 'style.min.css'), 'w') as f:
-        f.write(csscompressor.compress(content))
+import subprocess
 
 
 if __name__ == '__main__':
-    min_js()
-    min_css()
+    path = os.path.dirname(__file__)
+
+    print('Compile less...')
+    subprocess.run([
+        'lessc',
+        '--clean-css',
+        os.path.join(path, 'static', 'css', 'layout.less'),
+        os.path.join(path, 'static', 'css', 'layout.min.css')])
+
+    print('Webpack (be patient, this can take some time)...')
+    env = os.environ
+    env['NODE_ENV'] = 'production'
+    with subprocess.Popen([
+            os.path.join('.', 'node_modules', '.bin', 'webpack'),
+            '-p'],
+            env=env,
+            cwd=os.path.join(path, 'src'),
+            stdout=subprocess.PIPE) as proc:
+        print(proc.stdout.read().decode('utf-8'))
