@@ -205,7 +205,8 @@ if __name__ == '__main__':
             **config))
 
     with open(os.path.join(debian_path, 'install'), 'w') as f:
-        f.write('''src/usr /''')
+        f.write('''src/usr /
+src/etc /''')
 
     with open(os.path.join(debian_path, '{}.1'.format(
             config['package'])), 'w') as f:

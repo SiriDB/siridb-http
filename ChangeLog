@@ -1,3 +1,23 @@
+siridb-http (1.0.0) yakkety; urgency=medium
+
+  * Rebuild website using react framework.
+
+  * Rebuild style sheet using less.
+
+  * Enable optional Token and Session Authentication.
+
+  * Using a configuration file.
+
+  * Added SSL (HTTPS) which optionally can be enabled.
+
+  * Wait for a SiriDB connection at startup when not yet available.
+
+  * Keep command history in localstorage.
+
+  * Added multi user login support. (enabled by default)
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  Thu, 16 Feb 2017 12:12:03 +0000
+
 siridb-http (0.0.2) xenial; urgency=medium
 
   * Fixed loading HTTP Server from relative path.

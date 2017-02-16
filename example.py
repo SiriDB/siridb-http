@@ -7,21 +7,34 @@ import logging
 import argparse
 
 
-class Token:
+class Auth:
 
-    def __init__(self, secret, url):
+    def __init__(self, secret, url, only_secret=False):
         self.url = url
         self._secret = secret
         self._token = None
         self._refresh_ts = None
         self._refresh_token = None
+        self._only_secret = only_secret
 
-    async def get(self):
+    async def get_header(self, content_type='application/json'):
+        if not self._secret:
+            return {
+                'Content-Type': content_type
+            }
+        if self._only_secret:
+            return {
+                'Authorization': 'Secret {}'.format(self._secret),
+                'Content-Type': content_type
+            }
         if self._token is None:
             await self._get_token()
         elif time.time() > self._refresh_ts:
             await self._refresh()
-        return self._token
+        return {
+            'Authorization': 'Token {}'.format(self._token),
+            'Content-Type': content_type
+        }
 
     def _update(self, content):
         self._refresh_token = content['refresh_token']
@@ -60,27 +73,21 @@ class Token:
                         .format(resp.status))
 
 
-async def query(token, q):
-    headers = {
-        'Authorization': 'Token {}'.format(await token.get()),
-        'Content-Type': 'application/json'
-    }
-    data = {
-        'query': q
-    }
+async def query(auth, q):
+    data = {'query': q}
     async with aiohttp.ClientSession() as session:
         async with session.post(
-                '{}/query'.format(token.url),
+                '{}/query'.format(auth.url),
                 data=json.dumps(data),
-                headers=headers) as resp:
+                headers=(await auth.get_header())) as resp:
             status = resp.status
             res = await resp.json()
 
     return res, status
 
 
-async def example(url, secret):
-    token = Token(secret, url)
+async def example(args):
+    token = Auth(args.secret, args.url, args.only_secret)
     res, status = await query(token, 'show')
     if status == 200:
         for item in res['data']:
@@ -103,9 +110,15 @@ if __name__ == '__main__':
         '-s',
         '--secret',
         type=str,
-        required=True,
-        help='secret')
+        default='',
+        help='Authenticate using a secret')
+
+    parser.add_argument(
+        '-o', '--only-secret',
+        action='store_true',
+        help='Only authenticate using the secret. ' +
+             '(can only be used if a token is not required)')
 
     args = parser.parse_args()
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(example(args.url, args.secret))
+    loop.run_until_complete(example(args))
