@@ -2,6 +2,7 @@ import React from 'react';
 import DatabaseActions from '../Actions/DatabaseActions.jsx';
 import BaseStore from './BaseStore.jsx';
 import AppActions from '../Actions/AppActions.jsx';
+import * as d3 from 'd3';
 
 class DatabaseStore extends BaseStore {
 
