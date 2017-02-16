@@ -245,7 +245,6 @@ class Chart extends React.Component {
 
         tmp.selectAll('rect')
             .attr('height', this.height - this.props.marginTop - this.props.marginBottom)
-            // .attr('transform', 'translate(' + this.props.marginLeft + ' 0)')
             .attr('opacity', 0.4)
             .attr('stroke', null)
             .on('contextmenu', zoomOut);

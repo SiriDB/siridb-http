@@ -23,18 +23,10 @@ class Insert extends Reflux.Component {
     }
 
     _now() {
-        return parseInt(moment().format('x') / this.factor);
+        return parseInt(moment().format('x') / this.state.factor);
     }
 
     componentDidMount() {
-        /* Initialize factor */
-        this.factor = {
-            s: 1e3,
-            ms: 1e0,
-            us: 1e-3,
-            ns: 1e-6
-        }[this.state.timePrecision];
-
         /* Random value */
         let val = Math.floor((Math.random() * 100) + 1);
 

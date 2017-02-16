@@ -21,22 +21,11 @@ class Result extends Reflux.Component {
         this.store = DatabaseStore;
     }
 
-    _initTime() {
-        this.factor = {
-            s: 1e3,
-            ms: 1e0,
-            us: 1e-3,
-            ns: 1e-6
-        }[this.state.timePrecision];
-        this.utcFormat = d3.utcFormat("%Y-%m-%d %H:%M:%SZ");
-    }
-
     shouldComponentUpdate(nextProps, nextState) {
         return (this.props.result !== nextProps.result);
     }
 
     render() {
-        this._initTime();
         let data = this.props.result;
 
         let timeit = (data.__timeit__ !== undefined &&
@@ -111,10 +100,10 @@ class Result extends Reflux.Component {
 
         /**** Calc Statement ****/
         if (data.calc !== undefined && typeof data.calc === 'number') {
-            let seconds = parseInt(data.calc * this.factor / 1000);
+            let seconds = parseInt(data.calc * this.state.factor / 1000);
             let tooltip = <Tooltip id="calc">{(seconds < 315532800) ?
                 moment.duration(seconds, 'seconds').humanize() :
-                this.utcFormat(new Date(Math.floor(seconds * this.factor)))
+                this.state.utcFormat(new Date(Math.floor(seconds * this.state.factor)))
             }</Tooltip>;
             return (
                 <div className={'alert alert-info'}>
@@ -152,7 +141,7 @@ class Result extends Reflux.Component {
                         return <Chart
                             key={series}
                             name={series}
-                            points={points.map((point) => [point[0] * this.factor, point[1]])} />
+                            points={points.map((point) => [point[0] * this.state.factor, point[1]])} />
                     })
                 }
             </div>
@@ -193,8 +182,8 @@ class Result extends Reflux.Component {
                 </span>
             );
         },
-        start: (val) => this.utcFormat(new Date(Math.floor(val * this.factor))),
-        end: (val) => this.utcFormat(new Date(Math.floor(val * this.factor)))
+        start: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor))),
+        end: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor)))
     }
 
     _fmtServer = {
@@ -222,8 +211,8 @@ class Result extends Reflux.Component {
 
     _fmtShard = {
         size: (val) => this._fmtSize,
-        start: (val) => this.utcFormat(new Date(Math.floor(val * this.factor))),
-        end: (val) => this.utcFormat(new Date(Math.floor(val * this.factor)))
+        start: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor))),
+        end: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor)))
     }
 
     _fmtCount = {

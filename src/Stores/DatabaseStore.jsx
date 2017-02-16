@@ -11,7 +11,9 @@ class DatabaseStore extends BaseStore {
         this.state = {
             version: null,
             dbname: null,
-            timePrecision: null
+            timePrecision: null,
+            factor: null,
+            utcFormat: null
         };
         DatabaseActions.fetch();
     }
@@ -19,6 +21,13 @@ class DatabaseStore extends BaseStore {
     onFetch() {
         this.fetch('/db-info')
         .done((data) => {
+            data.factor = {
+                s: 1e3,
+                ms: 1e0,
+                us: 1e-3,
+                ns: 1e-6
+            }[data.timePrecision];
+            data.utcFormat = d3.utcFormat("%Y-%m-%d %H:%M:%SZ");
             this.setState(data);
         })
         .fail((error, data) => {
