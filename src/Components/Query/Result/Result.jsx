@@ -43,7 +43,7 @@ class Result extends Reflux.Component {
             data.__timeit__.length &&
             typeof data.__timeit__[0].server === 'string') ? (
             <div className="alert alert-info alert-timeit">
-                <span>{`Query time: ${data.__timeit__[0].time.toFixed(3)} seconds`}</span>
+                <span>{`Query time: ${data.__timeit__[data.__timeit__.length - 1].time.toFixed(3)} seconds`}</span>
                 <dl className="dl-horizontal">
                     {
                         data.__timeit__.reduce((acc, timeit, n) => acc.concat([
