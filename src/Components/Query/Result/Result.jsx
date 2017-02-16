@@ -21,7 +21,7 @@ class Result extends Reflux.Component {
         this.store = DatabaseStore;
     }
 
-    initTime() {
+    _initTime() {
         this.factor = {
             s: 1e3,
             ms: 1e0,
@@ -36,7 +36,7 @@ class Result extends Reflux.Component {
     }
 
     render() {
-        this.initTime();
+        this._initTime();
         let data = this.props.result;
 
         let timeit = (data.__timeit__ !== undefined &&
@@ -54,8 +54,10 @@ class Result extends Reflux.Component {
                 </dl>
             </div>
         ) : null;
-        console.log(timeit)
+
+        /* Remove timeit */
         delete data.__timeit__;
+
         return (
             <div>
                 {timeit}
