@@ -39,6 +39,33 @@ class Result extends Reflux.Component {
         this.initTime();
         let data = this.props.result;
 
+        let timeit = (data.__timeit__ !== undefined &&
+            data.__timeit__.length &&
+            typeof data.__timeit__[0].server === 'string') ? (
+            <div className="alert alert-info alert-timeit">
+                <span>{`Query time: ${data.__timeit__[0].time.toFixed(3)} seconds`}</span>
+                <dl className="dl-horizontal">
+                    {
+                        data.__timeit__.reduce((acc, timeit, n) => acc.concat([
+                            <dt key={`dt-${n}`}>{timeit.time.toFixed(3)}</dt>,
+                            <dd key={`dd-${n}`}>{timeit.server}</dd>
+                        ]), [])
+                    }
+                </dl>
+            </div>
+        ) : null;
+        console.log(timeit)
+        delete data.__timeit__;
+        return (
+            <div>
+                {timeit}
+                {this._getResult(data)}
+            </div>
+        )
+    }
+
+    _getResult(data) {
+
         /**** List Statement ****/
         if (data.columns !== undefined && typeof data.columns[0] === 'string') {
             return (data.series !== undefined) ?
