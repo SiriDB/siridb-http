@@ -6,3 +6,7 @@
 # Note: before dh $0, there should be a TAB, no spaces.
 %:
 	dh $@
+override_dh_strip:
+	dh_strip --exclude=libffi --exclude=cffi
+override_dh_shlibdeps:
+	dh_shlibdeps --exclude=libffs --exclude=cffi
