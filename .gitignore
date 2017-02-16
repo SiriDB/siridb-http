@@ -105,3 +105,6 @@ static/js/bundle.min.js
 # Compiled less
 static/css/layout.css
 static/css/layout.min.css
+
+# Secret
+.secret

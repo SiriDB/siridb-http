@@ -30,9 +30,15 @@ class App(Handlers, Application):
             'version': None,
             'timePrecision': None
         }
+
+        try:
+            secret = self.config.get('Secret', 'secret')
+        except Exception:
+            secret = get_secret()
+
         if self.config.getboolean('Configuration', 'enable_authentication'):
             self.auth = Auth(
-                secret=get_secret(),
+                secret=secret,
                 expiration_time=self.config.getint('Token', 'expiration_time'))
             self.token_required = \
                 self.config.getboolean('Token', 'is_required')
