@@ -1,0 +1,9 @@
+  * Rebuild website using react framework.
+
+  * Rebuild style sheet using less.
+
+  * Enable optional Token and Session Authentication.
+
+  * Using a configuration file.
+
+  * Added SSL (HTTPS) which optionally can be enabled.
