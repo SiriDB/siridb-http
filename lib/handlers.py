@@ -315,7 +315,6 @@ class Handlers:
                 'Error while reading data: {}'.format(str(e)))
         else:
             try:
-                print(data)
                 resp = await siri.insert(data)
             except Exception as e:
                 logging.error(e)
@@ -362,16 +361,21 @@ class Handlers:
     async def handle_get_token(self, request):
         ct = _UNSUPPORTED
         try:
+            ct = self._get_content_type(request)
             authorization = \
                 self._SECRET_RX.match(request.headers['Authorization'])
             if not authorization:
                 raise ValueError('Missing "Secret" in headers')
             secret = authorization.group(1)
-            ct = self._get_content_type(request)
         except Exception as e:
+            logging.error(e)
             resp = e
         else:
-            resp = self.auth.get_token(secret)
+            try:
+                resp = self.auth.get_token(secret)
+            except Exception as e:
+                logging.error(e)
+                resp = e
         finally:
             return self._RESPONSE_MAP[ct](self, resp)
 

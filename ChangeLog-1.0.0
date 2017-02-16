@@ -7,3 +7,9 @@
   * Using a configuration file.
 
   * Added SSL (HTTPS) which optionally can be enabled.
+
+  * Wait for a SiriDB connection at startup when not yet available.
+
+  * Keep command history in localstorage.
+
+  * Added multi user login support. (enabled by default)
