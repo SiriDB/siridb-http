@@ -10,6 +10,7 @@ Features:
   - SSL (HTTPS) support.
   - Token Authentication.
   - Multi user support for the web interface.
+  - Support for JSON, CSV, MsgPack and QPack.
   
 
  
