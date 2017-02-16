@@ -98,8 +98,10 @@ style.min.css
 # Compiled React
 /src/node_modules/
 
-# Compiled js
+# Compiled jsx
+static/js/bundle.js
 static/js/bundle.min.js
 
-# Compiled css
+# Compiled less
+static/css/layout.css
 static/css/layout.min.css
