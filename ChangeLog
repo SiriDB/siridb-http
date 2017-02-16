@@ -1,3 +1,9 @@
+siridb-http (1.0.1) xenial; urgency=medium
+
+  * Added timeit response
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  Thu, 16 Feb 2017 15:12:29 +0000
+
 siridb-http (1.0.0) yakkety; urgency=medium
 
   * Rebuild website using react framework.
