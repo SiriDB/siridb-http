@@ -210,7 +210,7 @@ class Result extends Reflux.Component {
     }
 
     _fmtShard = {
-        size: (val) => this._fmtSize,
+        size: this._fmtSize,
         start: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor))),
         end: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor)))
     }

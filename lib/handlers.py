@@ -117,7 +117,8 @@ class Handlers:
     _QUERY_MAP = {
         _MSGPACK: lambda content:
             msgpack.unpackb(content, use_list=False, encoding='utf-8'),
-        _CSV: lambda content: csvhandler.loads(content, is_query=True),
+        _CSV: lambda content:
+            csvhandler.loads(content.decode('utf-8'), is_query=True),
         _JSON: lambda content: json.loads(content.decode('utf-8')),
         _QPACK: qpack.unpackb
     }
@@ -268,10 +269,10 @@ class Handlers:
             status=status)
 
     @pack_exception
-    def _response_csv(self, text, status=200):
+    def _response_csv(self, data, status=200):
         return aiohttp.web.Response(
             headers={'ACCESS-CONTROL-ALLOW-ORIGIN': '*'},
-            body=csvdump(data),
+            body=csvhandler.dumps(data).encode('utf-8'),
             charset='UTF-8',
             content_type='application/csv',
             status=status)

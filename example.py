@@ -73,27 +73,43 @@ class Auth:
                         .format(resp.status))
 
 
-async def query(auth, q):
-    data = {'query': q}
+async def _query(auth, data, headers):
     async with aiohttp.ClientSession() as session:
         async with session.post(
                 '{}/query'.format(auth.url),
-                data=json.dumps(data),
-                headers=(await auth.get_header())) as resp:
+                data=data,
+                headers=headers) as resp:
             status = resp.status
-            res = await resp.json()
+            res = await resp.text()
 
     return res, status
 
 
-async def example(args):
-    token = Auth(args.secret, args.url, args.only_secret)
-    res, status = await query(token, 'show')
+async def query(auth, q):
+    data = {'query': q}
+    headers = await auth.get_header()
+    res, status = await _query(auth, data, headers)
+    return json.loads(res), status
+
+
+async def query_csv(auth, q):
+    data = '"query","{}"'.format(q)
+    headers = await auth.get_header(content_type='application/csv')
+    return await _query(auth, data, headers)
+
+
+async def example_show(args, auth):
+    res, status = await query(auth, 'show')
     if status == 200:
         for item in res['data']:
             print('{name:.<20}: {value}'.format(**item))
     else:
         print('Error: {}'.format(res.get('error_msg', status)))
+
+
+async def example_query(args, auth):
+    res, status = await query_csv(auth, args.query)
+    print(res)
 
 
 if __name__ == '__main__':
@@ -119,6 +135,17 @@ if __name__ == '__main__':
         help='Only authenticate using the secret. ' +
              '(can only be used if a token is not required)')
 
+    parser.add_argument(
+        '-q',
+        '--query',
+        type=str,
+        default='',
+        help='Send a query, output is parsed as csv')
+
     args = parser.parse_args()
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(example(args))
+    auth = Auth(args.secret, args.url, args.only_secret)
+    if not args.query:
+        loop.run_until_complete(example_show(args, auth))
+    else:
+        loop.run_until_complete(example_query(args, auth))

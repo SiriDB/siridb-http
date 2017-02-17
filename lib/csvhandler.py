@@ -76,8 +76,8 @@ def _from_query(grid):
 def loads(content, is_query=False):
     '''Load CSV data from string into a dictionary representing series with
     points.'''
-
     grid = csvloader.loads(content.strip('\n'))
+
     if is_query:
         return _from_query(grid)
 
@@ -93,6 +93,86 @@ def load(fo):
     return loads(fo.read())
 
 
-if __name__ == '__main__':
-    q = csvloader.loads('"select * from blabla"')
-    print(q)
+def escape_csv(val):
+    if isinstance(val, str):
+        return '"{}"'.format(val.replace('"', '""'))
+    if val is None:
+        return 'NULL'
+    if val is True:
+        return 'TRUE'
+    if val is False:
+        return 'FALSE'
+    return str(val)
+
+
+def _dump_result(data, lines):
+    # List
+    if 'columns' in data and \
+        len(data['columns']) and \
+            isinstance(data['columns'][0], str):
+        lines.append(','.join(map(escape_csv, data.pop('columns'))))
+        lines.extend([
+            ','.join(map(escape_csv, row))
+            for row in data.popitem()[1]])
+        return
+
+    # Count
+    for count in (
+            'series', 'servers', 'groups', 'shards', 'pools', 'users',
+            'servers_received_points', 'series_length', 'shards_size'):
+        if count in data and isinstance(data[count], int):
+            lines.append('"{}",{}'.format(count, data[count]))
+            return
+
+    # Show
+    if 'data' in data and \
+        len(data['data']) and \
+            isinstance(data['data'][0], dict):
+        lines.append('"name","value"')
+        lines.extend([
+            '"{name}",{value}'.format_map(item)
+            for item in data['data']])
+        return
+
+    # Calc
+    if 'calc' in data and isinstance(data['calc'], int):
+        lines.append('"timestamp",{}'.format(data['calc']))
+        return
+
+    # Success, Error msg
+    for msg in ('success_msg', 'error_msg', 'help'):
+        if msg in data and isinstance(data[msg], str):
+            lines.append('"{}",{}'.format(msg, escape_csv(data[msg])))
+            return
+
+    # Help and Motd
+    for text in ('help', 'motd'):
+        if msg in data and isinstance(data[msg], str):
+            lines.append(escape_csv(data[msg]))
+            return
+
+    for series, points in data.items():
+        name = escape_csv(series)
+        for point in points:
+            lines.append('{},{},{}'.format(
+                name,
+                point[0],
+                escape_csv(point[1])))
+
+
+def dumps(data):
+    '''Dump SiriDB response to CSV data.'''
+    lines = []
+
+    # Timeit
+    timeit = data.pop('__timeit__', None)
+    if timeit is not None:
+        lines.append('"server name","query time"')
+        for t in timeit:
+            lines.append('"{server}",{time}'.format_map(t))
+        lines.append('')
+
+    _dump_result(data, lines)
+
+    return '\n'.join(lines)
+
