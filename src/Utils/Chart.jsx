@@ -201,7 +201,6 @@ class Chart extends React.Component {
             this.svg.selectAll('.ttline').attr('display', 'none');
         }
 
-
         let zoomIn = () => {
 
             if (!d3.event.selection) {
@@ -239,7 +238,7 @@ class Chart extends React.Component {
 
         let tmp = this.g.append('g')
             .attr('class', 'xbrush')
-            .attr('transform', 'translate(' + this.props.marginLeft + '  ' + this.props.marginTop + ')')
+            .attr('transform', `translate(${this.props.marginLeft} ${this.props.marginTop})`)
             .on("mousedown", () => { if (d3.event.button === 2) { d3.event.stopImmediatePropagation(); } })
             .call(this.brush);
 
@@ -278,10 +277,10 @@ class Chart extends React.Component {
             .text(this.props.name);
         this.svg.append('g')
             .attr('class', 'xaxis')
-            .attr('transform', 'translate(0 ' + (this.height - this.props.marginBottom) + ')');
+            .attr('transform', `translate(0 ${this.height - this.props.marginBottom})`);
         this.svg.append('g')
             .attr('class', 'yaxis')
-            .attr('transform', 'translate(' + this.props.marginLeft + ' 0)');
+            .attr('transform', `translate(${this.props.marginLeft} 0)`);
 
         this.g = this.svg.append('g')
             .attr('class', 'series')
@@ -345,7 +344,7 @@ class Chart extends React.Component {
             var pt = self.props.points[idx];
 
             tt
-                .attr('transform', 'translate(' + x + ' ' + y + ')')
+                .attr('transform', `translate(${x} ${y})`)
                 .attr('display', 'inline');
             ttime.text(tFormat((new Date(pt[0]))));
             ttval.text(pt[1]);
@@ -363,8 +362,7 @@ class Chart extends React.Component {
                 .attr('display', 'inline');
         };
 
-
-        var tt = this.svg.append('g')
+        let tt = this.svg.append('g')
             .attr('class', 'tt')
             .attr('display', 'none');
 
@@ -375,12 +373,12 @@ class Chart extends React.Component {
             .attr('width', 160)
             .attr('height', 40);
 
-        var ttime = tt.append('text')
+        let ttime = tt.append('text')
             .attr('x', 4)
             .attr('y', 14)
             .attr('fill', this.props.textColor);
 
-        var ttval = tt.append('text')
+        let ttval = tt.append('text')
             .attr('class', 'ttval')
             .attr('x', 4)
             .attr('y', 30)
