@@ -5,6 +5,8 @@ import time
 import json
 import logging
 import argparse
+import msgpack
+import qpack
 
 
 class Auth:
@@ -80,7 +82,7 @@ async def _query(auth, data, headers):
                 data=data,
                 headers=headers) as resp:
             status = resp.status
-            res = await resp.text()
+            res = await resp.read()
 
     return res, status
 
@@ -89,17 +91,37 @@ async def query_json(auth, q):
     data = {'query': q}
     headers = await auth.get_header()
     res, status = await _query(auth, json.dumps(data), headers)
-    return json.loads(res), status
+    return json.loads(res.decode('utf-8')), status
 
 
 async def query_csv(auth, q):
     data = '"query","{}"'.format(q.replace('"', '""'))
     headers = await auth.get_header(content_type='application/csv')
-    return await _query(auth, data, headers)
+    res, status = await _query(auth, data, headers)
+    return res.decode('utf-8'), status
 
 
-async def example_show(args, auth):
-    res, status = await query_json(auth, 'show')
+async def query_msgpack(auth, q):
+    data = {'query': q}
+    headers = await auth.get_header(content_type='application/x-msgpack')
+    res, status = await _query(auth, msgpack.packb(data), headers)
+    return msgpack.unpackb(res, encoding='utf-8'), status
+
+
+async def query_qpack(auth, q):
+    data = {'query': q}
+    headers = await auth.get_header(content_type='application/x-qpack')
+    res, status = await _query(auth, qpack.packb(data), headers)
+    return qpack.unpackb(res, decode='utf-8'), status
+
+
+async def example_show(args, auth, method='json'):
+    methods = {
+        'json': query_json,
+        'msgpack': query_msgpack,
+        'qpack': query_qpack
+    }
+    res, status = await methods[method](auth, 'show')
     if status == 200:
         for item in res['data']:
             print('{name:.<20}: {value}'.format(**item))

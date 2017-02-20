@@ -120,14 +120,16 @@ class Handlers:
         _CSV: lambda content:
             csvhandler.loads(content.decode('utf-8'), is_query=True),
         _JSON: lambda content: json.loads(content.decode('utf-8')),
-        _QPACK: qpack.unpackb
+        _QPACK: lambda content:
+            qpack.unpackb(content, decode='utf-8')
     }
     _INSERT_MAP = {
         _MSGPACK: lambda content:
             msgpack.unpackb(content, use_list=False, encoding='utf-8'),
         _CSV: csvhandler.loads,
         _JSON: lambda content: json.loads(content.decode('utf-8')),
-        _QPACK: qpack.unpackb
+        _QPACK: lambda content:
+            qpack.unpackb(content, decode='utf-8')
     }
 
     def __init__(self, *args, **kwargs):

@@ -70,11 +70,9 @@ class Chart extends React.Component {
             .call(this.brush);
 
         this.svg.select('.xaxis')
-            //.each((_, i, nodelist) => this._xTicks(d3.select(nodelist[i])));
-            .call(this.xAxisFun.ticks((this.width-this.props.marginLeft-this.props.marginRight)/100));
+            .call(this.xAxisFun.ticks((this.width - this.props.marginLeft - this.props.marginRight) / 100));
 
         this.svg.select('.yaxis')
-            //.each((_, i, nodelist) => this._yTicks(d3.select(nodelist[i])));
             .call(this.yAxisFun);
 
         this.line.attr('d', this.lineFun);
@@ -93,99 +91,6 @@ class Chart extends React.Component {
                 .attr('cx', (d) => this.xS(d[0]))
                 .attr('cy', (d) => this.yS(d[1]));
         }
-    }
-
-
-    _xTicksFun(val, g, t0, t1, dFormat, hFormat) {
-        for (let i = t0 - t0 % val - 7200; i < t1 + 1; i += val) {
-            let d = this.xS(i * 1000);
-            if (d >= this.xS.range()[0]) {
-                g.append('text')
-                    .attr('x', d)
-                    .attr('y', 16)
-                    .attr('text-anchor', 'middle')
-                    .attr('fill', this.props.textColor)
-                    .text(i % 86400 === 86400 - 7200 ? dFormat(new Date(i * 1000)) : hFormat(new Date(i * 1000)));
-            }
-        }
-    }
-
-    _xTicks(g) {
-        let lineX = d3.line()
-            .x((d) => d[0])
-            .y((d) => d[1]);
-
-        g.html('')
-            .append('g')
-            .append('path')
-            .attr('d', lineX([
-                [this.props.marginLeft, 0],
-                [this.width - this.props.marginRight, 0]
-            ]))
-            .attr('stroke', this.props.axisColor);
-
-        let tickSize = 60;
-        let t0 = this.xS.domain()[0] / 1000;
-        let t1 = this.xS.domain()[1] / 1000;
-        let dFormat = d3.timeFormat('%a %d %b');
-        let hFormat = d3.timeFormat('%H:%M');
-        let diff = (this.xS.invert(tickSize) - this.xS.invert(0)) / 1000;
-
-        [300, 600, 900, 1800, 3600, 7200, 10800, 14400, 28800, 43200, 86400, 86400 * 2, 86400 * 7].some((d) => {
-            if (diff < d) {
-                this._xTicksFun(d, g, t0, t1, dFormat, hFormat);
-            }
-        });
-    }
-
-    _yTicksFun(val, g, t0, t1) {
-        for (let i = t0 - t0 % val; i < t1 + 1; i += val) {
-            let d = this.yS(i);
-            if (d <= this.yS.range()[0] && d >= this.yS.range()[1]) {
-                g.append('text')
-                    .attr('x', -10)
-                    .attr('y', d)
-                    .attr('text-anchor', 'end')
-                    .attr('fill', this.props.textColor)
-                    .text((i % 1) ? i.toFixed(5) : i);
-            }
-            this.nTicksReal++;
-        }
-    }
-
-    _yTicks(g) {
-        let lineY = d3.line()
-            .x((d) => d[0])
-            .y((d) => d[1]);
-
-        g.html('')
-            .append('g')
-            .append('path')
-            .attr('d', lineY([
-                [0, this.props.marginTop],
-                [0, this.height - this.props.marginBottom]
-            ]))
-            .attr('stroke', this.props.axisColor);
-        let tickSize = 20;
-
-        let t0 = this.yS.domain()[0];
-        let t1 = this.yS.domain()[1];
-        let diff = this.yS.invert(0) - this.yS.invert(tickSize);
-
-        this.nTicksReal = 0;
-
-        if (!diff) {
-            return;
-        }
-        let toExp = diff.toExponential().split('e');
-        let exp = toExp[1][0] === '+' ? +toExp[1].substr(1, toExp[1].length) : +toExp[1];
-
-        this._yTicksFun(Math.pow(10, exp) * 5, g, t0, t1);
-        if (this.nTicksReal > 5) {
-            return;
-        }
-        g.selectAll('text').remove();
-        this._yTicksFun(Math.pow(10, exp) * 2, g, t0, t1);
     }
 
     _initBrush() {
@@ -256,15 +161,15 @@ class Chart extends React.Component {
             .tickFormat(function (d) {
                 return (d3.timeSecond(d) < d ? d3.timeFormat('.%L')
                     : d3.timeMinute(d) < d ? d3.timeFormat(':%S')
-                    : d3.timeHour(d) < d ? d3.timeFormat('%H:%M')
-                    : d3.timeDay(d) < d ? d3.timeFormat('%H:%M')
-                    : d3.timeMonth(d) < d ? (d3.timeWeek(d) < d ? d3.timeFormat('%a %d') : d3.timeFormat('%b %d'))
-                    : d3.timeYear(d) < d ? d3.timeFormat('%B')
-                    : d3.timeFormat('%Y'))(d);
+                        : d3.timeHour(d) < d ? d3.timeFormat('%H:%M')
+                            : d3.timeDay(d) < d ? d3.timeFormat('%H:%M')
+                                : d3.timeMonth(d) < d ? (d3.timeWeek(d) < d ? d3.timeFormat('%a %d') : d3.timeFormat('%b %d'))
+                                    : d3.timeYear(d) < d ? d3.timeFormat('%B')
+                                        : d3.timeFormat('%Y'))(d);
             });
 
         this.yAxisFun = d3.axisLeft(this.yS)
-            .ticks((this.height-this.props.marginTop-this.props.marginBottom)/30);
+            .ticks((this.height - this.props.marginTop - this.props.marginBottom) / 30);
 
         this.lineFun = d3.line()
             .x((d) => this.xS(d[0]))
