@@ -19,9 +19,6 @@ class Chart extends React.Component {
     };
 
     static defaultProps = {
-        color: '#a1b2bc',
-        textColor: '#fff',
-        axisColor: '#999',
         marginTop: 14,
         marginRight: 0,
         marginBottom: 20,
@@ -49,10 +46,9 @@ class Chart extends React.Component {
             this._Tooltip();
         } else {
             this.g.append('text')
+                .attr('class', 'seriesmsg')
                 .attr('x', parseInt(this.width / 2))
                 .attr('y', parseInt(this.height / 2))
-                .attr('text-anchor', 'middle')
-                .attr('fill', this.props.textColor)
                 .text('no points found');
         }
         this._draw(true);
@@ -74,10 +70,12 @@ class Chart extends React.Component {
             .call(this.brush);
 
         this.svg.select('.xaxis')
-            .each((_, i, nodelist) => this._xTicks(d3.select(nodelist[i])));
+            //.each((_, i, nodelist) => this._xTicks(d3.select(nodelist[i])));
+            .call(this.xAxisFun.ticks((this.width-this.props.marginLeft-this.props.marginRight)/100));
 
         this.svg.select('.yaxis')
-            .each((_, i, nodelist) => this._yTicks(d3.select(nodelist[i])));
+            //.each((_, i, nodelist) => this._yTicks(d3.select(nodelist[i])));
+            .call(this.yAxisFun);
 
         this.line.attr('d', this.lineFun);
 
@@ -96,6 +94,7 @@ class Chart extends React.Component {
                 .attr('cy', (d) => this.yS(d[1]));
         }
     }
+
 
     _xTicksFun(val, g, t0, t1, dFormat, hFormat) {
         for (let i = t0 - t0 % val - 7200; i < t1 + 1; i += val) {
@@ -236,13 +235,11 @@ class Chart extends React.Component {
         let tmp = this.g.append('g')
             .attr('class', 'xbrush')
             .attr('transform', `translate(${this.props.marginLeft} ${this.props.marginTop})`)
-            .on("mousedown", () => { if (d3.event.button === 2) { d3.event.stopImmediatePropagation(); } })
+            .on('mousedown', () => { if (d3.event.button === 2) { d3.event.stopImmediatePropagation(); } })
             .call(this.brush);
 
         tmp.selectAll('rect')
             .attr('height', this.height - this.props.marginTop - this.props.marginBottom)
-            .attr('opacity', 0.4)
-            .attr('stroke', null)
             .on('contextmenu', zoomOut);
     }
 
@@ -255,28 +252,44 @@ class Chart extends React.Component {
             .domain(this._getDomain(this.props.points, Y_AXIS))
             .range([this.height - this.props.marginBottom, this.props.marginTop]);
 
+        this.xAxisFun = d3.axisBottom(this.xS)
+            .tickFormat(function (d) {
+                return (d3.timeSecond(d) < d ? d3.timeFormat('.%L')
+                    : d3.timeMinute(d) < d ? d3.timeFormat(':%S')
+                    : d3.timeHour(d) < d ? d3.timeFormat('%H:%M')
+                    : d3.timeDay(d) < d ? d3.timeFormat('%H:%M')
+                    : d3.timeMonth(d) < d ? (d3.timeWeek(d) < d ? d3.timeFormat('%a %d') : d3.timeFormat('%b %d'))
+                    : d3.timeYear(d) < d ? d3.timeFormat('%B')
+                    : d3.timeFormat('%Y'))(d);
+            });
+
+        this.yAxisFun = d3.axisLeft(this.yS)
+            .ticks((this.height-this.props.marginTop-this.props.marginBottom)/30);
+
         this.lineFun = d3.line()
             .x((d) => this.xS(d[0]))
             .y((d) => this.yS(d[1]));
 
-        this.svg = d3.select(this.refs.chart).html('').append('svg')
+        this.svg = d3.select(this.refs.chart).append('svg')
             .attr('viewBox', `0 0 ${this.width} ${this.height}`)
             .datum(this.props.points);
-        this.svg.append('rect')
+
+        let seriesHdr = this.svg.append('g')
+            .attr('class', 'serieshdr');
+        seriesHdr.append('rect')
             .attr('x', this.props.marginLeft)
             .attr('width', 10)
-            .attr('height', 10)
-            .attr('fill', this.props.color);
-        this.svg.append('text')
+            .attr('height', 10);
+        seriesHdr.append('text')
             .attr('x', this.props.marginLeft + 14)
             .attr('y', 10)
-            .attr('fill', this.props.textColor)
             .text(this.props.name);
+
         this.svg.append('g')
-            .attr('class', 'xaxis')
+            .attr('class', 'axis xaxis')
             .attr('transform', `translate(0 ${this.height - this.props.marginBottom})`);
         this.svg.append('g')
-            .attr('class', 'yaxis')
+            .attr('class', 'axis yaxis')
             .attr('transform', `translate(${this.props.marginLeft} 0)`);
 
         this.g = this.svg.append('g')
@@ -291,26 +304,19 @@ class Chart extends React.Component {
             .attr('height', this.height);
 
         this.line = this.g.append('path')
-            .attr('class', 'line')
-            .style('fill', 'none')
-            .style('stroke', this.props.color);
+            .attr('class', 'line');
 
         this.dots = this.g.append('g')
-            .attr('class', 'dots')
-            .style('fill', this.props.color);
+            .attr('class', 'dots');
 
         this.dots.append('circle')
             .attr('class', 'ttdot')
-            .attr('r', 3)
-            .attr('fill', this.props.color)
             .attr('display', 'none')
-            .attr('opacity', 0.4);
+            .attr('r', 3);
 
         this.dots.append('path')
             .attr('class', 'ttline')
-            .attr('stroke', this.props.axisColor)
-            .attr('display', 'none')
-            .attr('opacity', 0.3);
+            .attr('display', 'none');
     }
 
     _Tooltip() {
@@ -364,21 +370,18 @@ class Chart extends React.Component {
 
         tt.append('rect')
             .attr('class', 'ttbg')
-            .style("opacity", .8)
-            .attr('fill', "#777")
             .attr('width', 160)
             .attr('height', 40);
 
         let ttime = tt.append('text')
+            .attr('class', 'ttname')
             .attr('x', 4)
-            .attr('y', 14)
-            .attr('fill', this.props.textColor);
+            .attr('y', 14);
 
         let ttval = tt.append('text')
             .attr('class', 'ttval')
             .attr('x', 4)
-            .attr('y', 30)
-            .attr('fill', this.props.textColor);
+            .attr('y', 30);
 
         this.svg.select('.xbrush')
             .on('mousemove', ttMoveFun)
