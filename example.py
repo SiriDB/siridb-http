@@ -85,21 +85,21 @@ async def _query(auth, data, headers):
     return res, status
 
 
-async def query(auth, q):
+async def query_json(auth, q):
     data = {'query': q}
     headers = await auth.get_header()
-    res, status = await _query(auth, data, headers)
+    res, status = await _query(auth, json.dumps(data), headers)
     return json.loads(res), status
 
 
 async def query_csv(auth, q):
-    data = '"query","{}"'.format(q)
+    data = '"query","{}"'.format(q.replace('"', '""'))
     headers = await auth.get_header(content_type='application/csv')
     return await _query(auth, data, headers)
 
 
 async def example_show(args, auth):
-    res, status = await query(auth, 'show')
+    res, status = await query_json(auth, 'show')
     if status == 200:
         for item in res['data']:
             print('{name:.<20}: {value}'.format(**item))
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     loop = asyncio.get_event_loop()
     auth = Auth(args.secret, args.url, args.only_secret)
-    if not args.query:
-        loop.run_until_complete(example_show(args, auth))
-    else:
+    if args.query:
         loop.run_until_complete(example_query(args, auth))
+    else:
+        loop.run_until_complete(example_show(args, auth))

@@ -128,9 +128,8 @@ def _dump_result(data, lines):
     if 'data' in data and \
         len(data['data']) and \
             isinstance(data['data'][0], dict):
-        lines.append('"name","value"')
         lines.extend([
-            '"{name}",{value}'.format_map(item)
+            '"{}",{}'.format(item['name'], escape_csv(item['value']))
             for item in data['data']])
         return
 
