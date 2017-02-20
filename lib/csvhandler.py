@@ -138,18 +138,19 @@ def _dump_result(data, lines):
         lines.append('"timestamp",{}'.format(data['calc']))
         return
 
-    # Success, Error msg
+    # Success & Error
     for msg in ('success_msg', 'error_msg', 'help'):
         if msg in data and isinstance(data[msg], str):
             lines.append('"{}",{}'.format(msg, escape_csv(data[msg])))
             return
 
-    # Help and Motd
+    # Help & Motd
     for text in ('help', 'motd'):
         if msg in data and isinstance(data[msg], str):
             lines.append(escape_csv(data[msg]))
             return
 
+    # Select
     for series, points in data.items():
         name = escape_csv(series)
         for point in points:

@@ -49,11 +49,11 @@ class Chart extends React.Component {
             this._Tooltip();
         } else {
             this.g.append('text')
-                    .attr('x', parseInt(this.width / 2))
-                    .attr('y', parseInt(this.height / 2))
-                    .attr('text-anchor', 'middle')
-                    .attr('fill', this.props.textColor)
-                    .text('no points found');
+                .attr('x', parseInt(this.width / 2))
+                .attr('y', parseInt(this.height / 2))
+                .attr('text-anchor', 'middle')
+                .attr('fill', this.props.textColor)
+                .text('no points found');
         }
         this._draw(true);
     }
@@ -73,13 +73,11 @@ class Chart extends React.Component {
         this.svg.select('.xbrush')
             .call(this.brush);
 
-        let self = this;
-
         this.svg.select('.xaxis')
-            .each(function () { self._xTicks(d3.select(this)); });
+            .each((_, i, nodelist) => this._xTicks(d3.select(nodelist[i])));
 
         this.svg.select('.yaxis')
-            .each(function () { self._yTicks(d3.select(this)); });
+            .each((_, i, nodelist) => this._yTicks(d3.select(nodelist[i])));
 
         this.line.attr('d', this.lineFun);
 
@@ -97,7 +95,6 @@ class Chart extends React.Component {
                 .attr('cx', (d) => this.xS(d[0]))
                 .attr('cy', (d) => this.yS(d[1]));
         }
-
     }
 
     _xTicksFun(val, g, t0, t1, dFormat, hFormat) {
@@ -207,7 +204,7 @@ class Chart extends React.Component {
                 return;
             }
 
-            let span = d3.event.selection.map((v,i,a) => this.xS.invert(v + 80,i,a));
+            let span = d3.event.selection.map((v, i, a) => this.xS.invert(v + 80, i, a));
 
             if (this.xS(span[1]) - this.xS(span[0]) < 10) {
                 return;
@@ -324,24 +321,23 @@ class Chart extends React.Component {
             this.svg.select('.ttdot').attr('display', 'none');
             this.svg.select('.ttline').attr('display', 'none');
         };
-        var self = this;
 
         let ttLine = d3.line()
             .x((d) => d[0])
             .y((d) => d[1]);
 
-        let ttMoveFun = function () {
-            var pos = d3.mouse(this);
-            pos[0] += self.props.marginLeft;
-            var inv = self.xS.invert(pos[0]);
-            var idx = self.props.points
+        let ttMoveFun = (_, i, nodelist) => {
+            var pos = d3.mouse(nodelist[i]);
+            pos[0] += this.props.marginLeft;
+            var inv = this.xS.invert(pos[0]);
+            var idx = this.props.points
                 .map((d) => Math.abs(d[0] - inv))
                 .reduce((minIdx, d, i, alist) => d < alist[minIdx] ? i : minIdx, 0);
 
             var x = parseInt(pos[0] - 170 > 0 ? pos[0] - 170 : pos[0] + 10);
             var y = pos[1] - 50 > 0 ? pos[1] - 30 : pos[1] + 30;
 
-            var pt = self.props.points[idx];
+            var pt = this.props.points[idx];
 
             tt
                 .attr('transform', `translate(${x} ${y})`)
@@ -349,15 +345,15 @@ class Chart extends React.Component {
             ttime.text(tFormat((new Date(pt[0]))));
             ttval.text(pt[1]);
 
-            self.svg.select('.ttdot')
-                .attr('cx', self.xS(pt[0]))
-                .attr('cy', self.yS(pt[1]))
+            this.svg.select('.ttdot')
+                .attr('cx', this.xS(pt[0]))
+                .attr('cy', this.yS(pt[1]))
                 .attr('display', 'inline');
 
-            self.svg.select('.ttline')
+            this.svg.select('.ttline')
                 .attr('d', ttLine([
-                    [self.xS(pt[0]), self.props.marginTop],
-                    [self.xS(pt[0]), self.height - self.props.marginBottom]
+                    [this.xS(pt[0]), this.props.marginTop],
+                    [this.xS(pt[0]), this.height - this.props.marginBottom]
                 ]))
                 .attr('display', 'inline');
         };
