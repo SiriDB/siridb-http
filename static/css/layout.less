@@ -294,9 +294,61 @@ fieldset[disabled] .btn-default.active {
 }
 
 /**** Chart ****/
+@series_color: #a1b2bc;
+@text_color: #ddd;
+@axis_color: #bbb;
 .chart {
     margin-bottom: 20px;
+    fill: @text_color;
+    .axis {
+        text {
+            fill: @text_color;
+            font-family: "Lucida Console", Monaco, monospace;
+            font-size: 12px;
+        }
+        path {
+            fill: none;
+            stroke: @axis_color;
+            stroke-width: 2px;
+            stroke-opacity: .5;
+        }
+        line {
+            stroke: none;
+        }
+    }
+    .series {
+        .line {
+            fill: none;
+        }
+        .ttdot {
+            opacity: 0.4;
+        }
+        .ttline {
+            opacity: 0.3;
+        }
+        fill: @series_color;
+        stroke: @series_color;
+    }
+    .serieshdr {
+        rect {
+            fill: @series_color;
+        }
+    }
+    .xbrush {
+        opacity: 0.4;
+        stroke-width: 0px;
+    }
+    .tt {
+        .ttbg {
+            opacity: 0.4;
+        }
+    }
+    .seriesmsg {
+        text-anchor: 'middle';
+    }
 }
+
+
 
 /**** Insert Form ****/
 .form-insert {
