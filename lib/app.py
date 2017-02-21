@@ -12,7 +12,7 @@ from .encryptedcookiestorage import EncryptedCookieStorage
 from .utils import get_path
 from aiohttp_session import session_middleware
 from aiohttp.web_exceptions import HTTPException
-
+from .version import __version__
 
 class App(Handlers, Application):
 
@@ -28,7 +28,8 @@ class App(Handlers, Application):
         self.db = {
             'dbname': None,
             'version': None,
-            'timePrecision': None
+            'timePrecision': None,
+            'httpServer': __version__
         }
 
         try:
