@@ -1,3 +1,11 @@
+siridb-http (1.0.3) xenial; urgency=medium
+
+  * Add version information for the HTTP Server to the /db-info handler.
+
+  * Update grammar with limit support. (issue #6)
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  Tue, 28 Feb 2017 15:15:51 +0000
+
 siridb-http (1.0.2) xenial; urgency=medium
 
   * Refactor init time. (Index and Query pages)
