@@ -29,6 +29,8 @@ class InfoModal extends Reflux.Component {
                         <dd>{this.state.dbname}</dd>
                         <dt>SiriDB:</dt>
                         <dd>{this.state.version}</dd>
+                        <dt>HTTP Server:</dt>
+                        <dd>{this.state.httpServer}</dd>
                     </dl>
                 </Modal.Body>
             </Modal>
