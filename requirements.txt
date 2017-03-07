@@ -8,3 +8,4 @@ qpack
 siridb-connector
 trender
 msgpack-python
+cryptography
