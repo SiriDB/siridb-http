@@ -1,3 +1,9 @@
+siridb-http (1.0.4) xenial; urgency=medium
+
+  * Fixed sending float values as float. (issue #7)
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  Tue, 07 Mar 2017 20:13:04 +0000
+
 siridb-http (1.0.3) xenial; urgency=medium
 
   * Add version information for the HTTP Server to the /db-info handler.
