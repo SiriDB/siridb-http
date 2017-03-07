@@ -1,4 +1,5 @@
 aiohttp==1.1.6
+aiohttp_session=0.8.0
 prompt-toolkit==1.0.9
 setproctitle==1.1.10
 colorlog==2.10.0
