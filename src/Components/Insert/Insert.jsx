@@ -67,7 +67,7 @@ class Insert extends Reflux.Component {
 
     onInsert() {
         this.cursorPos = SELECT_ALL;
-        InsertActions.insert(JSON.parse(this.state.data));
+        InsertActions.insert(this.state.data);
     }
 
     render() {

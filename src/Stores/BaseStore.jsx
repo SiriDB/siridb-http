@@ -16,6 +16,10 @@ class BaseStore extends Reflux.Store {
     post(url, data) {
         return new JsonRequest('POST', `${this.serverUrl}${url}`, data);
     }
+
+    postraw(url, raw) {
+        return new JsonRequest('POST', `${this.serverUrl}${url}`, raw, true);
+    }
 }
 
 export default BaseStore;

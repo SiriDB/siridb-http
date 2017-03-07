@@ -19,7 +19,7 @@ class InsertStore extends BaseStore {
 
     onInsert(data) {
         this.setState({ sending: true, alert: null });
-        this.post('/insert', data)
+        this.postraw('/insert', data)
             .always((xhr, data) => {
                 this.setState({ sending: false });
             })

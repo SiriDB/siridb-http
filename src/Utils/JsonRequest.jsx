@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 
 class JsonRequest {
 
-    constructor(type, url, data) {
+    constructor(type, url, data, isStringified) {
 
         this.doneCb = function (data) { };
         this.failCb = function (error, data) {
@@ -20,7 +20,8 @@ class JsonRequest {
                 let data = this._onResponse(xhr);
                 this.doneCb(data);
             })
-            .send(type, (data === undefined) ? undefined : JSON.stringify(data));
+            .send(type, (data === undefined || isStringified) ?
+                data : JSON.stringify(data));
     }
 
     _onResponse(xhr) {
