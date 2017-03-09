@@ -102,7 +102,7 @@ class Insert extends Reflux.Component {
                                 className="btn btn-default"
                                 onClick={this.onInsert.bind(this)}
                                 disabled={hasError || this.state.sending}>
-                                <i className="fa fa-fw fa-paper-plane"></i> insert
+                                <i className="fa fa-fw fa-paper-plane"></i> send
                             </button>
                         </div>
                     </div>
