@@ -101,7 +101,7 @@ if __name__ == '__main__':
             changelog=changelog.strip()
         ))
 
-    # Run setup.py to create executable
+    # Run pyinstaller to create executable
     subprocess.call(['pyinstaller', 'siridb-http.spec'])
 
     POSTINST = open(

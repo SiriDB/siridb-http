@@ -19,7 +19,7 @@ def extra_datas(mydir):
     return extra_datas
 
 a = Analysis(['siridb-http.py'],
-             pathex=['/home/joente/workspace/siridb-http'],
+             pathex=['./siridb-http'],
              binaries=None,
              datas=None,
              hiddenimports=[],
