@@ -1,3 +1,11 @@
+siridb-http (1.0.5) xenial; urgency=medium
+
+  * Updated siridb-connector and qpack to the latest version.
+
+  * Updated node packages.
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  Thu, 09 Mar 2017 09:23:31 +0000
+
 siridb-http (1.0.4) xenial; urgency=medium
 
   * Fixed sending float values as float. (issue #7)
