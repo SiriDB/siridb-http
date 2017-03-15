@@ -11,7 +11,7 @@
     "type": "git",
     "url": "https://github.com/transceptor-technology/siridb-http.git"
   },
-  "author": "",
+  "author": "Jeroen van der Heijden",
   "dependencies": {
     "babel-core": ">=6.23.1",
     "babel-loader": ">=6.4.0",
