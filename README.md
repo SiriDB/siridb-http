@@ -8,7 +8,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
   * [Features](#features)
   * [Installation](#installation)
     * [Ubuntu](#ubnutu)
-    * [Other](#other)
+    * [From source](#from-source)
     * [Configuration](#configuration)
   * [API](#api)
     * [Authentication](#authentication)
@@ -39,19 +39,19 @@ SiriDB HTTP is written in Python but uses C libraries for handling data which ma
 ### Ubuntu
 For Ubnutu we have a deb package available which can be downloaded [here](https://github.com/transceptor-technology/siridb-http/releases/latest).
 
-### Other
-Clone the project
+### From source
+Clone the project using git. (we assume git is installed)
 ```
 git clone https://github.com/transceptor-technology/siridb-http
 ```
 
-Install Python packages (we asume Python3 and pip are installed)
+Install Python packages (we assume Python3 and pip are installed)
 ```
 cd siridb-http
 pip3 install -f requirements.txt 
 ```
 
-Install node packages (we asume npm is installed)
+Install node packages (we assume the node package manager is installed)
 ```
 cd src
 npm install
