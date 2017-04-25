@@ -13,6 +13,13 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
       * [Secret](#secret)
       * [Token](#token)
     * [Query](#query)
+      * [JSON](#query_json)
+      * [CSV](#query_csv)
+      * [MsgPack](#query_msgpack)
+      * [QPack](#query_qpack)
+    * [Insert](#insert)
+      * [JSON (MsgPack & QPack)](#insert_json)
+      * [CSV](#insert_csv)
 
 ---------------------------------------
 
@@ -127,7 +134,7 @@ The response for a refresh token is similar to a get-token request.
 ### Query
 The `/query` uri can be used for querying SiriDB. SiriDB HTTP supports multiple formats which can be used by setting the `Content-Type` in a header.
 
-#### JSON
+#### Query JSON
 Content-Type: application/json
 Example:
 ```
@@ -136,7 +143,7 @@ Example:
 }
 ```
 
-#### CSV
+#### Query CSV
 Content-Type: application/csv
 Example:
 ```
@@ -147,18 +154,18 @@ When double quotes are requred in a query the can be escaped using two double  q
 "query","select * from ""my-series"" after now - 7d"
 ```
 
-#### MsgPack
+#### Query MsgPack
 Content-Type: application/x-msgpack
 The format for msgpack is equal to JSON except that it should be packed using msgpack which results in a byte string.
 
-#### QPack
+#### Query QPack
 Content-Type: application/x-qpack
 The format for qpack is equal to JSON except that it should be packed using qpack which results in a byte string.
 
 ### Insert
 The `/insert` uri can be used for inserting data into SiriDB. The same content types as for queries are supported. Both MsgPack and QPack are similar to JSON except that the data is packed to a byte string. Therefore we only explain JSON and CSV data here. *(Note: in the examples below we use a second time-precision)*
 
-#### JSON
+#### Insert JSON
 The preferred json layout is as following: (this is the layout which is returned by SiriDB on a select query)
 ```json
 {
@@ -178,7 +185,7 @@ Optionally the following format can be used:
 ]
 ```
 
-#### CSV
+#### Insert CSV
 CSV data is allowed in two formats which we call the list and table format.
 
 ##### List CSV format
