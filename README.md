@@ -22,7 +22,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
       * [MsgPack](#query-msgpack)
       * [QPack](#query-qpack)
     * [Insert](#insert)
-      * [JSON, MsgPack, QPack)](#insert-json)
+      * [JSON, MsgPack, QPack](#insert-json)
       * [CSV](#insert-csv)
   * [Web Interface](#web-interface)
 ---------------------------------------
