@@ -130,7 +130,7 @@ This is an example response: (note that the `expiration_time` can be set within 
 }
 ```
 
-A token can be used be including the `Authorization` field in a header. For example:
+A token can be used be including the `Authorization` field in your header. For example:
 ```
 Authorization: 'Token MyTokenString'
 Content-Type:  'application/json'
@@ -202,7 +202,7 @@ Response:
 ```
 
 ### Query
-The `/query` uri can be used for querying SiriDB. SiriDB HTTP supports multiple formats which can be used by setting the `Content-Type` in a header.
+The `/query` POST handler can be used for querying SiriDB. SiriDB HTTP supports multiple formats which can be used by setting the `Content-Type` in the header.
 
 #### Query JSON
 Content-Type: application/json
@@ -233,7 +233,7 @@ Content-Type: application/x-qpack
 The format for qpack is equal to JSON except that it should be packed using qpack which results in a byte string.
 
 ### Insert
-The `/insert` uri can be used for inserting data into SiriDB. The same content types as for queries are supported. Both MsgPack and QPack are similar to JSON except that the data is packed to a byte string. Therefore we only explain JSON and CSV data here. *(Note: in the examples below we use a second time-precision)*
+The `/insert` POST handler can be used for inserting data into SiriDB. The same content types as for queries are supported. Both MsgPack and QPack are similar to JSON except that the data is packed to a byte string. Therefore we only explain JSON and CSV data here. *(Note: in the examples below we use a second time-precision)*
 
 #### Insert JSON
 The preferred json layout is as following: (this is the layout which is returned by SiriDB on a select query)
