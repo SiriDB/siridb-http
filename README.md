@@ -13,13 +13,13 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
       * [Secret](#secret)
       * [Token](#token)
     * [Query](#query)
-      * [JSON](#query_json)
-      * [CSV](#query_csv)
-      * [MsgPack](#query_msgpack)
-      * [QPack](#query_qpack)
+      * [JSON](#query-json)
+      * [CSV](#query-csv)
+      * [MsgPack](#query-msgpack)
+      * [QPack](#query-qpack)
     * [Insert](#insert)
-      * [JSON (MsgPack & QPack)](#insert_json)
-      * [CSV](#insert_csv)
+      * [JSON, MsgPack, QPack)](#insert-json)
+      * [CSV](#insert-csv)
 
 ---------------------------------------
 
