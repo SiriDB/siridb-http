@@ -79,7 +79,7 @@ python3 siridb-http.py
 ```
 
 ### Configuration
-The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`.
+The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`. By default siridb http will listen on port 8080 but this default can be changed by setting `port` within the `[Configuration]` section in the config file.
 
 ## API
 SiriDB HTTP has an HTTP api which can be used to insert and query a SiriDB cluster.
@@ -265,6 +265,9 @@ Example table:
 ```
 
 ## Web interface
-SiriDB has an optional web interface which can be enabled by setting `enable_web` to `True`. This web interface will ask for user authentication if `enable_authentication` is set to `True`. Only the `user` which is configured in the configuration file is allowed to login unless `enable_multi_user` is set to `True`.
+SiriDB has an optional web interface which can be enabled by setting `enable_web` to `True`. This web interface will ask for user authentication if `enable_authentication` is set to `True`. Only the `user` which is configured in the configuration file is allowed to login unless `enable_multi_user` is set to `True`. 
 
 The Web interface allows you to run queries and insert data using JSON format.
+
+## SSL (HTTPS)
+SSL (HTTPS) support can be enabled by setting `enable_ssl` to `True` in the `[Configuration]` section. When enabled the `crt_file` and `key_file` in section `[SSL]` must be set. As values its possbile to use relative paths. The certificate files will then be searched relative to the application path.
