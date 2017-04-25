@@ -21,7 +21,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
     * [Insert](#insert)
       * [JSON, MsgPack, QPack)](#insert-json)
       * [CSV](#insert-csv)
-
+  * [Web Interface](#web-interface)
 ---------------------------------------
 
 ## Features
@@ -263,3 +263,8 @@ Example table:
 1440138931,100,,8.0
 1440140932,40,9.3,
 ```
+
+## Web interface
+SiriDB has an optional web interface which can be enabled by setting `enable_web` to `True`. This web interface will ask for user authentication if `enable_authentication` is set to `True`. Only the `user` which is configured in the configuration file is allowed to login unless `enable_multi_user` is set to `True`.
+
+The Web interface allows you to run queries and insert data using JSON format.
