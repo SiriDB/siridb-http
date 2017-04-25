@@ -79,9 +79,9 @@ SiriDB HTTP has an HTTP api which can be used to insert and query a SiriDB clust
 Authentication is required when `enable_authentication` is set to `True` in the configuration file and several options are possible.
 
 #### Secret
-A secret can only be used if `[Token]is_required` is set to `False`. The secret can be forced in the configuration file by setting the `secret` variable in section `[Secret]`. If no secret is specified, one will be auto-generated and can be found in a hidden file: `.secret` in the application path.
+A secret can only be used if `[Token]is_required` is set to `False`. A secret can be configured in the configuration file by setting the `secret` variable in section `[Secret]`. If no secret is specified, one will be created automatically and can be found in a hidden file: `.secret` in the application path.
 
-To use the secret we need to use set the Authorization field in header. This example is a header when we want to post and receive JSON data using a secret **MySecretString**. (Note that the Authorization field is prefixed with `Secret ` which is required) 
+To use the secret we need to use set the Authorization header field for each request. This is an example header for when we want to post and receive JSON data using a secret **MySecretString**. (Note that the Authorization field is prefixed with `Secret ` which is required) 
 ```
 Authorization: 'Secret MySecretString'
 Content-Type:  'application/json'
