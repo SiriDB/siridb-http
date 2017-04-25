@@ -140,8 +140,13 @@ Example:
 Content-Type: application/csv
 Example:
 ```
-query,"select mean(1h) => difference() from 'my-series'"
+"query","select mean(1h) => difference() from 'my-series'"
 ```
+When double quoetes are requred in a query the can be escaped using two double  quotes, for example:
+```
+"query","select mean(1h) => difference() from ""my-series"""
+```
+
 
 #### MsgPack
 Content-Type: application/x-msgpack
