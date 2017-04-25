@@ -21,7 +21,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
 SiriDB HTTP is written in Python but uses C libraries for handling data which makes it fast.
 
 ### Ubuntu
-For Ubnutu 64bit we have a deb package available which can be doenloaded [here](https://github.com/transceptor-technology/siridb-http/releases/latest).
+For Ubnutu we have a deb package available which can be downloaded [here](https://github.com/transceptor-technology/siridb-http/releases/latest).
 
 ### Other
 Clone the project
