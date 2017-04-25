@@ -1,3 +1,11 @@
+siridb-http (1.0.6) xenial; urgency=medium
+
+  * Changed link location from /usr/sbin to /usr/local/bin in deb package.
+
+  * Update grammar with list_limit and select_points_limit. (issue #9)
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  Tue, 25 Apr 2017 08:48:20 +0000
+
 siridb-http (1.0.5) xenial; urgency=medium
 
   * Updated siridb-connector and qpack to the latest version.
