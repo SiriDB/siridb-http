@@ -125,7 +125,7 @@ header:    Authorization: 'Refresh ...'
 The response for a refresh token is similar to a get-token request.
 
 ### Query
-The `/query` uri can be used for querying a SiriDB cluster. SiriDB HTTP supports multiple formats which can be requested be setting the `Content-Type` in a header.
+The `/query` uri can be used for querying SiriDB. SiriDB HTTP supports multiple formats which can be used by setting the `Content-Type` in a header.
 
 #### JSON
 Content-Type: application/json
@@ -147,7 +147,6 @@ When double quotes are requred in a query the can be escaped using two double  q
 "query","select * from ""my-series"" after now - 7d"
 ```
 
-
 #### MsgPack
 Content-Type: application/x-msgpack
 The format for msgpack is equal to JSON except that it should be packed using msgpack which results in a byte string.
@@ -156,3 +155,48 @@ The format for msgpack is equal to JSON except that it should be packed using ms
 Content-Type: application/x-qpack
 The format for qpack is equal to JSON except that it should be packed using qpack which results in a byte string.
 
+### Insert
+The `/insert` uri can be used for inserting data into SiriDB. The same content types as for queries are supported. Both MsgPack and QPack are similar to JSON except that the data is packed to a byte string. Therefore we only explain JSON and CSV data here. *(Note: in the examples below we use a second time-precision)*
+
+#### JSON
+The preferred json layout is as following: (this is the layout which is returned by SiriDB on a select query)
+```json
+{
+    "my-series-01": [[1493126582, 4.2], ...],
+    ...
+}      
+```
+
+Optionally the following format can be used:
+```json
+[
+    {
+        "name": "my-series-01",
+        "points": [[1493126582, 4.2], ...]
+    },
+    ...
+]
+```
+
+#### CSV
+CSV data is allowed in two formats which we call the list and table format.
+
+##### List CSV format
+When using the list format, each row in the csv should contain a series name, timestamp and value.
+
+Example list:
+```csv
+Series 001,1440138931,100
+Series 003,1440138931,8.0
+Series 001,1440140932,40
+Series 002,1440140932,9.3
+```
+##### Table CSV format
+A table format is more compact, especially if multiple series share points with equal timestamps. The csv should start with an empty field which is indicated with the first comma.
+
+Example table:
+```csv
+,Series 001,Series 002,Series 003
+1440138931,100,,8.0
+1440140932,40,9.3,
+```
