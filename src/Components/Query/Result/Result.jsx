@@ -187,6 +187,8 @@ class Result extends Reflux.Component {
     }
 
     _fmtServer = {
+        list_limit: this._fmtLongNumber,
+        select_points_limit: this._fmtLongNumber,
         received_points: this._fmtLongNumber,
         buffer_size: this._fmtSize,
         mem_usage: (val) => this._fmtSize(val * 1024 * 1024),
