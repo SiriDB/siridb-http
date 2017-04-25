@@ -7,7 +7,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
 ---------------------------------------
   * [Features](#features)
   * [Installation](#installation)
-    * [Ubuntu](#ubnutu)
+    * [Ubuntu](#ubuntu)
     * [From source](#from-source)
   * [Configuration](#configuration)
     * [Multi server support](#multi-server-support)
