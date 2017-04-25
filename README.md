@@ -90,7 +90,7 @@ Content-Type:  'application/json'
 #### Token
 A static secret cannot be used when `[Token]is_required` is set to `True`. Instead a token can be used which can be requested by using the secret. This is slightly more secure since the secret will be used only once and all other communication is done by rotation tokens.
 
-For receiving a token the following request should be used:
+For receiving a token the following request should be used: (... must be replaced with your secret)
 ```
 type:      POST
 uri:       /get-token
@@ -107,4 +107,18 @@ This is an example response: (note that the `expiration_time` can be set within 
 }
 ```
 
- 
+A token can be used be including the `Authorization` field in a header. For example:
+```
+Authorization: 'Token MyTokenString'
+Content-Type:  'application/json'
+```
+
+In case the expiration time is passed the token cannot be used anymore and a new token must be requested using the refresh token. A token refresh can be done using the following request: (... must be replaced with your refresh token)
+```
+type:      POST
+uri:       /refresh-token
+header:    Authorization: 'Refresh ...'
+           Content-Type:  'application/json'                    
+```
+
+The response for a refresh token is similar to a get-token request.
