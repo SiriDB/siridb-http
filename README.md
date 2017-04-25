@@ -98,12 +98,12 @@ header:    Authorization: 'Secret ...'
            Content-Type:  'application/json'                    
 ```
 
-This is an example response:
+This is an example response: (note that the `expiration_time` can be set within the `[Token]` section in the configuration file)
 ```json
 {
-    "refresh_token": "a_refresh_token_string",
-    "expires_in": 3600
-    "token": "a_token_string"
+    "token": "a_token_string",
+    "expires_in": 3600,
+    "refresh_token": "a_refresh_token_string"
 }
 ```
 
