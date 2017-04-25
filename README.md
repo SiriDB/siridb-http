@@ -85,7 +85,7 @@ python3 siridb-http.py
 The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`. By default siridb http will listen on port 8080 but this default can be changed by setting `port` within the `[Configuration]` section in the config file.
 
 ### Multi server support
-SiriDB can scale accross multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are member of `pool 0` and sdb03 and sdb04 are member of `pool 1`. 
+SiriDB can scale across multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are member of `pool 0` and sdb03 and sdb04 are member of `pool 1`. 
 
 We should now configure SiriDB to connect to both servers in pool 0 and/or pool 1. This ensures queries and inserts will always work, even when a server in the SiriDB cluster is not available for whatever reason. The only requirement is that each pool has at least one server online.
 
@@ -147,7 +147,7 @@ header:    Authorization: 'Refresh ...'
 The response for a refresh token is similar to a get-token request.
 
 #### Session
-SiriDB HTTP has session support and exposes the following uri's for handling session authtication:
+SiriDB HTTP has session support and exposes the following uri's for handling session authentication:
 - /auth/secret
 - /auth/login
 - /auth/fetch
@@ -163,7 +163,7 @@ body:      {"secret": "my-secret-string"}
 ```
 
 ##### /auth/login
-Login can be used to authenticate and create a SiriDB database user. If the option `enable_multi_user` within the section `[Session]` in the configuration file is set to `True`, any database user with at least `show` previleges can be used. In case multi user support is turned off, the only allowed user is the one configured in the configuration file.
+Login can be used to authenticate and create a SiriDB database user. If the option `enable_multi_user` within the section `[Session]` in the configuration file is set to `True`, any database user with at least `show` privileges can be used. In case multi user support is turned off, the only allowed user is the one configured in the configuration file.
 
 ```
 type:      POST
@@ -284,4 +284,4 @@ SiriDB has an optional web interface which can be enabled by setting `enable_web
 The Web interface allows you to run queries and insert data using JSON format.
 
 ## SSL (HTTPS)
-SSL (HTTPS) support can be enabled by setting `enable_ssl` to `True` in the `[Configuration]` section. When enabled the `crt_file` and `key_file` in section `[SSL]` must be set. As values its possbile to use relative paths. The certificate files will then be searched relative to the application path.
+SSL (HTTPS) support can be enabled by setting `enable_ssl` to `True` in the `[Configuration]` section. When enabled the `crt_file` and `key_file` in section `[SSL]` must be set. As values its possible to use relative paths. The certificate files will then be searched relative to the application path.
