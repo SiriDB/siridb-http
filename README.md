@@ -131,6 +131,49 @@ header:    Authorization: 'Refresh ...'
 
 The response for a refresh token is similar to a get-token request.
 
+#### Sessions
+SiriDB HTTP has session support and exposes the following uri's for handling session authtication:
+- /auth/secret
+- /auth/login
+- /auth/fetch
+- /auth/logoff
+
+##### /auth/secret
+This uri can be used to authenticate and create a session using the secret. The authenticated user will be the one specified in the configuration file.
+```
+type:      POST
+uri:       /auth/secret
+header:    Content-Type:  'application/json'
+body:      {"secret": "my-secret-string"}
+```
+
+##### /auth/login
+Login can be used to authenticate and create a SiriDB database user. If the option `enable_multi_user` within the section `[Session]` in the configuration file is set to `True`, any database user with at least `show` previleges can be used. In case multi user support is turned off, the only allowed user is the one configured in the configuration file.
+
+```
+type:      POST
+uri:       /auth/login
+header:    Content-Type:  'application/json'
+body:      {"username": "my-username", "password": "my-secret-password"}
+```
+
+##### /auth/fetch
+Fetch can be used to retreive the current session user.
+```
+type:      GET
+uri:       /auth/fetch
+header:    Content-Type:  'application/json'
+```
+The response contains the current user and a boolean value to indicate if authentication is required. In case no user is logged on and authentication is required, the value for `user` will be `null`.
+
+Example response:
+```json
+{
+    "user": "logged_on_username",
+    "authRequired": true
+}
+```
+
 ### Query
 The `/query` uri can be used for querying SiriDB. SiriDB HTTP supports multiple formats which can be used by setting the `Content-Type` in a header.
 
