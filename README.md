@@ -10,6 +10,8 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
     * [Configuration](#configuration)
   * [API](#api)
     * [Authentication](#authentication)
+      * [Secret](#secret)
+      * [Token](#token)
 
 ---------------------------------------
 
@@ -88,13 +90,21 @@ Content-Type:  'application/json'
 #### Token
 A static secret cannot be used when `[Token]is_required` is set to `True`. Instead a token can be used which can be requested by using the secret. This is slightly more secure since the secret will be used only once and all other communication is done by rotation tokens.
 
-For receiving a token the following post request should be used:
-
-http(s)://my-siridb-host**/get-token**
-
+For receiving a token the following request should be used:
 ```
-Authorization: 'Secret ...'
-Content-Type:  'application/json'
+type:      POST
+uri:       /get-token
+header:    Authorization: 'Secret ...'
+           Content-Type:  'application/json'                    
+```
+
+This is an example response:
+```json
+{
+    "refresh_token": "a_refresh_token_string",
+    "expires_in": 3600
+    "token": "a_token_string"
+}
 ```
 
  
