@@ -7,6 +7,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
   * [Installation](#installation)
     * [Ubuntu](#ubnutu)
     * [Other](#other)
+    * [Configuration]
 
 ---------------------------------------
 
@@ -64,6 +65,22 @@ Finished, you can now start SiriDB HTTP
 python3 siridb-http.py
 ```
 
-  
+### Configuration
+The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`.
+
+## API
+SiriDB HTTP has an HTTP api which can be used to insert and query a SiriDB cluster.
+
+### Authentication
+Authentication is required when `enable_authentication` is set to `True` in the configuration file and several options are possible.
+#### Using secret
+A secret can only be used if `[Token]is_required` is set to `False`. The secret can be forced in the configuration file by setting the `secret` variable in section `[Secret]`. If no secret is specified, one will be auto-generated and can be found in a hidden file: `.secret` in the application path.
+
+#### Example using a secret
+```
+http://localhost/query
+
+
+
 
  
