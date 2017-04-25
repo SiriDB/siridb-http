@@ -7,7 +7,9 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
   * [Installation](#installation)
     * [Ubuntu](#ubnutu)
     * [Other](#other)
-    * [Configuration]
+    * [Configuration](#configuration)
+  * [API](#api)
+    * [Authentication](#authentication)
 
 ---------------------------------------
 
@@ -73,7 +75,8 @@ SiriDB HTTP has an HTTP api which can be used to insert and query a SiriDB clust
 
 ### Authentication
 Authentication is required when `enable_authentication` is set to `True` in the configuration file and several options are possible.
-#### Using secret
+
+#### Secret
 A secret can only be used if `[Token]is_required` is set to `False`. The secret can be forced in the configuration file by setting the `secret` variable in section `[Secret]`. If no secret is specified, one will be auto-generated and can be found in a hidden file: `.secret` in the application path.
 
 To use the secret we need to use set the Authorization field in header. This example is a header when we want to post and receive JSON data using a secret **MySecretString**. (Note that the Authorization field is prefixed with `Secret ` which is required) 
@@ -82,5 +85,16 @@ Authorization: 'Secret MySecretString'
 Content-Type:  'application/json'
 ```
 
+#### Token
+A static secret cannot be used when `[Token]is_required` is set to `True`. Instead a token can be used which can be requested by using the secret. This is slightly more secure since the secret will be used only once and all other communication is done by rotation tokens.
+
+For receiving a token the following post request should be used:
+
+http(s)://my-siridb-host**/get-token**
+
+```
+Authorization: 'Secret ...'
+Content-Type:  'application/json'
+```
 
  
