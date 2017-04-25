@@ -12,6 +12,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
     * [Authentication](#authentication)
       * [Secret](#secret)
       * [Token](#token)
+    * [Query](#query)
 
 ---------------------------------------
 
@@ -122,3 +123,31 @@ header:    Authorization: 'Refresh ...'
 ```
 
 The response for a refresh token is similar to a get-token request.
+
+### Query
+The `/query` uri can be used for querying a SiriDB cluster. SiriDB HTTP supports multiple formats which can be requested be setting the `Content-Type` in a header.
+
+#### JSON
+Content-Type: application/json
+Example:
+```
+{
+    "query": "select mean(1h) => difference() from 'my-series'"
+}
+```
+
+#### CSV
+Content-Type: application/csv
+Example:
+```
+query,"select mean(1h) => difference() from 'my-series'"
+```
+
+#### MsgPack
+Content-Type: application/x-msgpack
+The format for msgpack is equal to JSON except that it should be packed using msgpack which results in a byte string.
+
+#### QPack
+Content-Type: application/x-qpack
+The format for qpack is equal to JSON except that it should be packed using qpack which results in a byte string.
+
