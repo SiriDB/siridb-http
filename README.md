@@ -76,11 +76,11 @@ Authentication is required when `enable_authentication` is set to `True` in the 
 #### Using secret
 A secret can only be used if `[Token]is_required` is set to `False`. The secret can be forced in the configuration file by setting the `secret` variable in section `[Secret]`. If no secret is specified, one will be auto-generated and can be found in a hidden file: `.secret` in the application path.
 
-#### Example using a secret
+To use the secret we need to use set the Authorization field in header. This example is a header when we want to post and receive JSON data using a secret **MySecretString**. (Note that the Authorization field is prefixed with `Secret ` which is required) 
 ```
-http://localhost/query
-
-
+Authorization: 'Secret MySecretString'
+Content-Type:  'application/json'
+```
 
 
  
