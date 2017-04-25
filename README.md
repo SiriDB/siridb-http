@@ -9,8 +9,8 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
   * [Installation](#installation)
     * [Ubuntu](#ubnutu)
     * [From source](#from-source)
-    * [Configuration](#configuration)
-      * [Multi server support](#multi-server-support)
+  * [Configuration](#configuration)
+    * [Multi server support](#multi-server-support)
   * [API](#api)
     * [Authentication](#authentication)
       * [Secret](#secret)
@@ -81,10 +81,10 @@ Finished, you can now start SiriDB HTTP
 python3 siridb-http.py
 ```
 
-### Configuration
+## Configuration
 The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`. By default siridb http will listen on port 8080 but this default can be changed by setting `port` within the `[Configuration]` section in the config file.
 
-#### Multi server support
+### Multi server support
 SiriDB can scale accross multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are member of `pool 0` and sdb03 and sdb04 are member of `pool 1`. 
 
 We should now configure SiriDB to connect to both servers in pool 0 and/or pool 1. This ensures queries and inserts will always work, even when a server in the SiriDB cluster is not available for whatever reason. The only requirement is that each pool has at least one server online.
