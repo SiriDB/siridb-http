@@ -12,6 +12,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
     * [Authentication](#authentication)
       * [Secret](#secret)
       * [Token](#token)
+      * [Session](#session)
     * [Query](#query)
       * [JSON](#query-json)
       * [CSV](#query-csv)
@@ -131,7 +132,7 @@ header:    Authorization: 'Refresh ...'
 
 The response for a refresh token is similar to a get-token request.
 
-#### Sessions
+#### Session
 SiriDB HTTP has session support and exposes the following uri's for handling session authtication:
 - /auth/secret
 - /auth/login
@@ -172,6 +173,18 @@ Example response:
     "user": "logged_on_username",
     "authRequired": true
 }
+```
+
+##### /auth/logoff
+When calling this uri the current session will be cleared.
+```
+type:      GET
+uri:       /auth/logoff
+header:    Content-Type:  'application/json'
+```
+Response:
+```json
+{"user": null}
 ```
 
 ### Query
