@@ -35,7 +35,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
   - Support for JSON, CSV, MsgPack and QPack.
 
 ## Installation
-SiriDB HTTP is written in Python but uses C libraries for handling data which makes it fast.
+SiriDB HTTP is written in Python but uses C libraries for handling data.
 
 ### Ubuntu
 For Ubnutu we have a deb package available which can be downloaded [here](https://github.com/transceptor-technology/siridb-http/releases/latest).
