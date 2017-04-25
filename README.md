@@ -1,5 +1,6 @@
 SiriDB HTTP
 ===========
+![alt SiriDB HTTP](/siridb-http.png?raw=true)
 SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
 
 ---------------------------------------
