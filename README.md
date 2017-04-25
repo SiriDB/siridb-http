@@ -142,7 +142,7 @@ Example:
 ```
 "query","select min(1h) prefix 'min-', max(1h) prefix 'max-' from 'my-series'"
 ```
-When double quoetes are requred in a query the can be escaped using two double  quotes, for example:
+When double quotes are requred in a query the can be escaped using two double  quotes, for example:
 ```
 "query","select * from ""my-series"" after now - 7d"
 ```
