@@ -85,9 +85,9 @@ python3 siridb-http.py
 The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`. By default siridb http will listen on port 8080 but this default can be changed by setting `port` within the `[Configuration]` section in the config file.
 
 ### Multi server support
-SiriDB can scale across multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are member of `pool 0` and sdb03 and sdb04 are member of `pool 1`. 
+SiriDB can scale across multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are members of `pool 0` and sdb03 and sdb04 are members of `pool 1`. 
 
-We should now configure SiriDB to connect to both servers in pool 0 and/or pool 1. This ensures queries and inserts will always work, even when a server in the SiriDB cluster is not available for whatever reason. The only requirement is that each pool has at least one server online.
+We should now configure SiriDB to connect to both servers in pool 0 and/or pool 1. This ensures that queries and inserts always work, even when a server in the SiriDB cluster is not available for whatever reason. The only requirement is that each pool has at least one server online.
 
 To configure SiriDB HTTP to connect to multiple servers a comma must be used as separator like this:
 ```
@@ -96,10 +96,10 @@ servers = sdb01:9000,sdb02:9000,sdb03:9000,sdb04:9000
 ```
 
 ## API
-SiriDB HTTP has an HTTP api which can be used to insert and query a SiriDB cluster.
+SiriDB HTTP has a HTTP api which can be used to insert and query a SiriDB cluster.
 
 ### Authentication
-Authentication is required when `enable_authentication` is set to `True` in the configuration file. Different methods for authentication can be used like providing a token in each request or using session authentication with a username/password. When authentication is disabled the `/insert` and `/query` handlers can be used directly without any authentication and privileges are defined by the user which is configured in the configuration file.
+Authentication is required when `enable_authentication` is set to `True` in the configuration file. Different methods for authentication can be used, like providing a token in each request or using session authentication with a username/password. When authentication is disabled the `/insert` and `/query` handlers can be used directly without any authentication, privileges are defined by the user and is configured in the configuration file.
 
 #### Secret
 A secret can only be used if `[Token]is_required` is set to `False`. A secret can be configured in the configuration file by setting the `secret` variable in section `[Secret]`. If no secret is specified, one will be created automatically and can be found in a hidden file: `.secret` in the application path.
@@ -130,13 +130,13 @@ This is an example response: (note that the `expiration_time` can be set within 
 }
 ```
 
-A token can be used be including the `Authorization` field in your header. For example:
+A token can be used by including the `Authorization` field in your header. For example:
 ```
 Authorization: 'Token MyTokenString'
 Content-Type:  'application/json'
 ```
 
-In case the expiration time is passed the token cannot be used anymore and a new token must be requested using the refresh token. A token refresh can be done using the following request: (... must be replaced with your refresh token)
+In case the expiration time is passed the token cannot be used anymore and a new token must be requested using the refresh token. A token refresh can be done by using the following request: (... must be replaced with your refresh token)
 ```
 type:      POST
 uri:       /refresh-token
@@ -173,7 +173,7 @@ body:      {"username": "my-username", "password": "my-secret-password"}
 ```
 
 ##### /auth/fetch
-Fetch can be used to retreive the current session user.
+Fetch can be used to retrieve the current session user.
 ```
 type:      GET
 uri:       /auth/fetch
@@ -202,7 +202,7 @@ Response:
 ```
 
 ### Query
-The `/query` POST handler can be used for querying SiriDB. SiriDB HTTP supports multiple formats which can be used by setting the `Content-Type` in the header.
+The `/query` POST handler can be used for querying SiriDB. SiriDB HTTP supports multiple formats that can be used by setting the `Content-Type` in the header.
 
 #### Query JSON
 Content-Type: application/json
@@ -219,7 +219,7 @@ Example:
 ```
 "query","select min(1h) prefix 'min-', max(1h) prefix 'max-' from 'my-series'"
 ```
-When double quotes are requred in a query the can be escaped using two double  quotes, for example:
+When double quotes are required in a query the can be escaped using two double  quotes, for example:
 ```
 "query","select * from ""my-series"" after now - 7d"
 ```
@@ -269,7 +269,7 @@ Series 001,1440140932,40
 Series 002,1440140932,9.3
 ```
 ##### Table CSV format
-A table format is more compact, especially if multiple series share points with equal timestamps. The csv should start with an empty field which is indicated with the first comma.
+A table format is more compact, especially if multiple series share points with equal timestamps. The csv should start with an empty field that is indicated with the first comma.
 
 Example table:
 ```csv
@@ -279,9 +279,9 @@ Example table:
 ```
 
 ## Web interface
-SiriDB has an optional web interface which can be enabled by setting `enable_web` to `True`. This web interface will ask for user authentication if `enable_authentication` is set to `True`. Only the `user` which is configured in the configuration file is allowed to login unless `enable_multi_user` is set to `True`. 
+SiriDB has an optional web interface that can be enabled by setting `enable_web` to `True`. This web interface will ask for user authentication if `enable_authentication` is set to `True`. Only the `user` that is configured in the configuration file is allowed to login unless `enable_multi_user` is set to `True`. 
 
 The Web interface allows you to run queries and insert data using JSON format.
 
 ## SSL (HTTPS)
-SSL (HTTPS) support can be enabled by setting `enable_ssl` to `True` in the `[Configuration]` section. When enabled the `crt_file` and `key_file` in section `[SSL]` must be set. As values its possible to use relative paths. The certificate files will then be searched relative to the application path.
+SSL (HTTPS) support can be enabled by setting `enable_ssl` to `True` in the `[Configuration]` section. When enabled the `crt_file` and `key_file` in section `[SSL]` must be set. As values it's possible to use relative paths. The certificate files will then be searched relative to the application path.
