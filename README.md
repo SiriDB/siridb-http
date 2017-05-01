@@ -104,7 +104,7 @@ Authentication is required when `enable_authentication` is set to `True` in the 
 #### Secret
 A secret can only be used if `[Token]is_required` is set to `False`. A secret can be configured in the configuration file by setting the `secret` variable in section `[Secret]`. If no secret is specified, one will be created automatically and can be found in a hidden file: `.secret` in the application path.
 
-To use the secret we need to use set the Authorization header field for each request. This is an example header for when we want to post and receive JSON data using a secret **MySecretString**. (Note that the Authorization field is prefixed with `Secret ` which is required) 
+To use the secret we need to set the Authorization header field for each request. This is an example header for when we want to post and receive JSON data using a secret **MySecretString**. (Note that the Authorization field is prefixed with `Secret ` which is required) 
 ```
 Authorization: 'Secret MySecretString'
 Content-Type:  'application/json'
@@ -219,7 +219,7 @@ Example:
 ```
 "query","select min(1h) prefix 'min-', max(1h) prefix 'max-' from 'my-series'"
 ```
-When double quotes are required in a query the can be escaped using two double  quotes, for example:
+When double quotes are required in a query they can be escaped using two double  quotes, for example:
 ```
 "query","select * from ""my-series"" after now - 7d"
 ```
