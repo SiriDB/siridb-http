@@ -1,3 +1,9 @@
+siridb-http (1.0.7) xenial; urgency=medium
+
+  * Added IPv6 support. (issue #12)
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  Thu, 04 May 2017 15:01:13 +0000
+
 siridb-http (1.0.6) xenial; urgency=medium
 
   * Changed link location from /usr/sbin to /usr/local/bin in deb package.
