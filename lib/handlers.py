@@ -80,7 +80,8 @@ def authentication(fun):
                     else:
                         user = session.get('user')
                         if user is None:
-                            raise AuthenticationError('Invalid session request.')
+                            raise AuthenticationError(
+                                'Invalid session request.')
 
                         siri, _ = self.siri_connections.get(user, (None, None))
                         if siri is None:

@@ -33,6 +33,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
   - Token Authentication.
   - Multi user support for the web interface.
   - Support for JSON, CSV, MsgPack and QPack.
+  - IPv6 support.
 
 ## Installation
 SiriDB HTTP is written in Python but uses C libraries for handling data which makes it fast.
@@ -49,7 +50,7 @@ git clone https://github.com/transceptor-technology/siridb-http
 Install Python packages (we assume Python3 and pip are installed)
 ```
 cd siridb-http
-pip3 install -f requirements.txt 
+pip3 install -f requirements.txt
 ```
 
 Install node packages (we assume the node package manager is installed)
@@ -85,7 +86,7 @@ python3 siridb-http.py
 The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`. By default siridb http will listen on port 8080 but this default can be changed by setting `port` within the `[Configuration]` section in the config file.
 
 ### Multi server support
-SiriDB can scale across multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are member of `pool 0` and sdb03 and sdb04 are member of `pool 1`. 
+SiriDB can scale across multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are member of `pool 0` and sdb03 and sdb04 are member of `pool 1`.
 
 We should now configure SiriDB to connect to both servers in pool 0 and/or pool 1. This ensures queries and inserts will always work, even when a server in the SiriDB cluster is not available for whatever reason. The only requirement is that each pool has at least one server online.
 
@@ -104,7 +105,7 @@ Authentication is required when `enable_authentication` is set to `True` in the 
 #### Secret
 A secret can only be used if `[Token]is_required` is set to `False`. A secret can be configured in the configuration file by setting the `secret` variable in section `[Secret]`. If no secret is specified, one will be created automatically and can be found in a hidden file: `.secret` in the application path.
 
-To use the secret we need to use set the Authorization header field for each request. This is an example header for when we want to post and receive JSON data using a secret **MySecretString**. (Note that the Authorization field is prefixed with `Secret ` which is required) 
+To use the secret we need to use set the Authorization header field for each request. This is an example header for when we want to post and receive JSON data using a secret **MySecretString**. (Note that the Authorization field is prefixed with `Secret ` which is required)
 ```
 Authorization: 'Secret MySecretString'
 Content-Type:  'application/json'
@@ -118,7 +119,7 @@ For receiving a token the following request should be used: (... must be replace
 type:      POST
 uri:       /get-token
 header:    Authorization: 'Secret ...'
-           Content-Type:  'application/json'                    
+           Content-Type:  'application/json'
 ```
 
 This is an example response: (note that the `expiration_time` can be set within the `[Token]` section in the configuration file)
@@ -141,7 +142,7 @@ In case the expiration time is passed the token cannot be used anymore and a new
 type:      POST
 uri:       /refresh-token
 header:    Authorization: 'Refresh ...'
-           Content-Type:  'application/json'                    
+           Content-Type:  'application/json'
 ```
 
 The response for a refresh token is similar to a get-token request.
@@ -241,7 +242,7 @@ The preferred json layout is as following: (this is the layout which is returned
 {
     "my-series-01": [[1493126582, 4.2], ...],
     ...
-}      
+}
 ```
 
 Optionally the following format can be used:
@@ -279,7 +280,7 @@ Example table:
 ```
 
 ## Web interface
-SiriDB has an optional web interface which can be enabled by setting `enable_web` to `True`. This web interface will ask for user authentication if `enable_authentication` is set to `True`. Only the `user` which is configured in the configuration file is allowed to login unless `enable_multi_user` is set to `True`. 
+SiriDB has an optional web interface which can be enabled by setting `enable_web` to `True`. This web interface will ask for user authentication if `enable_authentication` is set to `True`. Only the `user` which is configured in the configuration file is allowed to login unless `enable_multi_user` is set to `True`.
 
 The Web interface allows you to run queries and insert data using JSON format.
 

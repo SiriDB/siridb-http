@@ -14,6 +14,7 @@ from aiohttp_session import session_middleware
 from aiohttp.web_exceptions import HTTPException
 from .version import __version__
 
+
 class App(Handlers, Application):
 
     def __init__(self, config, siri, debug_mode=False):
@@ -93,7 +94,6 @@ class App(Handlers, Application):
             srv = self.loop.run_until_complete(
                 self.loop.create_server(
                     handler,
-                    host='0.0.0.0',
                     port=self.port,
                     ssl=sslcontext))
         except Exception as e:

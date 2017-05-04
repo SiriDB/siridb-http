@@ -27,7 +27,7 @@ from lib.version import __maintainer__
 from lib.version import __email__
 from lib.logger import setup_logger
 from lib.app import App
-
+from lib.utils import get_hostlist
 
 if __name__ == '__main__':
     setproctitle.setproctitle('siridb-http')
@@ -102,18 +102,12 @@ Home-page: http://siridb.net
         config.read_file(f)
 
     try:
-        config.hostlist = [
-            (server.strip(), int(port))
-            for server, port in [
-                s.split(':')
-                for s in re.split(
-                    r'\s+|\s*,\s*',
-                    config.get('Database', 'servers'))]]
+        config.hostlist = get_hostlist(config.get('Database', 'servers'))
 
     except ValueError:
         sys.exit('Invalid servers in configuration file "{}", '
                  'expecting something like: '
-                 'server1.local:9000,server2.local:9000 ...'
+                 'server1.local:9000,[::1]:9000 ...'
                  .format(args.config))
 
     siri = SiriDBClient(
