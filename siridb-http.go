@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+
+	siridb "github.com/transceptor-technology/go-siridb-connector"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	ini "gopkg.in/ini.v1"
@@ -12,6 +16,15 @@ import (
 
 // AppVersion exposes version information
 const AppVersion = "2.0.0"
+
+type settings struct {
+	user     string
+	password string
+	dbname   string
+	servers  []server
+	port     uint16
+	client   *siridb.Client
+}
 
 type server struct {
 	host string
@@ -24,6 +37,8 @@ var (
 	xVerbose = xApp.Flag("verbose", "Enable verbose logging.").Bool()
 	xVersion = xApp.Flag("version", "Print version information and exit.").Bool()
 )
+
+var base = settings{}
 
 func getHostAndPort(addr string) (server, error) {
 	parts := strings.Split(addr, ":")
@@ -60,6 +75,33 @@ func getServers(addrstr string) ([]server, error) {
 		servers[i] = server
 	}
 	return servers, nil
+}
+
+func serversToInterface(servers []server) [][]interface{} {
+	ret := make([][]interface{}, len(servers))
+	for i, svr := range servers {
+		ret[i] = make([]interface{}, 2)
+		ret[i][0] = svr.host
+		ret[i][1] = int(svr.port)
+	}
+	return ret
+}
+
+func logHandle(logCh chan string) {
+	for {
+		msg := <-logCh
+		if *xVerbose {
+			println(msg)
+		}
+	}
+}
+
+func sigHandle(sigCh chan os.Signal) {
+	for {
+		<-sigCh
+		println("CTRL+C pressed...")
+		os.Exit(0)
+	}
 }
 
 func main() {
@@ -100,6 +142,24 @@ func main() {
 
 	fmt.Printf("User: %s\n", user)
 
+	password, err := section.GetKey("password")
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Password: %s\n", password)
+
+	dbname, err := section.GetKey("dbname")
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Database: %s\n", dbname)
+
 	addrstr, err := section.GetKey("servers")
 
 	if err != nil {
@@ -118,4 +178,59 @@ func main() {
 
 	fmt.Printf("Servers (obj): %v\n", servers)
 
+	logCh := make(chan string)
+	go logHandle(logCh)
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt)
+	go sigHandle(sigCh)
+
+	base.user = user.String()
+	base.password = password.String()
+	base.dbname = dbname.String()
+
+	base.client = siridb.NewClient(
+		base.user,                   // username
+		base.password,               // password
+		base.dbname,                 // database
+		serversToInterface(servers), // siridb server(s)
+		logCh, // optional log channel
+	)
+
+	section, err = cfg.GetSection("Configuration")
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		os.Exit(1)
+	}
+
+	portini, err := section.GetKey("port")
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		os.Exit(1)
+	}
+
+	port64, err := portini.Uint64()
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		if base.client != nil {
+			base.client.Close()
+		}
+		os.Exit(1)
+	}
+
+	base.port = uint16(port64)
+
+	fmt.Printf("Port: %d\n", base.port)
+
+	http.HandleFunc("/db-info", handlerDbInfo)
+
+	fmt.Printf("Serving SiriDB HTTP API on port %d\nPress CTRL+C to quit\n", base.port)
+	if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), nil); err != nil {
+		fmt.Printf("error: %s\n", err)
+	}
+
+	base.client.Connect()
 }
