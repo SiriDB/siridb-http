@@ -22,13 +22,15 @@ const AppVersion = "2.0.0"
 const retryConnectTime = 5
 
 type settings struct {
-	user     string
-	password string
-	dbname   string
-	servers  []server
-	port     uint16
-	logCh    chan string
-	client   *siridb.Client
+	user          string
+	password      string
+	dbname        string
+	timePrecision string
+	version       string
+	servers       []server
+	port          uint16
+	logCh         chan string
+	client        *siridb.Client
 }
 
 type server struct {
@@ -105,16 +107,22 @@ func sigHandle(sigCh chan os.Signal) {
 	for {
 		<-sigCh
 		println("CTRL+C pressed...")
-		os.Exit(0)
+		quit(nil)
 	}
 }
 
 func quit(err error) {
-	fmt.Printf("%s\n", err)
+	rc := 0
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		rc = 1
+	}
+
 	if base.client != nil {
 		base.client.Close()
 	}
-	os.Exit(1)
+
+	os.Exit(rc)
 }
 
 func connect() {
@@ -122,13 +130,26 @@ func connect() {
 		base.logCh <- fmt.Sprintf("not connected to SiriDB, try again in %d seconds", retryConnectTime)
 		time.Sleep(retryConnectTime * time.Second)
 	}
-	res, err := base.client.Query("show version", 10)
+	res, err := base.client.Query("show time_precision, version", 10)
 	if err != nil {
 		quit(err)
 	}
-	println("here...")
-	base.logCh <- fmt.Sprint(res)
+	v, ok := res.(map[interface{}]interface{})
+	if !ok {
+		quit(fmt.Errorf("missing 'map' in data"))
+	}
 
+	arr, ok := v["data"].([]interface{})
+	if !ok || len(arr) != 2 {
+		quit(fmt.Errorf("missing array 'data' or length 2 in map"))
+	}
+
+	base.timePrecision, ok = arr[0].(map[interface{}]interface{})["value"].(string)
+	base.version, ok = arr[1].(map[interface{}]interface{})["value"].(string)
+
+	if !ok {
+		quit(fmt.Errorf("cannot find time_precision and/or version in data"))
+	}
 }
 
 func main() {
@@ -190,20 +211,14 @@ func main() {
 	addrstr, err := section.GetKey("servers")
 
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
-
-	fmt.Printf("Servers (str): %s\n", addrstr)
 
 	servers, err := getServers(addrstr.String())
 
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
-
-	fmt.Printf("Servers (obj): %v\n", servers)
 
 	base.logCh = make(chan string)
 	go logHandle(base.logCh)
@@ -229,19 +244,31 @@ func main() {
 		quit(err)
 	}
 
-	portini, err := section.GetKey("port")
+	portIni, err := section.GetKey("port")
 	if err != nil {
 		quit(err)
 	}
 
-	port64, err := portini.Uint64()
+	port64, err := portIni.Uint64()
 	if err != nil {
 		quit(err)
 	}
 
 	base.port = uint16(port64)
 
-	fmt.Printf("Port: %d\n", base.port)
+	enableWebIni, err := section.GetKey("enable_web")
+	if err != nil {
+		quit(err)
+	}
+
+	enableWeb, err := enableWebIni.Bool()
+	if err != nil {
+		quit(err)
+	}
+
+	if enableWeb {
+		http.HandleFunc("/", handlerMain)
+	}
 
 	http.HandleFunc("/db-info", handlerDbInfo)
 
@@ -252,5 +279,4 @@ func main() {
 	if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), nil); err != nil {
 		fmt.Printf("error: %s\n", err)
 	}
-
 }
