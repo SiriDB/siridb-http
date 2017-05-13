@@ -19,6 +19,8 @@ import (
 // AppVersion exposes version information
 const AppVersion = "2.0.0"
 
+const retryConnectTime = 5
+
 type settings struct {
 	user     string
 	password string
@@ -105,6 +107,28 @@ func sigHandle(sigCh chan os.Signal) {
 		println("CTRL+C pressed...")
 		os.Exit(0)
 	}
+}
+
+func quit(err error) {
+	fmt.Printf("%s\n", err)
+	if base.client != nil {
+		base.client.Close()
+	}
+	os.Exit(1)
+}
+
+func connect() {
+	for !base.client.IsConnected() {
+		base.logCh <- fmt.Sprintf("not connected to SiriDB, try again in %d seconds", retryConnectTime)
+		time.Sleep(retryConnectTime * time.Second)
+	}
+	res, err := base.client.Query("show version", 10)
+	if err != nil {
+		quit(err)
+	}
+	println("here...")
+	base.logCh <- fmt.Sprint(res)
+
 }
 
 func main() {
@@ -201,27 +225,18 @@ func main() {
 	)
 
 	section, err = cfg.GetSection("Configuration")
-
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
 
 	portini, err := section.GetKey("port")
-
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
 
 	port64, err := portini.Uint64()
-
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		if base.client != nil {
-			base.client.Close()
-		}
-		os.Exit(1)
+		quit(err)
 	}
 
 	base.port = uint16(port64)
@@ -230,15 +245,12 @@ func main() {
 
 	http.HandleFunc("/db-info", handlerDbInfo)
 
+	base.client.Connect()
+	go connect()
+
 	fmt.Printf("Serving SiriDB HTTP API on port %d\nPress CTRL+C to quit\n", base.port)
 	if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), nil); err != nil {
 		fmt.Printf("error: %s\n", err)
 	}
 
-	base.client.Connect()
-
-	for !base.client.IsConnected {
-
-		time.Sleep(30 * time.Second)
-	}
 }
