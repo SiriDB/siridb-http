@@ -1,0 +1,33 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google" content="notranslate" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Language" content="en" />
+    <title>SiriDB HTTP - Loading...</title>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap">
+    <link rel="stylesheet" type="text/css" href="/css/layout">
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+    <link rel="shortcut icon" href="/favicon.ico" />
+</head>
+
+<body>
+    <div class="container container-start">
+        <div class="row logo">
+            <img src="/img/siridb-large.png" alt="SiriDB Logo" />
+        </div>
+        <div class="row">
+            <p class="center">
+                <span>Waiting for a SiriDB connection...</span>
+                <img src="/img/loader.gif" alt="Loading bar" width=20 height=10 />
+            </p>
+        </div>
+    </div>
+    <script>
+        window.setTimeout(function() { window.location.reload(); }, 5000);
+    </script>
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 var webpack = require('webpack');
 var path = require('path');
 
-const BUILD_DIR = path.resolve(__dirname, '../static/js');
+const BUILD_DIR = path.resolve(__dirname, '../build');
 const APP_DIR = path.resolve(__dirname, '');
 
 var config = {
@@ -16,10 +16,7 @@ var config = {
             {
                 test: /\.jsx?/,
                 include: APP_DIR,
-                loader: 'babel-loader',
-                query: {
-                    cacheDirectory: true
-                }
+                loader: 'babel-loader'
             }
         ]
     },
