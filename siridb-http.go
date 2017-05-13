@@ -10,6 +10,8 @@ import (
 
 	siridb "github.com/transceptor-technology/go-siridb-connector"
 
+	"time"
+
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	ini "gopkg.in/ini.v1"
 )
@@ -23,6 +25,7 @@ type settings struct {
 	dbname   string
 	servers  []server
 	port     uint16
+	logCh    chan string
 	client   *siridb.Client
 }
 
@@ -178,8 +181,8 @@ func main() {
 
 	fmt.Printf("Servers (obj): %v\n", servers)
 
-	logCh := make(chan string)
-	go logHandle(logCh)
+	base.logCh = make(chan string)
+	go logHandle(base.logCh)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt)
@@ -194,7 +197,7 @@ func main() {
 		base.password,               // password
 		base.dbname,                 // database
 		serversToInterface(servers), // siridb server(s)
-		logCh, // optional log channel
+		base.logCh,                  // optional log channel
 	)
 
 	section, err = cfg.GetSection("Configuration")
@@ -233,4 +236,9 @@ func main() {
 	}
 
 	base.client.Connect()
+
+	for !base.client.IsConnected {
+
+		time.Sleep(30 * time.Second)
+	}
 }
