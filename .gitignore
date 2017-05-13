@@ -111,3 +111,6 @@ static/css/layout.min.css
 
 # dummy config
 dummy.conf
+
+# build
+siridb-http
