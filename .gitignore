@@ -114,3 +114,6 @@ dummy.conf
 
 # build
 siridb-http
+
+# Go generated files
+file*.go

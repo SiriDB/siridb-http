@@ -49,6 +49,8 @@ binfiles = [
     ("./static/img/siridb-large.png", "FileSiriDBLargePNG"),
     ("./static/img/siridb-small.png", "FileSiriDBSmallPNG"),
     ("./static/img/loader.gif", "FileLoaderGIF"),
+    ("./static/js/libs/jsleri-1.1.2.min.js", "FileLeriMinJS"),
+    ("./static/js/grammar.js", "FileGrammarJS"),
     ("./static/fonts/FontAwesome.otf", "FileFontAwesomeOTF"),
     ("./static/fonts/fontawesome-webfont.eot", "FileFontawesomeWebfontEOT"),
     ("./static/fonts/fontawesome-webfont.svg", "FileFontawesomeWebfontSVG"),
