@@ -9,7 +9,9 @@ import (
 )
 
 func handlerMain(w http.ResponseWriter, r *http.Request) {
-	if base.client.IsConnected() {
+	if r.URL.Path != "/" {
+		handlerNotFound(w, r)
+	} else if base.client.IsConnected() {
 		handleFileRequest(w, "./src/index.html")
 	} else {
 		handleFileRequest(w, "./src/waiting.html")

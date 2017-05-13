@@ -20,3 +20,7 @@ func handlerDbInfo(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 	}
 }
+
+func handlerNotFound(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "404 not found", http.StatusNotFound)
+}

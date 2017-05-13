@@ -156,10 +156,8 @@ func main() {
 
 	// parse arguments
 	_, err := xApp.Parse(os.Args[1:])
-
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
 
 	if *xVersion {
@@ -168,54 +166,36 @@ func main() {
 	}
 
 	cfg, err := ini.Load(*xConfig)
-
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
 
 	section, err := cfg.GetSection("Database")
-
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
 
 	user, err := section.GetKey("user")
-
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
-
-	fmt.Printf("User: %s\n", user)
 
 	password, err := section.GetKey("password")
-
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
-
-	fmt.Printf("Password: %s\n", password)
 
 	dbname, err := section.GetKey("dbname")
-
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
+		quit(err)
 	}
 
-	fmt.Printf("Database: %s\n", dbname)
-
 	addrstr, err := section.GetKey("servers")
-
 	if err != nil {
 		quit(err)
 	}
 
 	servers, err := getServers(addrstr.String())
-
 	if err != nil {
 		quit(err)
 	}
@@ -266,9 +246,13 @@ func main() {
 		quit(err)
 	}
 
+	http.HandleFunc("*", handlerNotFound)
+
 	if enableWeb {
 		http.HandleFunc("/", handlerMain)
 		http.HandleFunc("/js/bundle", handlerJsBundle)
+		http.HandleFunc("/js/jsleri", handlerLeriMinJS)
+		http.HandleFunc("/js/grammar", handlerGrammarJS)
 		http.HandleFunc("/css/bootstrap", handlerBootstrapCSS)
 		http.HandleFunc("/css/layout", handlerLayout)
 		http.HandleFunc("/favicon.ico", handlerFaviconIco)

@@ -60,6 +60,7 @@ binfiles = [
         "FileFontawesomeWebfontWOFF2"),
     ("./static/favicon.ico", "FileFaviconICO"),
     ("./src/index.html", "FileIndexHTML"),
+    ("./src/waiting.html", "FileWaitingHTML"),
     ("./build/bundle.min.js", "FileBundleMinJS"),
     ("./build/layout.min.css", "FileLayoutMinCSS"),
 ]

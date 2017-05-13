@@ -5,7 +5,14 @@ package main
 import "net/http"
 
 func handlerMain(w http.ResponseWriter, r *http.Request) {
-	w.Write(FileIndexHTML)
+	if r.URL.Path != "/" {
+		handlerNotFound(w, r)
+	} else if base.client.IsConnected() {
+		w.Write(FileIndexHTML)
+	} else {
+		w.Write(FileWaitingHTML)
+	}
+
 }
 
 func handlerJsBundle(w http.ResponseWriter, r *http.Request) {
