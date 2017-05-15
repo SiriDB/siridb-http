@@ -23,7 +23,7 @@ class InfoModal extends Reflux.Component {
                 <Modal.Header closeButton>
                 </Modal.Header>
                 <Modal.Body>
-                    <img src="/static/img/siridb-large.png" alt="SiriDB Logo" />
+                    <img src="/img/siridb-large.png" alt="SiriDB Logo" />
                     <dl className="dl-horizontal">
                         <dt>Database:</dt>
                         <dd>{this.state.dbname}</dd>

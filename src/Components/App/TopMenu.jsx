@@ -25,7 +25,7 @@ class TopMenu extends React.Component {
                 <div className="container-fluid">
                     <div className="navbar-header">
                         <a className="navbar-brand" data-keyboard="true" onClick={this.props.onLogoClick}>
-                            <img src="/static/img/siridb-small.png" alt="SiriDB Logo" />
+                            <img src="/img/siridb-small.png" alt="SiriDB Logo" />
                         </a>
                         <button type="button" className="navbar-toggle collapsed">
                             <span className="sr-only">Toggle navigation</span>

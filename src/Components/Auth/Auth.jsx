@@ -49,7 +49,7 @@ class Auth extends Reflux.Component {
         return (
             <div className="container container-start">
                 <div className="row logo">
-                    <img src="/static/img/siridb-large.png" alt="SiriDB Logo" />
+                    <img src="/img/siridb-large.png" alt="SiriDB Logo" />
                 </div>
                 <div className="row">
                     <div className="form">

@@ -271,7 +271,7 @@ class Query extends Reflux.Component {
                 </div>
                 {
                     (this.state.sending) ? (
-                        <img src="/static/img/loader.gif" alt="Loading bar" style={{ width: 20, height: 10 }} />
+                        <img src="/img/loader.gif" alt="Loading bar" style={{ width: 20, height: 10 }} />
                     ) : (this.state.result) ? (
                         <Result result={this.state.result} setQuery={this.setQuery.bind(this)} />
                     ) : null

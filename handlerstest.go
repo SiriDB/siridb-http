@@ -96,5 +96,5 @@ func handleFileRequest(w http.ResponseWriter, fn string) {
 }
 
 func init() {
-	fmt.Println("DEBUG MODE: using original template files...")
+	fmt.Println("# DEBUG MODE: using original template files...")
 }

@@ -40,7 +40,7 @@ type server struct {
 
 var (
 	xApp     = kingpin.New("siridb-http", "Provides a HTTP API and optional web interface for SiriDB.")
-	xConfig  = xApp.Flag("config", "").Short('c').Default("/etc/siridb/siridb-http.conf").String()
+	xConfig  = xApp.Flag("config", "").Short('c').String()
 	xVerbose = xApp.Flag("verbose", "Enable verbose logging.").Bool()
 	xVersion = xApp.Flag("version", "Print version information and exit.").Bool()
 )
@@ -165,6 +165,52 @@ func main() {
 		os.Exit(0)
 	}
 
+	if *xConfig == "" {
+		fmt.Printf(
+			`#
+# A configuration file is required and shoud be provided with the --config <file> argument.
+# This is a configuration file template which can be saved and used:
+#
+
+[Database]
+user = <user>
+password = <password>
+dbname = <database name>
+# Multiple servers are possible and should be comma separated. When a port
+# is not provided the default port 9000 is used. IPv6 addresses are supported
+# and should be wrapped in square brackets [] in case an alternative port is
+# required.
+servers = <host:port>
+
+[Configuration]
+port = 5050
+enable_web = True
+enable_ssl = False
+# authentication shoud be either "None", "Secret", "Session" or "Both".
+authentication_methods = Both
+
+[Session]
+cookie_max_age = 604800
+# When multi user is disabled, only the user/password combination provided in
+# this configuration file can be used to create a session connection to SiriDB.
+enable_multi_user = False
+
+[Secret]
+# When "Secret" authentication is enabled,
+secret = my_super_secret
+
+[SSL]
+# Self-signed certificates can be created using:
+#
+#   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+#        -keyout certificate.key -out certificate.crt
+#
+crt_file = my_certificate.crt
+key_file = my_certificate.key
+`)
+		os.Exit(0)
+	}
+
 	cfg, err := ini.Load(*xConfig)
 	if err != nil {
 		quit(err)
@@ -269,6 +315,7 @@ func main() {
 	}
 
 	http.HandleFunc("/db-info", handlerDbInfo)
+	http.HandleFunc("/auth/fetch", handlerAuthFetch)
 
 	base.client.Connect()
 	go connect()
