@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/astaxie/beego/session"
 	siridb "github.com/transceptor-technology/go-siridb-connector"
 
 	"time"
@@ -31,6 +33,8 @@ type settings struct {
 	port          uint16
 	logCh         chan string
 	client        *siridb.Client
+	reqAuth       bool
+	multiUser     bool
 }
 
 type server struct {
@@ -40,12 +44,14 @@ type server struct {
 
 var (
 	xApp     = kingpin.New("siridb-http", "Provides a HTTP API and optional web interface for SiriDB.")
-	xConfig  = xApp.Flag("config", "").Short('c').String()
+	xConfig  = xApp.Flag("config", "Configuration and connection file for SiriDB HTTP.").Default("").Short('c').String()
 	xVerbose = xApp.Flag("verbose", "Enable verbose logging.").Bool()
 	xVersion = xApp.Flag("version", "Print version information and exit.").Bool()
 )
 
 var base = settings{}
+
+var globalSessions *session.Manager
 
 func getHostAndPort(addr string) (server, error) {
 	parts := strings.Split(addr, ":")
@@ -167,11 +173,7 @@ func main() {
 
 	if *xConfig == "" {
 		fmt.Printf(
-			`#
-# A configuration file is required and shoud be provided with the --config <file> argument.
-# This is a configuration file template which can be saved and used:
-#
-
+			`# SiriDB HTTP Configuration file
 [Database]
 user = <user>
 password = <password>
@@ -186,8 +188,8 @@ servers = <host:port>
 port = 5050
 enable_web = True
 enable_ssl = False
-# authentication shoud be either "None", "Secret", "Session" or "Both".
-authentication_methods = Both
+# session authentication will be enabled when set to True
+require_authentication = True
 
 [Session]
 cookie_max_age = 604800
@@ -196,7 +198,9 @@ cookie_max_age = 604800
 enable_multi_user = False
 
 [Secret]
-# When "Secret" authentication is enabled,
+# When a secret is specified, the /query and /insert POST request can be used
+# by providing the secret inside the header of each request. This method can be
+# used as an alternative to using sessions.
 secret = my_super_secret
 
 [SSL]
@@ -207,6 +211,14 @@ secret = my_super_secret
 #
 crt_file = my_certificate.crt
 key_file = my_certificate.key
+
+#
+# Welcome and thank you for using SiriDB!
+#
+# A configuration file is required and shoud be provided with the --config <file> argument.
+# Above you find an example template which can used.
+#
+
 `)
 		os.Exit(0)
 	}
@@ -258,14 +270,14 @@ key_file = my_certificate.key
 	base.dbname = dbname.String()
 
 	base.client = siridb.NewClient(
-		base.user,                   // username
+		base.user,                   // user
 		base.password,               // password
 		base.dbname,                 // database
 		serversToInterface(servers), // siridb server(s)
 		base.logCh,                  // optional log channel
 	)
 
-	section, err = cfg.GetSection("Configuration")
+	section, err = cfg.GetSection("HTTP")
 	if err != nil {
 		quit(err)
 	}
@@ -288,6 +300,36 @@ key_file = my_certificate.key
 	}
 
 	enableWeb, err := enableWebIni.Bool()
+	if err != nil {
+		quit(err)
+	}
+
+	section, err = cfg.GetSection("Configuration")
+	if err != nil {
+		quit(err)
+	}
+
+	reqAuthIni, err := section.GetKey("require_authentication")
+	if err != nil {
+		quit(err)
+	}
+
+	base.reqAuth, err = reqAuthIni.Bool()
+	if err != nil {
+		quit(err)
+	}
+
+	multiUserIni, err := section.GetKey("enable_multi_user")
+	if err != nil {
+		quit(err)
+	}
+
+	base.multiUser, err = multiUserIni.Bool()
+	if err != nil {
+		quit(err)
+	}
+
+	section, err = cfg.GetSection("Session")
 	if err != nil {
 		quit(err)
 	}
@@ -316,6 +358,24 @@ key_file = my_certificate.key
 
 	http.HandleFunc("/db-info", handlerDbInfo)
 	http.HandleFunc("/auth/fetch", handlerAuthFetch)
+
+	if base.reqAuth {
+		cf := new(session.ManagerConfig)
+		cf.EnableSetCookie = true
+		s := `{"cookieName":"siridbadminsessionid","gclifetime":3600}`
+
+		if err = json.Unmarshal([]byte(s), cf); err != nil {
+			quit(err)
+		}
+
+		if globalSessions, err = session.NewManager("memory", cf); err != nil {
+			quit(err)
+		}
+
+		go globalSessions.GC()
+		http.HandleFunc("/auth/login", handlerAuthLogin)
+		http.HandleFunc("/auth/logoff", handlerAuthLogoff)
+	}
 
 	base.client.Connect()
 	go connect()
