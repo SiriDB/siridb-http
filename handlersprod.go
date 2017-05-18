@@ -7,7 +7,7 @@ import "net/http"
 func handlerMain(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		handlerNotFound(w, r)
-	} else if base.client.IsConnected() {
+	} else if base.connections[0].client.IsConnected() {
 		w.Write(FileIndexHTML)
 	} else {
 		w.Write(FileWaitingHTML)

@@ -52,8 +52,8 @@ class AuthStore extends BaseStore {
                 QueryActions.clearAll();
                 this.setState(data);
             })
-            .fail((error, data) => {
-                AuthActions.setAuthError(data.error_msg || 'Unknown error occurred');
+            .fail((error, msg) => {
+                AuthActions.setAuthError(msg || 'Unknown error occurred');
             });
         }
     }

@@ -12,8 +12,8 @@ class Auth extends Reflux.Component {
         super(props);
         this.store = AuthStore;
         this.state = {
-            username: '',
-            password: ''
+            username: 'iris',
+            password: 'siri'
         };
     }
 

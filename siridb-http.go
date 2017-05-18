@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego/session"
+	"github.com/googollee/go-socket.io"
 	siridb "github.com/transceptor-technology/go-siridb-connector"
 
 	"time"
@@ -23,18 +24,24 @@ const AppVersion = "2.0.0"
 
 const retryConnectTime = 5
 
-type settings struct {
-	user          string
-	password      string
+// Conn is used to store the user/password with the client.
+type Conn struct {
+	user     string
+	password string
+	client   *siridb.Client
+}
+
+type store struct {
+	connections   []Conn
 	dbname        string
 	timePrecision string
 	version       string
 	servers       []server
 	port          uint16
 	logCh         chan string
-	client        *siridb.Client
 	reqAuth       bool
 	multiUser     bool
+	ssessions     map[string]string
 }
 
 type server struct {
@@ -49,7 +56,7 @@ var (
 	xVersion = xApp.Flag("version", "Print version information and exit.").Bool()
 )
 
-var base = settings{}
+var base = store{}
 
 var globalSessions *session.Manager
 
@@ -124,23 +131,25 @@ func quit(err error) {
 		rc = 1
 	}
 
-	if base.client != nil {
-		base.client.Close()
+	for _, conn := range base.connections {
+		if conn.client != nil {
+			conn.client.Close()
+		}
 	}
 
 	os.Exit(rc)
 }
 
-func connect() {
-	for !base.client.IsConnected() {
+func connect(conn Conn) {
+	for !conn.client.IsConnected() {
 		base.logCh <- fmt.Sprintf("not connected to SiriDB, try again in %d seconds", retryConnectTime)
 		time.Sleep(retryConnectTime * time.Second)
 	}
-	res, err := base.client.Query("show time_precision, version", 10)
+	res, err := conn.client.Query("show time_precision, version", 10)
 	if err != nil {
 		quit(err)
 	}
-	v, ok := res.(map[interface{}]interface{})
+	v, ok := res.(map[string]interface{})
 	if !ok {
 		quit(fmt.Errorf("missing 'map' in data"))
 	}
@@ -150,8 +159,8 @@ func connect() {
 		quit(fmt.Errorf("missing array 'data' or length 2 in map"))
 	}
 
-	base.timePrecision, ok = arr[0].(map[interface{}]interface{})["value"].(string)
-	base.version, ok = arr[1].(map[interface{}]interface{})["value"].(string)
+	base.timePrecision, ok = arr[0].(map[string]interface{})["value"].(string)
+	base.version, ok = arr[1].(map[string]interface{})["value"].(string)
 
 	if !ok {
 		quit(fmt.Errorf("cannot find time_precision and/or version in data"))
@@ -265,17 +274,19 @@ key_file = my_certificate.key
 	signal.Notify(sigCh, os.Interrupt)
 	go sigHandle(sigCh)
 
-	base.user = user.String()
-	base.password = password.String()
 	base.dbname = dbname.String()
 
-	base.client = siridb.NewClient(
-		base.user,                   // user
-		base.password,               // password
+	var conn Conn
+	conn.user = user.String()
+	conn.password = password.String()
+	conn.client = siridb.NewClient(
+		conn.user,                   // user
+		conn.password,               // password
 		base.dbname,                 // database
 		serversToInterface(servers), // siridb server(s)
 		base.logCh,                  // optional log channel
 	)
+	base.connections = append(base.connections, conn)
 
 	section, err = cfg.GetSection("HTTP")
 	if err != nil {
@@ -358,6 +369,7 @@ key_file = my_certificate.key
 
 	http.HandleFunc("/db-info", handlerDbInfo)
 	http.HandleFunc("/auth/fetch", handlerAuthFetch)
+	http.HandleFunc("/query", handlerQuery)
 
 	if base.reqAuth {
 		cf := new(session.ManagerConfig)
@@ -377,8 +389,32 @@ key_file = my_certificate.key
 		http.HandleFunc("/auth/logoff", handlerAuthLogoff)
 	}
 
-	base.client.Connect()
-	go connect()
+	conn.client.Connect()
+	go connect(conn)
+
+	server, err := socketio.NewServer(nil)
+	if err != nil {
+		quit(err)
+	}
+	server.On("connection", func(so socketio.Socket) {
+
+		fmt.Printf("on connection, id: %s\n", so.Id())
+
+		// so.Join("chat")
+		so.On("auth fetch", onAuthFetch)
+		// 	log.Println("emit:", so.Emit("chat message", msg))
+		// 	so.BroadcastTo("chat", "chat message", msg)
+		// })
+		so.On("disconnection", func(so socketio.Socket) {
+			fmt.Printf("on disconnection, id: %s\n", so.Id())
+		})
+	})
+
+	server.On("error", func(so socketio.Socket, err error) {
+		fmt.Println("error:", err)
+	})
+
+	http.Handle("/socket.io/", server)
 
 	fmt.Printf("Serving SiriDB HTTP API on port %d\nPress CTRL+C to quit\n", base.port)
 	if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), nil); err != nil {

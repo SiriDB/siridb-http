@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/googollee/go-socket.io"
 )
 
 func handlerDbInfo(w http.ResponseWriter, r *http.Request) {
@@ -27,12 +29,70 @@ func handlerDbInfo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
-	type AuthFetch struct {
-		User         interface{} `json:"user"`
-		AuthRequired bool        `json:"authRequired"`
+type tAuthFetch struct {
+	User         interface{} `json:"user"`
+	AuthRequired bool        `json:"authRequired"`
+}
+
+func onAuthFetch(so socketio.Socket) (status int, resp string) {
+	var authFetch tAuthFetch
+	if base.reqAuth {
+
+		user, ok := base.ssessions[so.Id()]
+
+		if !ok {
+			authFetch.User = nil
+		} else {
+			conn := getConnByUser(user)
+			if conn == nil {
+				authFetch.User = nil
+			} else {
+				authFetch.User = user
+			}
+		}
+
+		authFetch.AuthRequired = true
+	} else {
+		authFetch.User = base.connections[0].user
+		authFetch.AuthRequired = false
 	}
-	authFetch := AuthFetch{User: nil, AuthRequired: true}
+
+	b, err := json.Marshal(authFetch)
+	if err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+	return http.StatusOK, string(b)
+}
+
+func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
+
+	var authFetch tAuthFetch
+	if base.reqAuth {
+		sess, err := globalSessions.SessionStart(w, r)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		user, ok := sess.Get("user").(string)
+
+		if !ok {
+			authFetch.User = nil
+		} else {
+			conn := getConnByUser(user)
+			if conn == nil {
+				authFetch.User = nil
+			} else {
+				authFetch.User = user
+			}
+		}
+
+		authFetch.AuthRequired = true
+	} else {
+		authFetch.User = base.connections[0].user
+		authFetch.AuthRequired = false
+	}
 
 	if b, err := json.Marshal(authFetch); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -43,6 +103,15 @@ func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
 
 func handlerNotFound(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "404 not found", http.StatusNotFound)
+}
+
+func getConnByUser(user string) *Conn {
+	for _, conn := range base.connections {
+		if conn.user == user {
+			return &conn
+		}
+	}
+	return nil
 }
 
 func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
@@ -69,12 +138,11 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if authLoginReq.Username == base.user {
-		if authLoginReq.Password != base.password {
+	if conn := getConnByUser(authLoginReq.Username); conn != nil {
+		if authLoginReq.Password != conn.password {
 			http.Error(w, "Username or password incorrect", http.StatusUnprocessableEntity)
 			return
 		}
-
 	} else if base.multiUser {
 		fmt.Println(authLoginReq)
 	} else {
@@ -92,10 +160,6 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerAuthLogoff(w http.ResponseWriter, r *http.Request) {
-
-	contentType := r.Header.Get("Content-type")
-	fmt.Println(contentType)
-
 	type AuthLogoff struct {
 		User interface{} `json:"user"`
 	}
@@ -122,5 +186,57 @@ func handlerAuthLogoff(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerQuery(w http.ResponseWriter, r *http.Request) {
+	sess, err := globalSessions.SessionStart(w, r)
 
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	user, ok := sess.Get("user").(string)
+
+	if !ok {
+		http.Error(w, "not authenticated", http.StatusUnauthorized)
+	}
+
+	conn := getConnByUser(user)
+	if conn == nil {
+		http.Error(
+			w,
+			fmt.Sprintf("no connection for user '%s' found, please try to login again", user),
+			http.StatusUnauthorized)
+		return
+	}
+
+	type Query struct {
+		Query   string      `json:"query"`
+		Timeout interface{} `json:"timeout"`
+	}
+
+	var query Query
+
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&query)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	timeout, ok := query.Timeout.(uint16)
+	if !ok {
+		timeout = 30
+	}
+
+	res, err := conn.client.Query(query.Query, timeout)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if b, err := json.Marshal(res); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		w.Write(b)
+	}
 }

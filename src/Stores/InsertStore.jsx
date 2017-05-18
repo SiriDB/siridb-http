@@ -31,14 +31,14 @@ class InsertStore extends BaseStore {
                     }
                 });
             })
-            .fail((error, data) => {
+            .fail((error, msg) => {
                 if (error.status === 422) {
                     AuthActions.logoff();
                 } else {
                     this.setState({
                         alert: {
-                            severity: (data.error_msg) ? 'warning' : 'error',
-                            message: data.error_msg || unexpected_msg
+                            severity: (msg) ? 'warning' : 'error',
+                            message: msg || unexpected_msg
                         }
                     });
                 }

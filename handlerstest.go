@@ -11,7 +11,7 @@ import (
 func handlerMain(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		handlerNotFound(w, r)
-	} else if base.client.IsConnected() {
+	} else if base.connections[0].client.IsConnected() {
 		handleFileRequest(w, "./src/index.html")
 	} else {
 		handleFileRequest(w, "./src/waiting.html")
