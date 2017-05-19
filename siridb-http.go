@@ -340,11 +340,6 @@ key_file = my_certificate.key
 		quit(err)
 	}
 
-	section, err = cfg.GetSection("Session")
-	if err != nil {
-		quit(err)
-	}
-
 	http.HandleFunc("*", handlerNotFound)
 
 	if enableWeb {
@@ -401,11 +396,15 @@ key_file = my_certificate.key
 		fmt.Printf("on connection, id: %s\n", so.Id())
 
 		// so.Join("chat")
-		so.On("auth fetch", onAuthFetch)
+		so.On("auth fetch", func(msg string) (int, string) {
+
+			fmt.Printf("auth fetch....%s\n", so.Id())
+			return 200, "bla"
+		})
 		// 	log.Println("emit:", so.Emit("chat message", msg))
 		// 	so.BroadcastTo("chat", "chat message", msg)
 		// })
-		so.On("disconnection", func(so socketio.Socket) {
+		so.On("disconnection", func() {
 			fmt.Printf("on disconnection, id: %s\n", so.Id())
 		})
 	})
