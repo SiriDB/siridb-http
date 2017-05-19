@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -10,7 +11,8 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego/session"
-	"github.com/googollee/go-socket.io"
+	"github.com/graarh/golang-socketio"
+	"github.com/graarh/golang-socketio/transport"
 	siridb "github.com/transceptor-technology/go-siridb-connector"
 
 	"time"
@@ -41,6 +43,7 @@ type store struct {
 	logCh         chan string
 	reqAuth       bool
 	multiUser     bool
+	enableWeb     bool
 	ssessions     map[string]string
 }
 
@@ -288,66 +291,40 @@ key_file = my_certificate.key
 	)
 	base.connections = append(base.connections, conn)
 
-	section, err = cfg.GetSection("HTTP")
-	if err != nil {
-		quit(err)
-	}
-
-	portIni, err := section.GetKey("port")
-	if err != nil {
-		quit(err)
-	}
-
-	port64, err := portIni.Uint64()
-	if err != nil {
-		quit(err)
-	}
-
-	base.port = uint16(port64)
-
-	enableWebIni, err := section.GetKey("enable_web")
-	if err != nil {
-		quit(err)
-	}
-
-	enableWeb, err := enableWebIni.Bool()
-	if err != nil {
-		quit(err)
-	}
-
 	section, err = cfg.GetSection("Configuration")
 	if err != nil {
 		quit(err)
 	}
 
-	reqAuthIni, err := section.GetKey("require_authentication")
-	if err != nil {
+	if reqAuthIni, err := section.GetKey("require_authentication"); err != nil {
+		quit(err)
+	} else if base.reqAuth, err = reqAuthIni.Bool(); err != nil {
 		quit(err)
 	}
 
-	base.reqAuth, err = reqAuthIni.Bool()
-	if err != nil {
+	if portIni, err := section.GetKey("port"); err != nil {
+		quit(err)
+	} else if port64, err := portIni.Uint64(); err != nil {
+		quit(err)
+	} else {
+		base.port = uint16(port64)
+	}
+
+	if enableWebIni, err := section.GetKey("enable_web"); err != nil {
+		quit(err)
+	} else if base.enableWeb, err = enableWebIni.Bool(); err != nil {
 		quit(err)
 	}
 
-	multiUserIni, err := section.GetKey("enable_multi_user")
-	if err != nil {
+	if multiUserIni, err := section.GetKey("enable_multi_user"); err != nil {
 		quit(err)
-	}
-
-	base.multiUser, err = multiUserIni.Bool()
-	if err != nil {
-		quit(err)
-	}
-
-	section, err = cfg.GetSection("Session")
-	if err != nil {
+	} else if base.multiUser, err = multiUserIni.Bool(); err != nil {
 		quit(err)
 	}
 
 	http.HandleFunc("*", handlerNotFound)
 
-	if enableWeb {
+	if base.enableWeb {
 		http.HandleFunc("/", handlerMain)
 		http.HandleFunc("/js/bundle", handlerJsBundle)
 		http.HandleFunc("/js/jsleri", handlerLeriMinJS)
@@ -392,32 +369,38 @@ key_file = my_certificate.key
 	conn.client.Connect()
 	go connect(conn)
 
-	server, err := socketio.NewServer(nil)
-	if err != nil {
-		quit(err)
-	}
-	server.On("connection", func(so socketio.Socket) {
+	server := gosocketio.NewServer(transport.GetDefaultWebsocketTransport())
 
-		fmt.Printf("on connection, id: %s\n", so.Id())
+	// server, err := socketio.NewServer(nil)
+	// if err != nil {
+	// 	quit(err)
+	// }
 
-		// so.Join("chat")
-		so.On("auth fetch", onAuthFetch)
-		// 	log.Println("emit:", so.Emit("chat message", msg))
-		// 	so.BroadcastTo("chat", "chat message", msg)
-		// })
-		so.On("disconnection", func(so socketio.Socket) {
-			fmt.Printf("on disconnection, id: %s\n", so.Id())
-		})
+	server.On(gosocketio.OnConnection, func(c *gosocketio.Channel, args interface{}) {
+		//client id is unique
+		log.Println("New client connected, client id is ", c.Id())
 	})
 
-	server.On("error", func(so socketio.Socket, err error) {
-		fmt.Println("error:", err)
+	// server.On("auth fetch", onAuthFetch)
+
+	server.On(gosocketio.OnDisconnection, func(c *gosocketio.Channel) {
+		//caller is not necessary, client will be removed from rooms
+		//automatically on disconnect
+		//but you can remove client from room whenever you need to
+		log.Println("Disconnected")
+	})
+	//error catching handler
+	server.On(gosocketio.OnError, func(c *gosocketio.Channel) {
+		log.Println("Error occurs")
 	})
 
-	http.Handle("/socket.io/", server)
+	serveMux := http.NewServeMux()
+	serveMux.Handle("/socket.io/", server)
+
+	// http.Handle("/socket.io/", server)
 
 	fmt.Printf("Serving SiriDB HTTP API on port %d\nPress CTRL+C to quit\n", base.port)
-	if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), nil); err != nil {
+	if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), serveMux); err != nil {
 		fmt.Printf("error: %s\n", err)
 	}
 }
