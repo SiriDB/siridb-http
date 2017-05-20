@@ -8,15 +8,59 @@ import (
 	"github.com/googollee/go-socket.io"
 )
 
-func handlerDbInfo(w http.ResponseWriter, r *http.Request) {
-	type Db struct {
-		Dbname        string `json:"dbname"`
-		TimePrecision string `json:"timePrecision"`
-		Version       string `json:"version"`
-		HTTPServer    string `json:"httpServer"`
-	}
+type tDb struct {
+	Dbname        string `json:"dbname"`
+	TimePrecision string `json:"timePrecision"`
+	Version       string `json:"version"`
+	HTTPServer    string `json:"httpServer"`
+}
 
-	db := Db{
+type tAuthFetch struct {
+	User         interface{} `json:"user" qp:"user"`
+	AuthRequired bool        `json:"authRequired" qp:"authRequired"`
+}
+
+func getConnByHTTP(w http.ResponseWriter, r *http.Request) *Conn {
+	var conn *Conn
+	sess, err := globalSessions.SessionStart(w, r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		user, ok := sess.Get("user").(string)
+		if ok {
+			conn = getConnByUser(user)
+			if conn == nil {
+				http.Error(
+					w,
+					fmt.Sprintf("no connection for user '%s' found, please try to login again", user),
+					http.StatusUnauthorized)
+			}
+		} else if base.reqAuth {
+			http.Error(w, "not authenticated", http.StatusUnauthorized)
+		} else {
+			conn = &base.connections[0]
+		}
+	}
+	return conn
+}
+
+func onDbInfo(so *socketio.Socket) (int, string) {
+	db := tDb{
+		Dbname:        base.dbname,
+		TimePrecision: base.timePrecision,
+		Version:       base.version,
+		HTTPServer:    AppVersion}
+
+	b, err := json.Marshal(db)
+	if err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+	return http.StatusOK, string(b)
+}
+
+func handlerDbInfo(w http.ResponseWriter, r *http.Request) {
+	db := tDb{
 		Dbname:        base.dbname,
 		TimePrecision: base.timePrecision,
 		Version:       base.version,
@@ -29,32 +73,13 @@ func handlerDbInfo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type tAuthFetch struct {
-	User         interface{} `json:"user"`
-	AuthRequired bool        `json:"authRequired"`
-}
+func onAuthFetch(so *socketio.Socket) (int, string) {
+	authFetch := tAuthFetch{User: nil, AuthRequired: base.reqAuth}
 
-func onAuthFetch(so socketio.Socket) (status int, resp string) {
-	var authFetch tAuthFetch
-	if base.reqAuth {
-
-		user, ok := base.ssessions[so.Id()]
-
-		if !ok {
-			authFetch.User = nil
-		} else {
-			conn := getConnByUser(user)
-			if conn == nil {
-				authFetch.User = nil
-			} else {
-				authFetch.User = user
-			}
-		}
-
-		authFetch.AuthRequired = true
-	} else {
+	if user, ok := base.ssessions[(*so).Id()]; ok && getConnByUser(user) != nil {
+		authFetch.User = user
+	} else if !base.reqAuth {
 		authFetch.User = base.connections[0].user
-		authFetch.AuthRequired = false
 	}
 
 	b, err := json.Marshal(authFetch)
@@ -66,32 +91,18 @@ func onAuthFetch(so socketio.Socket) (status int, resp string) {
 
 func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
 
-	var authFetch tAuthFetch
-	if base.reqAuth {
-		sess, err := globalSessions.SessionStart(w, r)
+	authFetch := tAuthFetch{User: nil, AuthRequired: base.reqAuth}
+	sess, err := globalSessions.SessionStart(w, r)
 
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		user, ok := sess.Get("user").(string)
-
-		if !ok {
-			authFetch.User = nil
-		} else {
-			conn := getConnByUser(user)
-			if conn == nil {
-				authFetch.User = nil
-			} else {
-				authFetch.User = user
-			}
-		}
-
-		authFetch.AuthRequired = true
-	} else {
+	if user, ok := sess.Get("user").(string); ok && getConnByUser(user) != nil {
+		authFetch.User = user
+	} else if !base.reqAuth {
 		authFetch.User = base.connections[0].user
-		authFetch.AuthRequired = false
 	}
 
 	if b, err := json.Marshal(authFetch); err != nil {
@@ -114,15 +125,50 @@ func getConnByUser(user string) *Conn {
 	return nil
 }
 
+type tAuthLoginReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+type tAuthLoginRes struct {
+	User string `json:"user"`
+}
+type tAuthLogoff struct {
+	User interface{} `json:"user"`
+}
+
+func onAuthLogin(so *socketio.Socket, req string) (int, string) {
+	fmt.Println("Auth login....")
+	var authLoginReq tAuthLoginReq
+
+	err := json.Unmarshal([]byte(req), &authLoginReq)
+	if err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+
+	if conn := getConnByUser(authLoginReq.Username); conn != nil {
+		if authLoginReq.Password != conn.password {
+			return http.StatusUnprocessableEntity, "Username or password incorrect"
+		}
+	} else if base.multiUser {
+		fmt.Println(authLoginReq)
+	} else {
+		return http.StatusUnprocessableEntity, "Multiple user login is not allowed"
+
+	}
+
+	base.ssessions[(*so).Id()] = authLoginReq.Username
+	authLoginRes := tAuthLoginRes{User: authLoginReq.Username}
+
+	b, err := json.Marshal(authLoginRes)
+	if err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+	return http.StatusOK, string(b)
+}
+
 func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
-	type AuthLoginReq struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
-	type AuthLoginRes struct {
-		User string `json:"user"`
-	}
-	var authLoginReq AuthLoginReq
+
+	var authLoginReq tAuthLoginReq
 
 	sess, err := globalSessions.SessionStart(w, r)
 	if err != nil {
@@ -151,7 +197,7 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess.Set("user", authLoginReq.Username)
-	authLoginRes := AuthLoginRes{User: authLoginReq.Username}
+	authLoginRes := tAuthLoginRes{User: authLoginReq.Username}
 	if b, err := json.Marshal(authLoginRes); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
@@ -160,11 +206,7 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerAuthLogoff(w http.ResponseWriter, r *http.Request) {
-	type AuthLogoff struct {
-		User interface{} `json:"user"`
-	}
-
-	authLogoff := AuthLogoff{User: nil}
+	authLogoff := tAuthLogoff{User: nil}
 
 	sess, err := globalSessions.SessionStart(w, r)
 	if err != nil {
@@ -185,27 +227,24 @@ func handlerAuthLogoff(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handlerQuery(w http.ResponseWriter, r *http.Request) {
-	sess, err := globalSessions.SessionStart(w, r)
+func getConnBySIO(so *socketio.Socket) (conn *Conn, err error) {
+	if user, ok := base.ssessions[(*so).Id()]; ok {
+		conn = getConnByUser(user)
+		if conn == nil {
+			err = fmt.Errorf("no connection for user '%s' found, please try to login again", user)
+		}
+	} else if base.reqAuth {
+		err = fmt.Errorf("not authenticated")
+	} else {
+		conn = &base.connections[0]
+	}
+	return conn, err
+}
 
+func onQuery(so *socketio.Socket, req string) (int, string) {
+	conn, err := getConnBySIO(so)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	user, ok := sess.Get("user").(string)
-
-	if !ok {
-		http.Error(w, "not authenticated", http.StatusUnauthorized)
-	}
-
-	conn := getConnByUser(user)
-	if conn == nil {
-		http.Error(
-			w,
-			fmt.Sprintf("no connection for user '%s' found, please try to login again", user),
-			http.StatusUnauthorized)
-		return
+		return http.StatusUnauthorized, err.Error()
 	}
 
 	type Query struct {
@@ -215,12 +254,10 @@ func handlerQuery(w http.ResponseWriter, r *http.Request) {
 
 	var query Query
 
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&query)
+	fmt.Println(req)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err = json.Unmarshal([]byte(req), &query); err != nil {
+		return http.StatusInternalServerError, err.Error()
 	}
 
 	timeout, ok := query.Timeout.(uint16)
@@ -230,13 +267,100 @@ func handlerQuery(w http.ResponseWriter, r *http.Request) {
 
 	res, err := conn.client.Query(query.Query, timeout)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return http.StatusInternalServerError, err.Error()
 	}
 
-	if b, err := json.Marshal(res); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		w.Write(b)
+	b, err := json.Marshal(res)
+	if err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+	return http.StatusOK, string(b)
+}
+
+func handlerQuery(w http.ResponseWriter, r *http.Request) {
+	if conn := getConnByHTTP(w, r); conn != nil {
+		type Query struct {
+			Query   string      `json:"query"`
+			Timeout interface{} `json:"timeout"`
+		}
+
+		var query Query
+
+		decoder := json.NewDecoder(r.Body)
+		err := decoder.Decode(&query)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		timeout, ok := query.Timeout.(uint16)
+		if !ok {
+			timeout = 30
+		}
+
+		res, err := conn.client.Query(query.Query, timeout)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if b, err := json.Marshal(res); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			w.Write(b)
+		}
+	}
+}
+
+func onInsert(so *socketio.Socket, req string) (int, string) {
+	conn, err := getConnBySIO(so)
+	if err != nil {
+		return http.StatusUnauthorized, err.Error()
+	}
+
+	var insert interface{}
+
+	fmt.Println(req)
+
+	if err = json.Unmarshal([]byte(req), &insert); err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+
+	res, err := conn.client.Insert(insert, base.insertTimeout)
+	if err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+
+	b, err := json.Marshal(res)
+	if err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+	return http.StatusOK, string(b)
+}
+
+func handlerInsert(w http.ResponseWriter, r *http.Request) {
+	if conn := getConnByHTTP(w, r); conn != nil {
+		var insert interface{}
+
+		decoder := json.NewDecoder(r.Body)
+		err := decoder.Decode(&insert)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		res, err := conn.client.Insert(insert, base.insertTimeout)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if b, err := json.Marshal(res); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			w.Write(b)
+		}
 	}
 }

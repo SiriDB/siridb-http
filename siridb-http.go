@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -38,9 +39,11 @@ type store struct {
 	version       string
 	servers       []server
 	port          uint16
+	insertTimeout uint16
 	logCh         chan string
 	reqAuth       bool
 	multiUser     bool
+	enableWeb     bool
 	ssessions     map[string]string
 }
 
@@ -287,62 +290,50 @@ key_file = my_certificate.key
 		base.logCh,                  // optional log channel
 	)
 	base.connections = append(base.connections, conn)
-
-	section, err = cfg.GetSection("HTTP")
-	if err != nil {
-		quit(err)
-	}
-
-	portIni, err := section.GetKey("port")
-	if err != nil {
-		quit(err)
-	}
-
-	port64, err := portIni.Uint64()
-	if err != nil {
-		quit(err)
-	}
-
-	base.port = uint16(port64)
-
-	enableWebIni, err := section.GetKey("enable_web")
-	if err != nil {
-		quit(err)
-	}
-
-	enableWeb, err := enableWebIni.Bool()
-	if err != nil {
-		quit(err)
-	}
+	base.ssessions = make(map[string]string)
 
 	section, err = cfg.GetSection("Configuration")
 	if err != nil {
 		quit(err)
 	}
 
-	reqAuthIni, err := section.GetKey("require_authentication")
-	if err != nil {
+	if reqAuthIni, err := section.GetKey("require_authentication"); err != nil {
+		quit(err)
+	} else if base.reqAuth, err = reqAuthIni.Bool(); err != nil {
 		quit(err)
 	}
 
-	base.reqAuth, err = reqAuthIni.Bool()
-	if err != nil {
+	if portIni, err := section.GetKey("port"); err != nil {
+		quit(err)
+	} else if port64, err := portIni.Uint64(); err != nil {
+		quit(err)
+	} else {
+		base.port = uint16(port64)
+	}
+
+	if insertTimeoutIni, err := section.GetKey("insert_timeout"); err != nil {
+		quit(err)
+	} else if insertTimeout64, err := insertTimeoutIni.Uint64(); err != nil {
+		quit(err)
+	} else {
+		base.insertTimeout = uint16(insertTimeout64)
+	}
+
+	if enableWebIni, err := section.GetKey("enable_web"); err != nil {
+		quit(err)
+	} else if base.enableWeb, err = enableWebIni.Bool(); err != nil {
 		quit(err)
 	}
 
-	multiUserIni, err := section.GetKey("enable_multi_user")
-	if err != nil {
+	if multiUserIni, err := section.GetKey("enable_multi_user"); err != nil {
 		quit(err)
-	}
-
-	base.multiUser, err = multiUserIni.Bool()
-	if err != nil {
+	} else if base.multiUser, err = multiUserIni.Bool(); err != nil {
 		quit(err)
 	}
 
 	http.HandleFunc("*", handlerNotFound)
 
-	if enableWeb {
+	if base.enableWeb {
 		http.HandleFunc("/", handlerMain)
 		http.HandleFunc("/js/bundle", handlerJsBundle)
 		http.HandleFunc("/js/jsleri", handlerLeriMinJS)
@@ -365,6 +356,7 @@ key_file = my_certificate.key
 	http.HandleFunc("/db-info", handlerDbInfo)
 	http.HandleFunc("/auth/fetch", handlerAuthFetch)
 	http.HandleFunc("/query", handlerQuery)
+	http.HandleFunc("/insert", handlerInsert)
 
 	if base.reqAuth {
 		cf := new(session.ManagerConfig)
@@ -391,26 +383,30 @@ key_file = my_certificate.key
 	if err != nil {
 		quit(err)
 	}
+
 	server.On("connection", func(so socketio.Socket) {
-
-		fmt.Printf("on connection, id: %s\n", so.Id())
-
-		// so.Join("chat")
-		so.On("auth fetch", func(msg string) (int, string) {
-
-			fmt.Printf("auth fetch....%s\n", so.Id())
-			return 200, "bla"
+		so.On("db-info", func(req string) (int, string) {
+			return onDbInfo(&so)
 		})
-		// 	log.Println("emit:", so.Emit("chat message", msg))
-		// 	so.BroadcastTo("chat", "chat message", msg)
-		// })
+		so.On("auth fetch", func(req string) (int, string) {
+			return onAuthFetch(&so)
+		})
+		so.On("auth login", func(req string) (int, string) {
+			return onAuthLogin(&so, req)
+		})
+		so.On("query", func(req string) (int, string) {
+			return onQuery(&so, req)
+		})
+		so.On("insert", func(req string) (int, string) {
+			return onInsert(&so, req)
+		})
 		so.On("disconnection", func() {
-			fmt.Printf("on disconnection, id: %s\n", so.Id())
+			delete(base.ssessions, so.Id())
 		})
 	})
 
 	server.On("error", func(so socketio.Socket, err error) {
-		fmt.Println("error:", err)
+		log.Println("error:", err)
 	})
 
 	http.Handle("/socket.io/", server)
