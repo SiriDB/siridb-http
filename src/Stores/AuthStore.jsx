@@ -34,7 +34,7 @@ class AuthStore extends BaseStore {
     onLogoff() {
         localStorage.clear();
         QueryActions.clearAll();
-        this.fetch('/auth/logoff')
+        this.fetch('/auth/logout')
         .done((data) => {
             this.setState({user: null});
         })

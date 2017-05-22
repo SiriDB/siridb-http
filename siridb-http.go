@@ -44,6 +44,7 @@ type store struct {
 	reqAuth       bool
 	multiUser     bool
 	enableWeb     bool
+	enableSio     bool
 	ssessions     map[string]string
 }
 
@@ -325,6 +326,12 @@ key_file = my_certificate.key
 		quit(err)
 	}
 
+	if enableSioIni, err := section.GetKey("enable_socket_io"); err != nil {
+		quit(err)
+	} else if base.enableSio, err = enableSioIni.Bool(); err != nil {
+		quit(err)
+	}
+
 	if multiUserIni, err := section.GetKey("enable_multi_user"); err != nil {
 		quit(err)
 	} else if base.multiUser, err = multiUserIni.Bool(); err != nil {
@@ -373,43 +380,48 @@ key_file = my_certificate.key
 
 		go globalSessions.GC()
 		http.HandleFunc("/auth/login", handlerAuthLogin)
-		http.HandleFunc("/auth/logoff", handlerAuthLogoff)
+		http.HandleFunc("/auth/logout", handlerAuthLogout)
 	}
 
 	conn.client.Connect()
 	go connect(conn)
 
-	server, err := socketio.NewServer(nil)
-	if err != nil {
-		quit(err)
+	if base.enableSio {
+		server, err := socketio.NewServer(nil)
+		if err != nil {
+			quit(err)
+		}
+
+		server.On("connection", func(so socketio.Socket) {
+			so.On("db-info", func(req string) (int, string) {
+				return onDbInfo(&so)
+			})
+			so.On("auth fetch", func(req string) (int, string) {
+				return onAuthFetch(&so)
+			})
+			so.On("auth login", func(req string) (int, string) {
+				return onAuthLogin(&so, req)
+			})
+			so.On("auth logout", func(req string) (int, string) {
+				return onAuthLogout(&so)
+			})
+			so.On("query", func(req string) (int, string) {
+				return onQuery(&so, req)
+			})
+			so.On("insert", func(req string) (int, string) {
+				return onInsert(&so, req)
+			})
+			so.On("disconnection", func() {
+				delete(base.ssessions, so.Id())
+			})
+		})
+
+		server.On("error", func(so socketio.Socket, err error) {
+			log.Println("error:", err)
+		})
+
+		http.Handle("/socket.io/", server)
 	}
-
-	server.On("connection", func(so socketio.Socket) {
-		so.On("db-info", func(req string) (int, string) {
-			return onDbInfo(&so)
-		})
-		so.On("auth fetch", func(req string) (int, string) {
-			return onAuthFetch(&so)
-		})
-		so.On("auth login", func(req string) (int, string) {
-			return onAuthLogin(&so, req)
-		})
-		so.On("query", func(req string) (int, string) {
-			return onQuery(&so, req)
-		})
-		so.On("insert", func(req string) (int, string) {
-			return onInsert(&so, req)
-		})
-		so.On("disconnection", func() {
-			delete(base.ssessions, so.Id())
-		})
-	})
-
-	server.On("error", func(so socketio.Socket, err error) {
-		log.Println("error:", err)
-	})
-
-	http.Handle("/socket.io/", server)
 
 	fmt.Printf("Serving SiriDB HTTP API on port %d\nPress CTRL+C to quit\n", base.port)
 	if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), nil); err != nil {

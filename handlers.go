@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/googollee/go-socket.io"
 )
@@ -137,7 +138,6 @@ type tAuthLogoff struct {
 }
 
 func onAuthLogin(so *socketio.Socket, req string) (int, string) {
-	fmt.Println("Auth login....")
 	var authLoginReq tAuthLoginReq
 
 	err := json.Unmarshal([]byte(req), &authLoginReq)
@@ -205,7 +205,19 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handlerAuthLogoff(w http.ResponseWriter, r *http.Request) {
+func onAuthLogout(so *socketio.Socket) (int, string) {
+	authLogoff := tAuthLogoff{User: nil}
+
+	delete(base.ssessions, (*so).Id())
+
+	b, err := json.Marshal(authLogoff)
+	if err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+	return http.StatusOK, string(b)
+}
+
+func handlerAuthLogout(w http.ResponseWriter, r *http.Request) {
 	authLogoff := tAuthLogoff{User: nil}
 
 	sess, err := globalSessions.SessionStart(w, r)
@@ -253,8 +265,6 @@ func onQuery(so *socketio.Socket, req string) (int, string) {
 	}
 
 	var query Query
-
-	fmt.Println(req)
 
 	if err = json.Unmarshal([]byte(req), &query); err != nil {
 		return http.StatusInternalServerError, err.Error()
@@ -321,9 +331,10 @@ func onInsert(so *socketio.Socket, req string) (int, string) {
 
 	var insert interface{}
 
-	fmt.Println(req)
+	decoder := json.NewDecoder(strings.NewReader(req))
+	decoder.UseNumber()
 
-	if err = json.Unmarshal([]byte(req), &insert); err != nil {
+	if err = decoder.Decode(&insert); err != nil {
 		return http.StatusInternalServerError, err.Error()
 	}
 
@@ -344,9 +355,9 @@ func handlerInsert(w http.ResponseWriter, r *http.Request) {
 		var insert interface{}
 
 		decoder := json.NewDecoder(r.Body)
-		err := decoder.Decode(&insert)
+		decoder.UseNumber()
 
-		if err != nil {
+		if err := decoder.Decode(&insert); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
