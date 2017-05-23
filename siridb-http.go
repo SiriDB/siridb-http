@@ -45,7 +45,12 @@ type store struct {
 	multiUser     bool
 	enableWeb     bool
 	enableSio     bool
+	enableSSL     bool
 	ssessions     map[string]string
+	cookieMaxAge  uint64
+	crtFile       string
+	keyFile       string
+	gsessions     *session.Manager
 }
 
 type server struct {
@@ -61,8 +66,6 @@ var (
 )
 
 var base = store{}
-
-var globalSessions *session.Manager
 
 func getHostAndPort(addr string) (server, error) {
 	parts := strings.Split(addr, ":")
@@ -171,6 +174,24 @@ func connect(conn Conn) {
 	}
 }
 
+func readBool(section *ini.Section, key string) (b bool) {
+	if bIni, err := section.GetKey(key); err != nil {
+		quit(err)
+	} else if b, err = bIni.Bool(); err != nil {
+		quit(err)
+	}
+	return b
+}
+
+func readString(section *ini.Section, key string) (s string) {
+	if sIni, err := section.GetKey(key); err != nil {
+		quit(err)
+	} else {
+		s = sIni.String()
+	}
+	return s
+}
+
 func main() {
 
 	// parse arguments
@@ -188,33 +209,34 @@ func main() {
 		fmt.Printf(
 			`# SiriDB HTTP Configuration file
 [Database]
-user = <user>
-password = <password>
-dbname = <database name>
+user = iris
+password = siri
+dbname = dbtest
 # Multiple servers are possible and should be comma separated. When a port
-# is not provided the default port 9000 is used. IPv6 addresses are supported
-# and should be wrapped in square brackets [] in case an alternative port is
+# is not provided the default 9000 is used. IPv6 address are supported and
+# should be wrapped in square brackets [] in case an alternative port is
 # required.
-servers = <host:port>
+#
+# Valid examples:
+#   siridb01.local,siridb02.local,siridb03.local,siridb04.local
+#   10.20.30.40
+#   [::1]:5050,[::1]:5051
+#   2001:0db8:85a3:0000:0000:8a2e:0370:7334
+servers = localhost:9000
 
 [Configuration]
-port = 5050
-enable_web = True
-enable_ssl = False
-# session authentication will be enabled when set to True
+port = 8080
 require_authentication = True
-
-[Session]
-cookie_max_age = 604800
+enable_socket_io = True
+enable_ssl = False
+enable_web = True
 # When multi user is disabled, only the user/password combination provided in
 # this configuration file can be used to create a session connection to SiriDB.
 enable_multi_user = False
-
-[Secret]
-# When a secret is specified, the /query and /insert POST request can be used
-# by providing the secret inside the header of each request. This method can be
-# used as an alternative to using sessions.
-secret = my_super_secret
+cookie_max_age = 604800
+insert_timeout = 60
+# In case a secret is set, the secret can be used to authenticate each request.
+# secret = my_super_secret
 
 [SSL]
 # Self-signed certificates can be created using:
@@ -236,6 +258,8 @@ key_file = my_certificate.key
 		os.Exit(0)
 	}
 
+	var conn Conn
+
 	cfg, err := ini.Load(*xConfig)
 	if err != nil {
 		quit(err)
@@ -246,30 +270,14 @@ key_file = my_certificate.key
 		quit(err)
 	}
 
-	user, err := section.GetKey("user")
+	servers, err := getServers(readString(section, "servers"))
 	if err != nil {
 		quit(err)
 	}
 
-	password, err := section.GetKey("password")
-	if err != nil {
-		quit(err)
-	}
-
-	dbname, err := section.GetKey("dbname")
-	if err != nil {
-		quit(err)
-	}
-
-	addrstr, err := section.GetKey("servers")
-	if err != nil {
-		quit(err)
-	}
-
-	servers, err := getServers(addrstr.String())
-	if err != nil {
-		quit(err)
-	}
+	base.dbname = readString(section, "dbname")
+	conn.user = readString(section, "user")
+	conn.password = readString(section, "password")
 
 	base.logCh = make(chan string)
 	go logHandle(base.logCh)
@@ -278,11 +286,6 @@ key_file = my_certificate.key
 	signal.Notify(sigCh, os.Interrupt)
 	go sigHandle(sigCh)
 
-	base.dbname = dbname.String()
-
-	var conn Conn
-	conn.user = user.String()
-	conn.password = password.String()
 	conn.client = siridb.NewClient(
 		conn.user,                   // user
 		conn.password,               // password
@@ -298,11 +301,11 @@ key_file = my_certificate.key
 		quit(err)
 	}
 
-	if reqAuthIni, err := section.GetKey("require_authentication"); err != nil {
-		quit(err)
-	} else if base.reqAuth, err = reqAuthIni.Bool(); err != nil {
-		quit(err)
-	}
+	base.reqAuth = readBool(section, "require_authentication")
+	base.enableWeb = readBool(section, "enable_web")
+	base.enableSio = readBool(section, "enable_socket_io")
+	base.enableSSL = readBool(section, "enable_ssl")
+	base.multiUser = readBool(section, "enable_multi_user")
 
 	if portIni, err := section.GetKey("port"); err != nil {
 		quit(err)
@@ -310,6 +313,12 @@ key_file = my_certificate.key
 		quit(err)
 	} else {
 		base.port = uint16(port64)
+	}
+
+	if cookieMaxAgeIni, err := section.GetKey("cookie_max_age"); err != nil {
+		quit(err)
+	} else if base.cookieMaxAge, err = cookieMaxAgeIni.Uint64(); err != nil {
+		quit(err)
 	}
 
 	if insertTimeoutIni, err := section.GetKey("insert_timeout"); err != nil {
@@ -320,22 +329,13 @@ key_file = my_certificate.key
 		base.insertTimeout = uint16(insertTimeout64)
 	}
 
-	if enableWebIni, err := section.GetKey("enable_web"); err != nil {
-		quit(err)
-	} else if base.enableWeb, err = enableWebIni.Bool(); err != nil {
-		quit(err)
-	}
-
-	if enableSioIni, err := section.GetKey("enable_socket_io"); err != nil {
-		quit(err)
-	} else if base.enableSio, err = enableSioIni.Bool(); err != nil {
-		quit(err)
-	}
-
-	if multiUserIni, err := section.GetKey("enable_multi_user"); err != nil {
-		quit(err)
-	} else if base.multiUser, err = multiUserIni.Bool(); err != nil {
-		quit(err)
+	if base.enableSSL {
+		section, err = cfg.GetSection("SSL")
+		if err != nil {
+			quit(err)
+		}
+		base.crtFile = readString(section, "crt_file")
+		base.keyFile = readString(section, "key_file")
 	}
 
 	http.HandleFunc("*", handlerNotFound)
@@ -368,17 +368,17 @@ key_file = my_certificate.key
 	if base.reqAuth {
 		cf := new(session.ManagerConfig)
 		cf.EnableSetCookie = true
-		s := `{"cookieName":"siridbadminsessionid","gclifetime":3600}`
+		s := fmt.Sprintf(`{"cookieName":"siridbadminsessionid","gclifetime":%d}`, base.cookieMaxAge)
 
 		if err = json.Unmarshal([]byte(s), cf); err != nil {
 			quit(err)
 		}
 
-		if globalSessions, err = session.NewManager("memory", cf); err != nil {
+		if base.gsessions, err = session.NewManager("memory", cf); err != nil {
 			quit(err)
 		}
 
-		go globalSessions.GC()
+		go base.gsessions.GC()
 		http.HandleFunc("/auth/login", handlerAuthLogin)
 		http.HandleFunc("/auth/logout", handlerAuthLogout)
 	}
@@ -423,8 +423,19 @@ key_file = my_certificate.key
 		http.Handle("/socket.io/", server)
 	}
 
-	fmt.Printf("Serving SiriDB HTTP API on port %d\nPress CTRL+C to quit\n", base.port)
-	if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), nil); err != nil {
-		fmt.Printf("error: %s\n", err)
+	if base.enableSSL {
+		fmt.Printf("Serving SiriDB HTTPS API on port %d\nPress CTRL+C to quit\n", base.port)
+		if err = http.ListenAndServeTLS(
+			fmt.Sprintf(":%d", base.port),
+			base.crtFile,
+			base.keyFile,
+			nil); err != nil {
+			fmt.Printf("error: %s\n", err)
+		}
+	} else {
+		fmt.Printf("Serving SiriDB HTTP API on port %d\nPress CTRL+C to quit\n", base.port)
+		if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), nil); err != nil {
+			fmt.Printf("error: %s\n", err)
+		}
 	}
 }

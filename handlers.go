@@ -23,7 +23,7 @@ type tAuthFetch struct {
 
 func getConnByHTTP(w http.ResponseWriter, r *http.Request) *Conn {
 	var conn *Conn
-	sess, err := globalSessions.SessionStart(w, r)
+	sess, err := base.gsessions.SessionStart(w, r)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -93,7 +93,7 @@ func onAuthFetch(so *socketio.Socket) (int, string) {
 func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
 
 	authFetch := tAuthFetch{User: nil, AuthRequired: base.reqAuth}
-	sess, err := globalSessions.SessionStart(w, r)
+	sess, err := base.gsessions.SessionStart(w, r)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -170,7 +170,7 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 
 	var authLoginReq tAuthLoginReq
 
-	sess, err := globalSessions.SessionStart(w, r)
+	sess, err := base.gsessions.SessionStart(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -220,7 +220,7 @@ func onAuthLogout(so *socketio.Socket) (int, string) {
 func handlerAuthLogout(w http.ResponseWriter, r *http.Request) {
 	authLogoff := tAuthLogoff{User: nil}
 
-	sess, err := globalSessions.SessionStart(w, r)
+	sess, err := base.gsessions.SessionStart(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
