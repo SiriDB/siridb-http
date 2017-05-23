@@ -104,8 +104,7 @@ func getServers(addrstr string) ([]server, error) {
 	return servers, nil
 }
 
-// ServersToInterface takes a server object and retruns a interface{}
-func ServersToInterface(servers []server) [][]interface{} {
+func serversToInterface(servers []server) [][]interface{} {
 	ret := make([][]interface{}, len(servers))
 	for i, svr := range servers {
 		ret[i] = make([]interface{}, 2)
@@ -291,7 +290,7 @@ key_file = my_certificate.key
 		conn.user,                        // user
 		conn.password,                    // password
 		base.dbname,                      // database
-		ServersToInterface(base.servers), // siridb server(s)
+		serversToInterface(base.servers), // siridb server(s)
 		base.logCh,                       // optional log channel
 	)
 	base.connections = append(base.connections, conn)

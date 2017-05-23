@@ -158,7 +158,7 @@ func onAuthLogin(so *socketio.Socket, req string) (int, string) {
 			conn.user,                        // user
 			conn.password,                    // password
 			base.dbname,                      // database
-			ServersToInterface(base.servers), // siridb server(s)
+			serversToInterface(base.servers), // siridb server(s)
 			base.logCh,                       // optional log channel
 		)
 		conn.client.Connect()
@@ -215,7 +215,7 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 			conn.user,                        // user
 			conn.password,                    // password
 			base.dbname,                      // database
-			ServersToInterface(base.servers), // siridb server(s)
+			serversToInterface(base.servers), // siridb server(s)
 			base.logCh,                       // optional log channel
 		)
 		conn.client.Connect()
