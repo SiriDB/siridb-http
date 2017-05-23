@@ -12,6 +12,21 @@ class TopMenu extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            in: false
+        };
+    }
+
+    onToggleClick() {
+        this.setState({
+            in: !this.state.in
+        });
+    }
+
+    onItemClick() {
+        this.setState({
+            in: false
+        });
     }
 
     render() {
@@ -20,6 +35,8 @@ class TopMenu extends React.Component {
                 <Link onClick={AuthActions.logoff} activeClassName="active">Logoff</Link>
             </li> : null;
 
+        let navclass = (this.state.in) ? ' in' : '';
+
         return (
             <nav className="navbar navbar-default">
                 <div className="container-fluid">
@@ -27,7 +44,7 @@ class TopMenu extends React.Component {
                         <a className="navbar-brand" data-keyboard="true" onClick={this.props.onLogoClick}>
                             <img src="/img/siridb-small.png" alt="SiriDB Logo" />
                         </a>
-                        <button type="button" className="navbar-toggle collapsed">
+                        <button type="button" className="navbar-toggle collapsed" onClick={this.onToggleClick.bind(this)}>
                             <span className="sr-only">Toggle navigation</span>
                             <span className="icon-bar"></span>
                             <span className="icon-bar"></span>
@@ -35,8 +52,8 @@ class TopMenu extends React.Component {
                         </button>
                     </div>
 
-                    <div className="collapse navbar-collapse">
-                        <ul className="nav navbar-nav navbar-right">
+                    <div className={`collapse navbar-collapse${navclass}`}>
+                        <ul className="nav navbar-nav navbar-right" onClick={this.onItemClick.bind(this)}>
                             <li><IndexLink to="/" activeClassName="active">Query</IndexLink></li>
                             <li><Link to="insert" activeClassName="active">Insert</Link></li>
                             {logoff}

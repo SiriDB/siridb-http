@@ -206,6 +206,9 @@ class Query extends Reflux.Component {
     }
 
     onQuery() {
+        if (this.state.alert !== null) {
+            QueryActions.clearAlert();
+        }
         if (this.state.query != this.queries[this.idx] &&
             this.state.query != this.queries[this.queries.length - 1]) {
             this.idx = this.queries.length;

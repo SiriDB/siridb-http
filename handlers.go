@@ -22,8 +22,60 @@ type tAuthFetch struct {
 	AuthRequired bool        `json:"authRequired" qp:"authRequired"`
 }
 
+type tAuthLoginReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type tAuthLoginRes struct {
+	User string `json:"user"`
+}
+
+type tAuthLogoff struct {
+	User interface{} `json:"user"`
+}
+
+func checkBasicAuth(r *http.Request) (conn *Conn) {
+	if !base.enableBasicAuth {
+		return nil
+	}
+	username, password, ok := r.BasicAuth()
+	if !ok {
+		return nil
+	}
+	conn = getConnByUser(username)
+	if conn != nil {
+		if password == conn.password {
+			return conn
+		}
+		return nil
+	}
+	if base.multiUser {
+		conn, _ = addConnection(username, password)
+	}
+	return conn
+}
+
+func getConnBySIO(so *socketio.Socket) (conn *Conn, err error) {
+	if user, ok := base.ssessions[(*so).Id()]; ok {
+		conn = getConnByUser(user)
+		if conn == nil {
+			err = fmt.Errorf("no connection for user '%s' found, please try to login again", user)
+		}
+	} else if base.reqAuth {
+		err = fmt.Errorf("not authenticated")
+	} else {
+		conn = &base.connections[0]
+	}
+	return conn, err
+}
+
 func getConnByHTTP(w http.ResponseWriter, r *http.Request) *Conn {
 	var conn *Conn
+
+	if conn = checkBasicAuth(r); conn != nil {
+		return conn
+	}
 	sess, err := base.gsessions.SessionStart(w, r)
 
 	if err != nil {
@@ -47,18 +99,64 @@ func getConnByHTTP(w http.ResponseWriter, r *http.Request) *Conn {
 	return conn
 }
 
+func sendJSON(w http.ResponseWriter, data interface{}) {
+	if b, err := json.Marshal(data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Write(b)
+	}
+}
+
+func retJSON(data interface{}) (int, string) {
+	b, err := json.Marshal(data)
+	if err != nil {
+		return http.StatusInternalServerError, err.Error()
+	}
+	return http.StatusOK, string(b)
+}
+
+func getConnByUser(user string) *Conn {
+	for _, conn := range base.connections {
+		if conn.user == user {
+			return &conn
+		}
+	}
+	return nil
+}
+
+func addConnection(username, password string) (*Conn, error) {
+	var conn Conn
+	conn.user = username
+	conn.password = password
+	conn.client = siridb.NewClient(
+		conn.user,                        // user
+		conn.password,                    // password
+		base.dbname,                      // database
+		serversToInterface(base.servers), // siridb server(s)
+		base.logCh,                       // optional log channel
+	)
+	conn.client.Connect()
+	if conn.client.IsConnected() {
+		base.connections = append(base.connections, conn)
+	} else {
+		conn.client.Close()
+		return nil, fmt.Errorf("Cannot login using the username and password")
+	}
+	return &conn, nil
+}
+
+func handlerNotFound(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "404 not found", http.StatusNotFound)
+}
+
 func onDbInfo(so *socketio.Socket) (int, string) {
 	db := tDb{
 		Dbname:        base.dbname,
 		TimePrecision: base.timePrecision,
 		Version:       base.version,
 		HTTPServer:    AppVersion}
-
-	b, err := json.Marshal(db)
-	if err != nil {
-		return http.StatusInternalServerError, err.Error()
-	}
-	return http.StatusOK, string(b)
+	return retJSON(db)
 }
 
 func handlerDbInfo(w http.ResponseWriter, r *http.Request) {
@@ -67,12 +165,7 @@ func handlerDbInfo(w http.ResponseWriter, r *http.Request) {
 		TimePrecision: base.timePrecision,
 		Version:       base.version,
 		HTTPServer:    AppVersion}
-
-	if b, err := json.Marshal(db); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		w.Write(b)
-	}
+	sendJSON(w, db)
 }
 
 func onAuthFetch(so *socketio.Socket) (int, string) {
@@ -83,12 +176,7 @@ func onAuthFetch(so *socketio.Socket) (int, string) {
 	} else if !base.reqAuth {
 		authFetch.User = base.connections[0].user
 	}
-
-	b, err := json.Marshal(authFetch)
-	if err != nil {
-		return http.StatusInternalServerError, err.Error()
-	}
-	return http.StatusOK, string(b)
+	return retJSON(authFetch)
 }
 
 func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
@@ -106,36 +194,7 @@ func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
 	} else if !base.reqAuth {
 		authFetch.User = base.connections[0].user
 	}
-
-	if b, err := json.Marshal(authFetch); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		w.Write(b)
-	}
-}
-
-func handlerNotFound(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "404 not found", http.StatusNotFound)
-}
-
-func getConnByUser(user string) *Conn {
-	for _, conn := range base.connections {
-		if conn.user == user {
-			return &conn
-		}
-	}
-	return nil
-}
-
-type tAuthLoginReq struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-type tAuthLoginRes struct {
-	User string `json:"user"`
-}
-type tAuthLogoff struct {
-	User interface{} `json:"user"`
+	sendJSON(w, authFetch)
 }
 
 func onAuthLogin(so *socketio.Socket, req string) (int, string) {
@@ -151,37 +210,17 @@ func onAuthLogin(so *socketio.Socket, req string) (int, string) {
 			return http.StatusUnprocessableEntity, "Username or password incorrect"
 		}
 	} else if base.multiUser {
-		var conn Conn
-		conn.user = authLoginReq.Username
-		conn.password = authLoginReq.Password
-		conn.client = siridb.NewClient(
-			conn.user,                        // user
-			conn.password,                    // password
-			base.dbname,                      // database
-			serversToInterface(base.servers), // siridb server(s)
-			base.logCh,                       // optional log channel
-		)
-		conn.client.Connect()
-		if conn.client.IsConnected() {
-			base.connections = append(base.connections, conn)
-		} else {
-			conn.client.Close()
-			return http.StatusUnprocessableEntity, "Cannot login using the username and password"
+		if _, err := addConnection(authLoginReq.Username, authLoginReq.Password); err != nil {
+			return http.StatusUnprocessableEntity, err.Error()
 		}
-
 	} else {
 		return http.StatusUnprocessableEntity, "Multiple user login is not allowed"
-
 	}
 
 	base.ssessions[(*so).Id()] = authLoginReq.Username
 	authLoginRes := tAuthLoginRes{User: authLoginReq.Username}
 
-	b, err := json.Marshal(authLoginRes)
-	if err != nil {
-		return http.StatusInternalServerError, err.Error()
-	}
-	return http.StatusOK, string(b)
+	return retJSON(authLoginRes)
 }
 
 func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
@@ -208,22 +247,8 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else if base.multiUser {
-		var conn Conn
-		conn.user = authLoginReq.Username
-		conn.password = authLoginReq.Password
-		conn.client = siridb.NewClient(
-			conn.user,                        // user
-			conn.password,                    // password
-			base.dbname,                      // database
-			serversToInterface(base.servers), // siridb server(s)
-			base.logCh,                       // optional log channel
-		)
-		conn.client.Connect()
-		if conn.client.IsConnected() {
-			base.connections = append(base.connections, conn)
-		} else {
-			conn.client.Close()
-			http.Error(w, "Cannot login using the username and password", http.StatusUnprocessableEntity)
+		if _, err := addConnection(authLoginReq.Username, authLoginReq.Password); err != nil {
+			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 			return
 		}
 	} else {
@@ -233,23 +258,13 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 
 	sess.Set("user", authLoginReq.Username)
 	authLoginRes := tAuthLoginRes{User: authLoginReq.Username}
-	if b, err := json.Marshal(authLoginRes); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		w.Write(b)
-	}
+	sendJSON(w, authLoginRes)
 }
 
 func onAuthLogout(so *socketio.Socket) (int, string) {
 	authLogoff := tAuthLogoff{User: nil}
-
 	delete(base.ssessions, (*so).Id())
-
-	b, err := json.Marshal(authLogoff)
-	if err != nil {
-		return http.StatusInternalServerError, err.Error()
-	}
-	return http.StatusOK, string(b)
+	return retJSON(authLogoff)
 }
 
 func handlerAuthLogout(w http.ResponseWriter, r *http.Request) {
@@ -261,31 +276,12 @@ func handlerAuthLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.Flush()
-	if err != nil {
+	if err = sess.Flush(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if b, err := json.Marshal(authLogoff); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		w.Write(b)
-	}
-}
-
-func getConnBySIO(so *socketio.Socket) (conn *Conn, err error) {
-	if user, ok := base.ssessions[(*so).Id()]; ok {
-		conn = getConnByUser(user)
-		if conn == nil {
-			err = fmt.Errorf("no connection for user '%s' found, please try to login again", user)
-		}
-	} else if base.reqAuth {
-		err = fmt.Errorf("not authenticated")
-	} else {
-		conn = &base.connections[0]
-	}
-	return conn, err
+	sendJSON(w, authLogoff)
 }
 
 func onQuery(so *socketio.Socket, req string) (int, string) {
@@ -315,11 +311,7 @@ func onQuery(so *socketio.Socket, req string) (int, string) {
 		return http.StatusInternalServerError, err.Error()
 	}
 
-	b, err := json.Marshal(res)
-	if err != nil {
-		return http.StatusInternalServerError, err.Error()
-	}
-	return http.StatusOK, string(b)
+	return retJSON(res)
 }
 
 func handlerQuery(w http.ResponseWriter, r *http.Request) {
@@ -350,11 +342,7 @@ func handlerQuery(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if b, err := json.Marshal(res); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		} else {
-			w.Write(b)
-		}
+		sendJSON(w, res)
 	}
 }
 
@@ -378,11 +366,7 @@ func onInsert(so *socketio.Socket, req string) (int, string) {
 		return http.StatusInternalServerError, err.Error()
 	}
 
-	b, err := json.Marshal(res)
-	if err != nil {
-		return http.StatusInternalServerError, err.Error()
-	}
-	return http.StatusOK, string(b)
+	return retJSON(res)
 }
 
 func handlerInsert(w http.ResponseWriter, r *http.Request) {
@@ -403,10 +387,6 @@ func handlerInsert(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if b, err := json.Marshal(res); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		} else {
-			w.Write(b)
-		}
+		sendJSON(w, res)
 	}
 }

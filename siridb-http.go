@@ -33,24 +33,25 @@ type Conn struct {
 }
 
 type store struct {
-	connections   []Conn
-	dbname        string
-	timePrecision string
-	version       string
-	servers       []server
-	port          uint16
-	insertTimeout uint16
-	logCh         chan string
-	reqAuth       bool
-	multiUser     bool
-	enableWeb     bool
-	enableSio     bool
-	enableSSL     bool
-	ssessions     map[string]string
-	cookieMaxAge  uint64
-	crtFile       string
-	keyFile       string
-	gsessions     *session.Manager
+	connections     []Conn
+	dbname          string
+	timePrecision   string
+	version         string
+	servers         []server
+	port            uint16
+	insertTimeout   uint16
+	logCh           chan string
+	reqAuth         bool
+	multiUser       bool
+	enableWeb       bool
+	enableSio       bool
+	enableSSL       bool
+	enableBasicAuth bool
+	ssessions       map[string]string
+	cookieMaxAge    uint64
+	crtFile         string
+	keyFile         string
+	gsessions       *session.Manager
 }
 
 type server struct {
@@ -209,9 +210,9 @@ func main() {
 		fmt.Printf(
 			`# SiriDB HTTP Configuration file
 [Database]
-user = iris
-password = siri
-dbname = dbtest
+user = <your_username>
+password = <your_password>
+dbname = <your_database>
 # Multiple servers are possible and should be comma separated. When a port
 # is not provided the default 9000 is used. IPv6 address are supported and
 # should be wrapped in square brackets [] in case an alternative port is
@@ -230,13 +231,12 @@ require_authentication = True
 enable_socket_io = True
 enable_ssl = False
 enable_web = True
+enable_basic_auth = False
 # When multi user is disabled, only the user/password combination provided in
 # this configuration file can be used to create a session connection to SiriDB.
 enable_multi_user = False
 cookie_max_age = 604800
 insert_timeout = 60
-# In case a secret is set, the secret can be used to authenticate each request.
-# secret = my_super_secret
 
 [SSL]
 # Self-signed certificates can be created using:
@@ -244,8 +244,8 @@ insert_timeout = 60
 #   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 #        -keyout certificate.key -out certificate.crt
 #
-crt_file = my_certificate.crt
-key_file = my_certificate.key
+crt_file = certificate.crt
+key_file = certificate.key
 
 #
 # Welcome and thank you for using SiriDB!
@@ -306,6 +306,7 @@ key_file = my_certificate.key
 	base.enableSio = readBool(section, "enable_socket_io")
 	base.enableSSL = readBool(section, "enable_ssl")
 	base.multiUser = readBool(section, "enable_multi_user")
+	base.enableBasicAuth = readBool(section, "enable_basic_auth")
 
 	if portIni, err := section.GetKey("port"); err != nil {
 		quit(err)
@@ -365,23 +366,21 @@ key_file = my_certificate.key
 	http.HandleFunc("/query", handlerQuery)
 	http.HandleFunc("/insert", handlerInsert)
 
-	if base.reqAuth {
-		cf := new(session.ManagerConfig)
-		cf.EnableSetCookie = true
-		s := fmt.Sprintf(`{"cookieName":"siridbadminsessionid","gclifetime":%d}`, base.cookieMaxAge)
+	cf := new(session.ManagerConfig)
+	cf.EnableSetCookie = true
+	s := fmt.Sprintf(`{"cookieName":"siridbadminsessionid","gclifetime":%d}`, base.cookieMaxAge)
 
-		if err = json.Unmarshal([]byte(s), cf); err != nil {
-			quit(err)
-		}
-
-		if base.gsessions, err = session.NewManager("memory", cf); err != nil {
-			quit(err)
-		}
-
-		go base.gsessions.GC()
-		http.HandleFunc("/auth/login", handlerAuthLogin)
-		http.HandleFunc("/auth/logout", handlerAuthLogout)
+	if err = json.Unmarshal([]byte(s), cf); err != nil {
+		quit(err)
 	}
+
+	if base.gsessions, err = session.NewManager("memory", cf); err != nil {
+		quit(err)
+	}
+
+	go base.gsessions.GC()
+	http.HandleFunc("/auth/login", handlerAuthLogin)
+	http.HandleFunc("/auth/logout", handlerAuthLogout)
 
 	conn.client.Connect()
 	go connect(conn)
@@ -423,7 +422,7 @@ key_file = my_certificate.key
 		http.Handle("/socket.io/", server)
 	}
 
-	msg := "Serving SiriDB API on http%s://0.0.0.0:%d\nPress CTRL+C to quit\n"
+	msg := "Serving SiriDB API on http%s://127.0.0.1:%d\n"
 	if base.enableSSL {
 		fmt.Printf(msg, "s", base.port)
 		if err = http.ListenAndServeTLS(
