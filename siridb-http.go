@@ -104,7 +104,8 @@ func getServers(addrstr string) ([]server, error) {
 	return servers, nil
 }
 
-func serversToInterface(servers []server) [][]interface{} {
+// ServersToInterface takes a server object and retruns a interface{}
+func ServersToInterface(servers []server) [][]interface{} {
 	ret := make([][]interface{}, len(servers))
 	for i, svr := range servers {
 		ret[i] = make([]interface{}, 2)
@@ -270,7 +271,7 @@ key_file = my_certificate.key
 		quit(err)
 	}
 
-	servers, err := getServers(readString(section, "servers"))
+	base.servers, err = getServers(readString(section, "servers"))
 	if err != nil {
 		quit(err)
 	}
@@ -287,11 +288,11 @@ key_file = my_certificate.key
 	go sigHandle(sigCh)
 
 	conn.client = siridb.NewClient(
-		conn.user,                   // user
-		conn.password,               // password
-		base.dbname,                 // database
-		serversToInterface(servers), // siridb server(s)
-		base.logCh,                  // optional log channel
+		conn.user,                        // user
+		conn.password,                    // password
+		base.dbname,                      // database
+		ServersToInterface(base.servers), // siridb server(s)
+		base.logCh,                       // optional log channel
 	)
 	base.connections = append(base.connections, conn)
 	base.ssessions = make(map[string]string)
@@ -423,8 +424,9 @@ key_file = my_certificate.key
 		http.Handle("/socket.io/", server)
 	}
 
+	msg := "Serving SiriDB API on http%s://0.0.0.0:%d\nPress CTRL+C to quit\n"
 	if base.enableSSL {
-		fmt.Printf("Serving SiriDB HTTPS API on port %d\nPress CTRL+C to quit\n", base.port)
+		fmt.Printf(msg, "s", base.port)
 		if err = http.ListenAndServeTLS(
 			fmt.Sprintf(":%d", base.port),
 			base.crtFile,
@@ -433,7 +435,7 @@ key_file = my_certificate.key
 			fmt.Printf("error: %s\n", err)
 		}
 	} else {
-		fmt.Printf("Serving SiriDB HTTP API on port %d\nPress CTRL+C to quit\n", base.port)
+		fmt.Printf(msg, "", base.port)
 		if err = http.ListenAndServe(fmt.Sprintf(":%d", base.port), nil); err != nil {
 			fmt.Printf("error: %s\n", err)
 		}

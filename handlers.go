@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/googollee/go-socket.io"
+	siridb "github.com/transceptor-technology/go-siridb-connector"
 )
 
 type tDb struct {
@@ -150,7 +151,24 @@ func onAuthLogin(so *socketio.Socket, req string) (int, string) {
 			return http.StatusUnprocessableEntity, "Username or password incorrect"
 		}
 	} else if base.multiUser {
-		fmt.Println(authLoginReq)
+		var conn Conn
+		conn.user = authLoginReq.Username
+		conn.password = authLoginReq.Password
+		conn.client = siridb.NewClient(
+			conn.user,                        // user
+			conn.password,                    // password
+			base.dbname,                      // database
+			ServersToInterface(base.servers), // siridb server(s)
+			base.logCh,                       // optional log channel
+		)
+		conn.client.Connect()
+		if conn.client.IsConnected() {
+			base.connections = append(base.connections, conn)
+		} else {
+			conn.client.Close()
+			return http.StatusUnprocessableEntity, "Cannot login using the username and password"
+		}
+
 	} else {
 		return http.StatusUnprocessableEntity, "Multiple user login is not allowed"
 
@@ -190,7 +208,24 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else if base.multiUser {
-		fmt.Println(authLoginReq)
+		var conn Conn
+		conn.user = authLoginReq.Username
+		conn.password = authLoginReq.Password
+		conn.client = siridb.NewClient(
+			conn.user,                        // user
+			conn.password,                    // password
+			base.dbname,                      // database
+			ServersToInterface(base.servers), // siridb server(s)
+			base.logCh,                       // optional log channel
+		)
+		conn.client.Connect()
+		if conn.client.IsConnected() {
+			base.connections = append(base.connections, conn)
+		} else {
+			conn.client.Close()
+			http.Error(w, "Cannot login using the username and password", http.StatusUnprocessableEntity)
+			return
+		}
 	} else {
 		http.Error(w, "Multiple user login is not allowed", http.StatusUnprocessableEntity)
 		return
