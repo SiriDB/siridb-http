@@ -9,13 +9,11 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/astaxie/beego/session"
 	"github.com/googollee/go-socket.io"
 	siridb "github.com/transceptor-technology/go-siridb-connector"
-
-	"time"
-
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	ini "gopkg.in/ini.v1"
 )
@@ -63,7 +61,7 @@ var (
 	xApp     = kingpin.New("siridb-http", "Provides a HTTP API and optional web interface for SiriDB.")
 	xConfig  = xApp.Flag("config", "Configuration and connection file for SiriDB HTTP.").Default("").Short('c').String()
 	xVerbose = xApp.Flag("verbose", "Enable verbose logging.").Bool()
-	xVersion = xApp.Flag("version", "Print version information and exit.").Bool()
+	xVersion = xApp.Flag("version", "Print version information and exit.").Short('v').Bool()
 )
 
 var base = store{}
@@ -127,7 +125,6 @@ func logHandle(logCh chan string) {
 func sigHandle(sigCh chan os.Signal) {
 	for {
 		<-sigCh
-		println("CTRL+C pressed...")
 		quit(nil)
 	}
 }
@@ -438,4 +435,5 @@ key_file = certificate.key
 			fmt.Printf("error: %s\n", err)
 		}
 	}
+	quit(nil)
 }

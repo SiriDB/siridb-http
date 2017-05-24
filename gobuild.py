@@ -2,6 +2,7 @@
 import argparse
 import os
 import subprocess
+import sys
 
 template = '''// +build !debug
 
@@ -106,6 +107,20 @@ def compile_less():
         os.path.join(path, 'build', 'layout.css')])
 
 
+def webpack():
+    print('(be patient, this can take some time)...')
+    path = os.path.dirname(__file__)
+    env = os.environ
+    env['NODE_ENV'] = 'production'
+    with subprocess.Popen([
+            os.path.join('.', 'node_modules', '.bin', 'webpack'),
+            '-p'],
+            env=env,
+            cwd=os.path.join(path, 'src'),
+            stdout=subprocess.PIPE) as proc:
+        print(proc.stdout.read().decode('utf-8'))
+
+
 def compile(fn, variable, empty=False):
     if empty:
         data = ''
@@ -121,12 +136,18 @@ def compile(fn, variable, empty=False):
         ))
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
         '-l', '--less',
         action='store_true',
         help='compile less')
+
+    parser.add_argument(
+        '-w', '--webpack',
+        action='store_true',
+        help='compile production webpack')
 
     parser.add_argument(
         '-g', '--go',
@@ -145,22 +166,40 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    if args.go and args.go_empty:
+        print('Cannot use -e and -g at the same time')
+        sys.exit(1)
+
     if args.less:
-        print('Compile less...')
+        print('Compiling less...')
         compile_less()
-        print('Finished!')
-    elif args.go:
-        print('Compile go...')
+        print('Finished compiling less!')
+
+    if args.webpack:
+        print('Compiling javascript using webpack...')
+        webpack()
+        print('Finished compiling javascript using webpack...')
+
+    if args.go:
+        print('Create go handler files...')
         for bf in binfiles:
             compile(*bf)
-        print('Finished!')
-    elif args.go_empty:
-        print('Compiled empty go files...')
+        print('Finished creating go handler files!')
+
+    if args.go_empty:
+        print('Create empty go handler files...')
         for bf in binfiles:
             compile(*bf, empty=True)
-        print('Finished!')
-    elif args.build_all:
+        print('Finished creating  empty go handler files!')
+
+    if args.build_all:
         build_all()
-        print('Finished!')
-    else:
+        print('Finished building binaries!')
+
+    if not any([
+            args.go,
+            args.go_empty,
+            args.less,
+            args.webpack,
+            args.build_all]):
         parser.print_usage()

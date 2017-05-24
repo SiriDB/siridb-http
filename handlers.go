@@ -5,15 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
-
-	msgpack "gopkg.in/vmihailenco/msgpack.v2"
-
 	"reflect"
+	"strings"
 
 	"github.com/googollee/go-socket.io"
 	qpack "github.com/transceptor-technology/go-qpack"
 	siridb "github.com/transceptor-technology/go-siridb-connector"
+	msgpack "gopkg.in/vmihailenco/msgpack.v2"
 )
 
 type tDb struct {
@@ -303,7 +301,7 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := readBody(w, r, &authLoginReq); err != nil {
-		return
+		return // error is send by the readBody function
 	}
 
 	if conn := getConnByUser(authLoginReq.Username); conn != nil {
