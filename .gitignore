@@ -118,5 +118,3 @@ siridb-http
 # Go generated files
 file*.go
 
-# Certificate files
-certificate.*
