@@ -214,6 +214,7 @@ func sendData(w http.ResponseWriter, r *http.Request, data interface{}) {
 	case "application/x-msgpack":
 		sendMsgPack(w, data)
 	default:
+		fmt.Println(data)
 		sendError(w, fmt.Sprintf("unsupported content-type: %s", contentType), http.StatusUnsupportedMediaType)
 	}
 }
@@ -222,6 +223,9 @@ func readBody(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	contentType := r.Header.Get("Content-type")
 
 	switch strings.ToLower(contentType) {
+	case "application/csv":
+		return readCSV(w, r, &v)
+
 	case "application/json":
 		return readJSON(w, r, &v)
 	case "application/x-qpack":
@@ -436,20 +440,7 @@ func readMsgPack(w http.ResponseWriter, r *http.Request, v *interface{}) error {
 	return nil
 }
 
-func readQPack(w http.ResponseWriter, r *http.Request, v *interface{}) error {
-	b, err := ioutil.ReadAll(r.Body)
-
-	if err != nil {
-		sendError(w, err.Error(), http.StatusInternalServerError)
-		return err
-	}
-
-	res, err := qpack.Unpack(b, qpack.QpFlagStringKeysOnly)
-	if err != nil {
-		sendError(w, err.Error(), http.StatusInternalServerError)
-		return err
-	}
-
+func resToPlan(w http.ResponseWriter, res interface{}, v *interface{}) error {
 	iface, ok := (*v).(*interface{})
 	if ok {
 		*iface = res
@@ -478,8 +469,33 @@ func readQPack(w http.ResponseWriter, r *http.Request, v *interface{}) error {
 			e.Field(i).Set(reflect.ValueOf(val))
 		}
 	}
-
 	return nil
+}
+
+func readQPack(w http.ResponseWriter, r *http.Request, v *interface{}) error {
+	b, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		sendError(w, err.Error(), http.StatusInternalServerError)
+		return err
+	}
+
+	res, err := qpack.Unpack(b, qpack.QpFlagStringKeysOnly)
+	if err != nil {
+		sendError(w, err.Error(), http.StatusInternalServerError)
+		return err
+	}
+
+	return resToPlan(w, res, v)
+}
+
+func readCSV(w http.ResponseWriter, r *http.Request, v *interface{}) error {
+	res, err := parseCsv(r.Body)
+	if err != nil {
+		sendError(w, err.Error(), http.StatusInternalServerError)
+		return err
+	}
+	return resToPlan(w, res, v)
 }
 
 func handlerInsert(w http.ResponseWriter, r *http.Request) {
