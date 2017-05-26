@@ -4,8 +4,56 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
+	"strings"
 )
+
+func toCsvVal(s string) string {
+	if strings.ContainsRune(s, '"') {
+		return fmt.Sprintf("\"%s\"", strings.Replace(s, `"`, `""`, -1))
+	}
+	if strings.ContainsRune(s, ',') {
+		return fmt.Sprintf("\"%s\"", s)
+	}
+	return s
+}
+
+func toCsv(v interface{}) (string, error) {
+	t := reflect.TypeOf(v)
+	switch t.Kind() {
+	case reflect.Struct:
+		m := reflect.ValueOf(v)
+		n := m.NumField()
+		lines := make([]string, n)
+		for i := 0; i < n; i++ {
+			field := t.Field(i)
+			fn := field.Tag.Get("csv")
+			if len(fn) == 0 {
+				fn = field.Name
+			}
+
+			val := m.Field(i)
+			lines[i] = fmt.Sprintf("%s,%s", fn, val.String())
+		}
+		return strings.Join(lines, "\n"), nil
+	case reflect.Map:
+		return queryToCsv(v)
+	default:
+		return "", fmt.Errorf("unexpected data type: %s", t.Kind())
+	}
+}
+
+func queryToCsv(v interface{}) (string, error) {
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("got an unexpected map")
+	}
+	if columns, ok := m["columns"]; ok {
+		fmt.Println(columns)
+	}
+	return "mapje", nil
+}
 
 func parseCsv(r io.Reader) (map[string]interface{}, error) {
 

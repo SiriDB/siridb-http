@@ -15,33 +15,33 @@ import (
 )
 
 type tDb struct {
-	Dbname        string `json:"dbname" qp:"dbname" msgpack:"dbname"`
-	TimePrecision string `json:"timePrecision" qp:"timePrecision" msgpack:"timePrecision"`
-	Version       string `json:"version" qp:"version" msgpack:"version"`
-	HTTPServer    string `json:"httpServer" qp:"httpServer" msgpack:"httpServer"`
+	Dbname        string `json:"dbname" qp:"dbname" msgpack:"dbname" csv:"dbname"`
+	TimePrecision string `json:"timePrecision" qp:"timePrecision" msgpack:"timePrecision" csv:"timePrecision"`
+	Version       string `json:"version" qp:"version" msgpack:"version" csv:"version"`
+	HTTPServer    string `json:"httpServer" qp:"httpServer" msgpack:"httpServer" csv:"httpServer"`
 }
 
 type tAuthFetch struct {
-	User         interface{} `json:"user" qp:"user" msgpack:"user"`
-	AuthRequired bool        `json:"authRequired" qp:"authRequired" msgpack:"authRequired"`
+	User         interface{} `json:"user" qp:"user" msgpack:"user" csv:"user"`
+	AuthRequired bool        `json:"authRequired" qp:"authRequired" msgpack:"authRequired" csv:"authRequired"`
 }
 
 type tAuthLoginReq struct {
-	Username string `json:"username" qp:"username" msgpack:"username"`
-	Password string `json:"password" qp:"password" msgpack:"password"`
+	Username string `json:"username" qp:"username" msgpack:"username" csv:"username"`
+	Password string `json:"password" qp:"password" msgpack:"password" csv:"password"`
 }
 
 type tAuthLoginRes struct {
-	User string `json:"user" qp:"user" msgpack:"user"`
+	User string `json:"user" qp:"user" msgpack:"user" msgpack:"user" csv:"user"`
 }
 
 type tAuthLogoff struct {
-	User interface{} `json:"user" qp:"user" msgpack:"user"`
+	User interface{} `json:"user" qp:"user" msgpack:"user" csv:"user"`
 }
 
 type tQuery struct {
-	Query   string      `json:"query" qp:"query" msgpack:"query"`
-	Timeout interface{} `json:"timeout" qp:"timeout" msgpack:"timeout"`
+	Query   string      `json:"query" qp:"query" msgpack:"query" csv:"query"`
+	Timeout interface{} `json:"timeout" qp:"timeout" msgpack:"timeout" csv:"timeout"`
 }
 
 func checkBasicAuth(r *http.Request) (conn *Conn) {
@@ -111,6 +111,16 @@ func getConnByHTTP(w http.ResponseWriter, r *http.Request) *Conn {
 func sendError(w http.ResponseWriter, err string, code int) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	http.Error(w, err, code)
+}
+
+func sendCSV(w http.ResponseWriter, data interface{}) {
+	if s, err := toCsv(data); err != nil {
+		sendError(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/csv; charset=UTF-8")
+		w.Write([]byte(s))
+	}
 }
 
 func sendJSON(w http.ResponseWriter, data interface{}) {
@@ -207,6 +217,8 @@ func sendData(w http.ResponseWriter, r *http.Request, data interface{}) {
 	contentType := r.Header.Get("Content-type")
 
 	switch strings.ToLower(contentType) {
+	case "application/csv":
+		sendCSV(w, data)
 	case "application/json":
 		sendJSON(w, data)
 	case "application/x-qpack":
@@ -225,7 +237,6 @@ func readBody(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	switch strings.ToLower(contentType) {
 	case "application/csv":
 		return readCSV(w, r, &v)
-
 	case "application/json":
 		return readJSON(w, r, &v)
 	case "application/x-qpack":
