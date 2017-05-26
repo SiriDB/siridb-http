@@ -451,7 +451,7 @@ func readMsgPack(w http.ResponseWriter, r *http.Request, v *interface{}) error {
 	return nil
 }
 
-func resToPlan(w http.ResponseWriter, res interface{}, v *interface{}) error {
+func resToPlan(w http.ResponseWriter, res interface{}, v *interface{}, ft string) error {
 	iface, ok := (*v).(*interface{})
 	if ok {
 		*iface = res
@@ -471,12 +471,17 @@ func resToPlan(w http.ResponseWriter, res interface{}, v *interface{}) error {
 
 	for i := 0; i < n; i++ {
 		field := t.Field(i)
-		fn := field.Tag.Get("qp")
+		fn := field.Tag.Get(ft)
 		if len(fn) == 0 {
 			fn = field.Name
 		}
 		val, ok := m[fn]
 		if ok {
+			if e.Field(i).Type() != reflect.TypeOf(val) {
+				err := fmt.Errorf("unexpected type")
+				sendError(w, err.Error(), http.StatusInternalServerError)
+				return err
+			}
 			e.Field(i).Set(reflect.ValueOf(val))
 		}
 	}
@@ -497,7 +502,7 @@ func readQPack(w http.ResponseWriter, r *http.Request, v *interface{}) error {
 		return err
 	}
 
-	return resToPlan(w, res, v)
+	return resToPlan(w, res, v, "qp")
 }
 
 func readCSV(w http.ResponseWriter, r *http.Request, v *interface{}) error {
@@ -506,7 +511,7 @@ func readCSV(w http.ResponseWriter, r *http.Request, v *interface{}) error {
 		sendError(w, err.Error(), http.StatusInternalServerError)
 		return err
 	}
-	return resToPlan(w, res, v)
+	return resToPlan(w, res, v, "csv")
 }
 
 func handlerInsert(w http.ResponseWriter, r *http.Request) {

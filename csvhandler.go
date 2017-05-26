@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func toCsvVal(s string) string {
+func escapeCsv(s string) string {
 	if strings.ContainsRune(s, '"') {
 		return fmt.Sprintf("\"%s\"", strings.Replace(s, `"`, `""`, -1))
 	}
@@ -38,21 +38,98 @@ func toCsv(v interface{}) (string, error) {
 		}
 		return strings.Join(lines, "\n"), nil
 	case reflect.Map:
-		return queryToCsv(v)
+		var lines []string
+		if err := queryToCsv(&lines, v); err != nil {
+			return "", err
+		}
+		return strings.Join(lines, "\n"), nil
 	default:
 		return "", fmt.Errorf("unexpected data type: %s", t.Kind())
 	}
 }
 
-func queryToCsv(v interface{}) (string, error) {
+func queryToCsv(lines *[]string, v interface{}) error {
 	m, ok := v.(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("got an unexpected map")
+		return fmt.Errorf("got an unexpected map")
 	}
-	if columns, ok := m["columns"]; ok {
-		fmt.Println(columns)
+
+	if stop, err := tryList(lines, m); stop {
+		return err
 	}
-	return "mapje", nil
+	return fmt.Errorf("cannot convert query data to csv")
+}
+
+func tryCount(lines *[]string, m map[string]interface{}) (bool, error) {
+	cols := [9]string{
+		"series",
+		"servers",
+		"groups",
+		"shards",
+		"pools",
+		"users",
+		"servers_received_points",
+		"series_length",
+		"shards_size"}
+
+}
+
+func tryList(lines *[]string, m map[string]interface{}) (bool, error) {
+	var columns interface{}
+	var ok bool
+	if columns, ok = m["columns"]; !ok {
+		return false, fmt.Errorf("columns not found")
+	}
+
+	if reflect.TypeOf(columns).Kind() != reflect.Slice {
+		return false, fmt.Errorf("columns not a slice")
+	}
+
+	slice := reflect.ValueOf(columns)
+	n := slice.Len()
+	if n == 0 {
+		return false, fmt.Errorf("zero comuns found")
+	}
+
+	var temp = make([]string, n)
+	for i := 0; i < n; i++ {
+		v := slice.Index(i).Interface()
+		if s, ok := v.(string); ok {
+			temp[i] = escapeCsv(s)
+		} else {
+			return false, fmt.Errorf("columns contains non string")
+		}
+	}
+	*lines = append(*lines, strings.Join(temp, ","))
+
+	delete(m, "columns")
+
+	for k, data := range m {
+		if reflect.TypeOf(data).Kind() != reflect.Slice {
+			return true, fmt.Errorf("%s not a slice", k)
+		}
+		rows := reflect.ValueOf(data)
+		nrows := rows.Len()
+		for r := 0; r < nrows; r++ {
+			row := rows.Index(r).Interface()
+
+			if reflect.TypeOf(row).Kind() != reflect.Slice {
+				return true, fmt.Errorf("row not a slice")
+			}
+			cols := reflect.ValueOf(row)
+
+			ncols := cols.Len()
+			if n != ncols {
+				return true, fmt.Errorf("number of columns does not equel values")
+			}
+			var temp = make([]string, n)
+			for i := 0; i < ncols; i++ {
+				temp[i] = escapeCsv(fmt.Sprint(cols.Index(i).Interface()))
+			}
+			*lines = append(*lines, strings.Join(temp, ","))
+		}
+	}
+	return true, nil
 }
 
 func parseCsv(r io.Reader) (map[string]interface{}, error) {
@@ -139,7 +216,7 @@ func readTable(data *map[string]interface{}, record []string, reader *csv.Reader
 			return fmt.Errorf("expecting a time-stamp in column zero at line %d", n)
 		}
 		for i := 1; i < len(record); i++ {
-			arr[i-1] = append(arr[i-1], [2]interface{}{ts, parseCsvVal(record[i])})
+			arr[i-1] = append(arr[i-1], [2]interface{}{ts, escapeCsv(record[i])})
 		}
 	}
 	return nil
