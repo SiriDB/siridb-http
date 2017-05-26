@@ -65,6 +65,42 @@ func queryToCsv(lines *[]string, v interface{}) error {
 	return fmt.Errorf("cannot convert query data to csv")
 }
 
+func tryShow(lines *[]string, m map[string]interface{}) (bool, error) {
+	var data, item, name, value interface{}
+	var ok bool
+
+	if data, ok = m["data"]; !ok {
+		return false, fmt.Errorf("show: data not found")
+	}
+
+	if reflect.TypeOf(data).Kind() != reflect.Slice {
+		return false, fmt.Errorf("show: data not a slice")
+	}
+
+	slice := reflect.ValueOf(data)
+	n := slice.Len()
+	if n == 0 {
+		return false, fmt.Errorf("zero data items found")
+	}
+
+	var temp = make([]string, n)
+	for i := 0; i < n; i++ {
+		v := slice.Index(i).Interface()
+		if item, ok = v.(map[string]interface{}); !ok {
+			return false, fmt.Errorf("show: data contains a type other than map")
+		}
+		if name, ok = item["name"]; !ok {
+			return false, fmt.Errorf("show: name not fount in item")
+		}
+
+		if value, ok = item["value"]; !ok {
+			return false, fmt.Errorf("show: value not fount in item")
+		}
+		s =
+	}
+
+}
+
 func tryCount(lines *[]string, m map[string]interface{}) (bool, error) {
 	cols := [9]string{
 		"series",
