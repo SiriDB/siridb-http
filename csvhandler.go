@@ -57,6 +57,11 @@ func queryToCsv(lines *[]string, v interface{}) error {
 	if stop, err := tryList(lines, m); stop {
 		return err
 	}
+
+	if stop, err := tryCount(lines, m); stop {
+		return err
+	}
+
 	return fmt.Errorf("cannot convert query data to csv")
 }
 
@@ -71,7 +76,16 @@ func tryCount(lines *[]string, m map[string]interface{}) (bool, error) {
 		"servers_received_points",
 		"series_length",
 		"shards_size"}
-
+	for _, col := range cols {
+		if count, ok := m[col]; ok {
+			i, ok := count.(int)
+			if ok {
+				*lines = append(*lines, fmt.Sprintf(`"%s",%d`, col, i))
+				return true, nil
+			}
+		}
+	}
+	return false, fmt.Errorf("no counter key found")
 }
 
 func tryList(lines *[]string, m map[string]interface{}) (bool, error) {
