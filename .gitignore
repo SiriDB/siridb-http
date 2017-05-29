@@ -120,3 +120,6 @@ file*.go
 
 # Certificates
 certificates/
+
+# Binaries
+bin/

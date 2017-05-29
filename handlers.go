@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/googollee/go-socket.io"
@@ -279,28 +280,21 @@ func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
 	sendData(w, r, authFetch)
 }
 
-func onAuthLogin(so *socketio.Socket, req string) (int, string) {
-	var authLoginReq tAuthLoginReq
-
-	err := json.Unmarshal([]byte(req), &authLoginReq)
-	if err != nil {
-		return http.StatusInternalServerError, err.Error()
-	}
-
-	if conn := getConnByUser(authLoginReq.Username); conn != nil {
-		if authLoginReq.Password != conn.password {
+func onAuthLogin(so *socketio.Socket, req *tAuthLoginReq) (int, string) {
+	if conn := getConnByUser(req.Username); conn != nil {
+		if req.Password != conn.password {
 			return http.StatusUnprocessableEntity, "Username or password incorrect"
 		}
 	} else if base.multiUser {
-		if _, err := addConnection(authLoginReq.Username, authLoginReq.Password); err != nil {
+		if _, err := addConnection(req.Username, req.Password); err != nil {
 			return http.StatusUnprocessableEntity, err.Error()
 		}
 	} else {
 		return http.StatusUnprocessableEntity, "Multiple user login is not allowed"
 	}
 
-	base.ssessions[(*so).Id()] = authLoginReq.Username
-	authLoginRes := tAuthLoginRes{User: authLoginReq.Username}
+	base.ssessions[(*so).Id()] = req.Username
+	authLoginRes := tAuthLoginRes{User: req.Username}
 
 	return retJSON(authLoginRes)
 }
@@ -362,24 +356,22 @@ func handlerAuthLogout(w http.ResponseWriter, r *http.Request) {
 	sendData(w, r, authLogoff)
 }
 
-func onQuery(so *socketio.Socket, req string) (int, string) {
+func onQuery(so *socketio.Socket, req *tQuery) (int, string) {
 	conn, err := getConnBySIO(so)
 	if err != nil {
 		return http.StatusUnauthorized, err.Error()
 	}
 
-	var query tQuery
+	var timeout uint64
+	timeout = 30
 
-	if err = json.Unmarshal([]byte(req), &query); err != nil {
-		return http.StatusInternalServerError, err.Error()
+	if req.Timeout != nil {
+		if timeout, err = strconv.ParseUint(fmt.Sprint(req.Timeout), 10, 16); err != nil {
+			timeout = 30
+		}
 	}
 
-	timeout, ok := query.Timeout.(uint16)
-	if !ok {
-		timeout = 30
-	}
-
-	res, err := conn.client.Query(query.Query, timeout)
+	res, err := conn.client.Query(req.Query, uint16(timeout))
 	if err != nil {
 		return http.StatusInternalServerError, err.Error()
 	}
@@ -410,21 +402,13 @@ func handlerQuery(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func onInsert(so *socketio.Socket, req string) (int, string) {
+func onInsert(so *socketio.Socket, insert *interface{}) (int, string) {
 	conn, err := getConnBySIO(so)
 	if err != nil {
 		return http.StatusUnauthorized, err.Error()
 	}
 
-	var insert interface{}
-	decoder := json.NewDecoder(strings.NewReader(req))
-	decoder.UseNumber()
-
-	if err = decoder.Decode(&insert); err != nil {
-		return http.StatusInternalServerError, err.Error()
-	}
-
-	res, err := conn.client.Insert(insert, base.insertTimeout)
+	res, err := conn.client.Insert(*insert, base.insertTimeout)
 	if err != nil {
 		return http.StatusInternalServerError, err.Error()
 	}

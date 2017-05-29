@@ -427,17 +427,17 @@ key_file = certificate.key
 			so.On("auth fetch", func(req string) (int, string) {
 				return onAuthFetch(&so)
 			})
-			so.On("auth login", func(req string) (int, string) {
-				return onAuthLogin(&so, req)
+			so.On("auth login", func(req tAuthLoginReq) (int, string) {
+				return onAuthLogin(&so, &req)
 			})
 			so.On("auth logout", func(req string) (int, string) {
 				return onAuthLogout(&so)
 			})
-			so.On("query", func(req string) (int, string) {
-				return onQuery(&so, req)
+			so.On("query", func(req tQuery) (int, string) {
+				return onQuery(&so, &req)
 			})
-			so.On("insert", func(req string) (int, string) {
-				return onInsert(&so, req)
+			so.On("insert", func(req interface{}) (int, string) {
+				return onInsert(&so, &req)
 			})
 			so.On("disconnection", func() {
 				delete(base.ssessions, so.Id())
