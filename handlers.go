@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/googollee/go-socket.io"
 	qpack "github.com/transceptor-technology/go-qpack"
 	siridb "github.com/transceptor-technology/go-siridb-connector"
+	"github.com/transceptor-technology/go-socket.io"
 	msgpack "gopkg.in/vmihailenco/msgpack.v2"
 )
 

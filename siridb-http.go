@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/astaxie/beego/session"
-	"github.com/googollee/go-socket.io"
 	siridb "github.com/transceptor-technology/go-siridb-connector"
+	"github.com/transceptor-technology/go-socket.io"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	ini "gopkg.in/ini.v1"
 )
