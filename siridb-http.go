@@ -421,16 +421,16 @@ key_file = certificate.key
 		}
 
 		server.On("connection", func(so socketio.Socket) {
-			so.On("db-info", func(req string) (int, string) {
+			so.On("db-info", func(_ string) (int, string) {
 				return onDbInfo(&so)
 			})
-			so.On("auth fetch", func(req string) (int, string) {
+			so.On("auth fetch", func(_ string) (int, string) {
 				return onAuthFetch(&so)
 			})
 			so.On("auth login", func(req tAuthLoginReq) (int, string) {
 				return onAuthLogin(&so, &req)
 			})
-			so.On("auth logout", func(req string) (int, string) {
+			so.On("auth logout", func(_ string) (int, string) {
 				return onAuthLogout(&so)
 			})
 			so.On("query", func(req tQuery) (int, string) {
