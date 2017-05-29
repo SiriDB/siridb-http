@@ -69,7 +69,7 @@ binfiles = [
 
 def build_all():
     version = None
-    with open('admin.go', 'r') as f:
+    with open('siridb-http.go', 'r') as f:
         for line in f:
             if line.startswith('const AppVersion ='):
                 version = line.split('"')[1]
@@ -84,7 +84,7 @@ def build_all():
         tmp_env = os.environ.copy()
         tmp_env["GOOS"] = goos
         tmp_env["GOARCH"] = goarch
-        outfile = os.path.join(outpath, 'siridb-admin_{}_{}_{}.{}'.format(
+        outfile = os.path.join(outpath, 'siridb-http_{}_{}_{}.{}'.format(
             version, goos, goarch, 'exe' if goos == 'windows' else 'bin'))
         with subprocess.Popen(
                 ['go', 'build', '-o', outfile],
