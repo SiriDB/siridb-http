@@ -183,7 +183,7 @@ func addConnection(username, password string) (*Conn, error) {
 		base.logCh,                       // optional log channel
 	)
 	conn.client.Connect()
-	if conn.client.IsConnected() {
+	if conn.client.IsConnected() && conn.client.IsAvailable() {
 		base.connections = append(base.connections, conn)
 	} else {
 		conn.client.Close()
