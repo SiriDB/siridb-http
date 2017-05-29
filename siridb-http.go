@@ -207,13 +207,21 @@ func main() {
 		fmt.Printf(
 			`# SiriDB HTTP Configuration file
 [Database]
+# User with at least 'show' privileges.
 user = <your_username>
+
+# A password is required. To protect the password this file should be placed in
+# a folder where unauthorized users have no access.
 password = <your_password>
+
+# Database to connect to.
 dbname = <your_database>
-# Multiple servers are possible and should be comma separated. When a port
+
+# Multiple servers are allowed and should be comma separated. When a port
 # is not provided the default 9000 is used. IPv6 address are supported and
 # should be wrapped in square brackets [] in case an alternative port is
-# required.
+# required. SiriDB HTTP will randomly select an available siridb server
+# for each request.
 #
 # Valid examples:
 #   siridb01.local,siridb02.local,siridb03.local,siridb04.local
@@ -223,20 +231,43 @@ dbname = <your_database>
 servers = localhost:9000
 
 [Configuration]
-port = 8080
+# Listening to TCP port.
+port = 5050
+
+# When disabled no authentication is required. When enabled session
+# authentication or basic authentication is required.
 require_authentication = True
+
+# When enabled /socket.io/ will be enabled and Socket-IO can be used as an
+# alternative to the standard http rest api.
 enable_socket_io = True
+
+# When enabled the crt_file and key_file must be configured and the server
+# will be hosted on https.
 enable_ssl = False
+
+# When enabled a website is hosted on the configured port. When disabled the
+# resource URIs like /query, /insert, /auth/.. etc. are still available.
 enable_web = True
+
+# When enabled the /query and /insert resource URIs can be used with basic
+# authentication.
 enable_basic_auth = False
+
 # When multi user is disabled, only the user/password combination provided in
-# this configuration file can be used to create a session connection to SiriDB.
+# this configuration file can be used.
 enable_multi_user = False
+
+# Cookie max age is used to set the cookie expiration time in seconds.
 cookie_max_age = 604800
+
+# The query api allows you to specify a timeout for each query, but the insert
+# api only accepts data. Therefore the insert timeout is set as a general
+# value and is applicable to each insert.
 insert_timeout = 60
 
 [SSL]
-# Self-signed certificates can be created using:
+# Self-signed certificates can be created with the following command:
 #
 #   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 #        -keyout certificate.key -out certificate.crt
@@ -247,8 +278,9 @@ key_file = certificate.key
 #
 # Welcome and thank you for using SiriDB!
 #
-# A configuration file is required and shoud be provided with the --config <file> argument.
-# Above you find an example template which can used.
+# A configuration file is required and shoud be provided with the
+#   --config <file> argument.
+# Above you find an example template which can be used.
 #
 
 `)
