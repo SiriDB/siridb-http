@@ -123,3 +123,5 @@ certificates/
 
 # Binaries
 bin/
+*.exe
+*.bin

@@ -58,6 +58,19 @@ Clone the project using git. (we assume git is installed)
 git clone https://github.com/transceptor-technology/siridb-http
 ```
 
+Install required npm packages:
+```
+$ cd siridb-http/src
+$ npm install
+```
+
+Make sure less is installed:
+```
+$ sudo npm install -g less less-plugin-clean-css
+```
+
+The gobuild.py script can be
+
 
 ## Configuration
 The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`. By default siridb http will listen on port 8080 but this default can be changed by setting `port` within the `[Configuration]` section in the config file.

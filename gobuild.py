@@ -67,16 +67,21 @@ binfiles = [
 ]
 
 
-def build_all():
+def get_version(path):
     version = None
-    with open('siridb-http.go', 'r') as f:
+    with open(os.path.join(path, 'siridb-http.go'), 'r') as f:
         for line in f:
             if line.startswith('const AppVersion ='):
                 version = line.split('"')[1]
     if version is None:
         raise Exception('Cannot find version in siridb-http.go')
+    return version
 
-    outpath = os.path.join('bin', version)
+
+def build_all():
+    path = os.path.dirname(__file__)
+    version = get_version(path)
+    outpath = os.path.join(path, 'bin', version)
     if not os.path.exists(outpath):
         os.makedirs(outpath)
 
@@ -89,8 +94,26 @@ def build_all():
         with subprocess.Popen(
                 ['go', 'build', '-o', outfile],
                 env=tmp_env,
+                cwd=path,
                 stdout=subprocess.PIPE) as proc:
             print('Building {}/{}...'.format(goos, goarch))
+
+
+def build(development=True):
+    path = os.path.dirname(__file__)
+    version = get_version(path)
+    outfile = os.path.join(path, 'siridb-http_{}.{}'.format(
+        version, 'exe' if sys.platform.startswith('win') else 'bin'))
+    args = ['go', 'build', '-o', outfile]
+
+    if development:
+        args.extend(['--tags', 'debug'])
+
+    with subprocess.Popen(
+            args,
+            cwd=os.path.dirname(__file__),
+            stdout=subprocess.PIPE) as proc:
+        print('Building {}...'.format(outfile))
 
 
 def compile_less():
@@ -152,17 +175,22 @@ if __name__ == '__main__':
     parser.add_argument(
         '-g', '--go',
         action='store_true',
-        help='compile go')
+        help='compile go files for production')
 
     parser.add_argument(
         '-e', '--go-empty',
         action='store_true',
-        help='compile empty go files')
+        help='compile placeholder go files for development')
+
+    parser.add_argument(
+        '-b', '--build',
+        action='store_true',
+        help='build binary (developemt or production depending on -g or -e)')
 
     parser.add_argument(
         '-a', '--build-all',
         action='store_true',
-        help='build for all goos and goarchs')
+        help='build production binaries for all goos and goarchs')
 
     args = parser.parse_args()
 
@@ -191,6 +219,18 @@ if __name__ == '__main__':
         for bf in binfiles:
             compile(*bf, empty=True)
         print('Finished creating  empty go handler files!')
+
+    if args.build:
+        if args.go:
+            print('Build production binary')
+            build(development=False)
+        elif args.go_empty:
+            print('Build develpment binary')
+            build(development=True)
+        else:
+            print('Cannot use -b without -e or -g')
+            sys.exit(1)
+        print('Finished build!')
 
     if args.build_all:
         build_all()
