@@ -154,14 +154,6 @@ func sendMsgPack(w http.ResponseWriter, data interface{}) {
 	}
 }
 
-func retJSON(data interface{}) (int, string) {
-	b, err := json.Marshal(data)
-	if err != nil {
-		return http.StatusInternalServerError, err.Error()
-	}
-	return http.StatusOK, string(b)
-}
-
 func getConnByUser(user string) *Conn {
 	for _, conn := range base.connections {
 		if conn.user == user {
@@ -196,13 +188,13 @@ func handlerNotFound(w http.ResponseWriter, r *http.Request) {
 	sendError(w, "404 not found", http.StatusNotFound)
 }
 
-func onDbInfo(so *socketio.Socket) (int, string) {
+func onDbInfo(so *socketio.Socket) (int, interface{}) {
 	db := tDb{
 		Dbname:        base.dbname,
 		TimePrecision: base.timePrecision,
 		Version:       base.version,
 		HTTPServer:    AppVersion}
-	return retJSON(db)
+	return http.StatusOK, db
 }
 
 func handlerDbInfo(w http.ResponseWriter, r *http.Request) {
@@ -251,7 +243,7 @@ func readBody(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	}
 }
 
-func onAuthFetch(so *socketio.Socket) (int, string) {
+func onAuthFetch(so *socketio.Socket) (int, interface{}) {
 	authFetch := tAuthFetch{User: nil, AuthRequired: base.reqAuth}
 
 	if user, ok := base.ssessions[(*so).Id()]; ok && getConnByUser(user) != nil {
@@ -259,7 +251,7 @@ func onAuthFetch(so *socketio.Socket) (int, string) {
 	} else if !base.reqAuth {
 		authFetch.User = base.connections[0].user
 	}
-	return retJSON(authFetch)
+	return http.StatusOK, authFetch
 }
 
 func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
@@ -280,7 +272,7 @@ func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
 	sendData(w, r, authFetch)
 }
 
-func onAuthLogin(so *socketio.Socket, req *tAuthLoginReq) (int, string) {
+func onAuthLogin(so *socketio.Socket, req *tAuthLoginReq) (int, interface{}) {
 	if conn := getConnByUser(req.Username); conn != nil {
 		if req.Password != conn.password {
 			return http.StatusUnprocessableEntity, "Username or password incorrect"
@@ -296,7 +288,7 @@ func onAuthLogin(so *socketio.Socket, req *tAuthLoginReq) (int, string) {
 	base.ssessions[(*so).Id()] = req.Username
 	authLoginRes := tAuthLoginRes{User: req.Username}
 
-	return retJSON(authLoginRes)
+	return http.StatusOK, authLoginRes
 }
 
 func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
@@ -333,10 +325,10 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 	sendData(w, r, authLoginRes)
 }
 
-func onAuthLogout(so *socketio.Socket) (int, string) {
+func onAuthLogout(so *socketio.Socket) (int, interface{}) {
 	authLogoff := tAuthLogoff{User: nil}
 	delete(base.ssessions, (*so).Id())
-	return retJSON(authLogoff)
+	return http.StatusOK, authLogoff
 }
 
 func handlerAuthLogout(w http.ResponseWriter, r *http.Request) {
@@ -356,7 +348,7 @@ func handlerAuthLogout(w http.ResponseWriter, r *http.Request) {
 	sendData(w, r, authLogoff)
 }
 
-func onQuery(so *socketio.Socket, req *tQuery) (int, string) {
+func onQuery(so *socketio.Socket, req *tQuery) (int, interface{}) {
 	conn, err := getConnBySIO(so)
 	if err != nil {
 		return http.StatusUnauthorized, err.Error()
@@ -376,7 +368,7 @@ func onQuery(so *socketio.Socket, req *tQuery) (int, string) {
 		return http.StatusInternalServerError, err.Error()
 	}
 
-	return retJSON(res)
+	return http.StatusOK, res
 }
 
 func handlerQuery(w http.ResponseWriter, r *http.Request) {
@@ -402,7 +394,7 @@ func handlerQuery(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func onInsert(so *socketio.Socket, insert *interface{}) (int, string) {
+func onInsert(so *socketio.Socket, insert *interface{}) (int, interface{}) {
 	conn, err := getConnBySIO(so)
 	if err != nil {
 		return http.StatusUnauthorized, err.Error()
@@ -413,7 +405,7 @@ func onInsert(so *socketio.Socket, insert *interface{}) (int, string) {
 		return http.StatusInternalServerError, err.Error()
 	}
 
-	return retJSON(res)
+	return http.StatusOK, res
 }
 
 func readJSON(w http.ResponseWriter, r *http.Request, v *interface{}) error {
