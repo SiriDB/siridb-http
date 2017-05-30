@@ -116,28 +116,41 @@ def build(development=True):
         print('Building {}...'.format(outfile))
 
 
-def compile_less():
+def npm_install():
     path = os.path.dirname(__file__)
-    subprocess.run([
-        'lessc',
-        '--clean-css',
-        os.path.join(path, 'src', 'layout.less'),
-        os.path.join(path, 'build', 'layout.min.css')])
-
-    subprocess.run([
-        'lessc',
-        os.path.join(path, 'src', 'layout.less'),
-        os.path.join(path, 'build', 'layout.css')])
+    with subprocess.Popen(
+            ['npm', 'install'],
+            cwd=os.path.join(path, 'src'),
+            stdout=subprocess.PIPE) as proc:
+        print(
+            'Installing required packages and dependencies.\n'
+            '(be patient, this can take some time)...')
 
 
-def webpack():
+def compile_less(development=True):
+    path = os.path.dirname(__file__)
+    if development:
+        subprocess.run([
+            'lessc',
+            os.path.join(path, 'src', 'layout.less'),
+            os.path.join(path, 'build', 'layout.css')])
+    else:
+        subprocess.run([
+            'lessc',
+            '--clean-css',
+            os.path.join(path, 'src', 'layout.less'),
+            os.path.join(path, 'build', 'layout.min.css')])
+
+
+def webpack(development=True):
     print('(be patient, this can take some time)...')
     path = os.path.dirname(__file__)
     env = os.environ
-    env['NODE_ENV'] = 'production'
+    if not development:
+        env['NODE_ENV'] = 'production'
     with subprocess.Popen([
             os.path.join('.', 'node_modules', '.bin', 'webpack'),
-            '-p'],
+            '-d' if development else '-p'],
             env=env,
             cwd=os.path.join(path, 'src'),
             stdout=subprocess.PIPE) as proc:
@@ -163,29 +176,34 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        '-n', '--npm-packages',
+        action='store_true',
+        help='install required npm packages and dependencies')
+
+    parser.add_argument(
         '-l', '--less',
         action='store_true',
-        help='compile less')
+        help='compile less (requires -d or -p)')
 
     parser.add_argument(
         '-w', '--webpack',
         action='store_true',
-        help='compile production webpack')
+        help='compile webpack (requires -d or -p)')
 
     parser.add_argument(
-        '-g', '--go',
+        '-p', '--production-go',
         action='store_true',
-        help='compile go files for production')
+        help='prepare go files for production')
 
     parser.add_argument(
-        '-e', '--go-empty',
+        '-d', '--development-go',
         action='store_true',
-        help='compile placeholder go files for development')
+        help='prepare placeholder go files for development')
 
     parser.add_argument(
         '-b', '--build',
         action='store_true',
-        help='build binary (developemt or production depending on -g or -e)')
+        help='build binary (requires -d or -p)')
 
     parser.add_argument(
         '-a', '--build-all',
@@ -194,42 +212,69 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.go and args.go_empty:
-        print('Cannot use -e and -g at the same time')
+    if args.production_go and args.development_go:
+        print('Cannot use -d and -p at the same time')
         sys.exit(1)
 
+    if args.build and not args.production_go and not args.development_go:
+        print('Cannot use -b without -d or -p')
+        sys.exit(1)
+
+    if args.webpack and not args.production_go and not args.development_go:
+        print('Cannot use -w without -d or -p')
+        sys.exit(1)
+
+    if args.less and not args.production_go and not args.development_go:
+        print('Cannot use -l without -d or -p')
+        sys.exit(1)
+
+    if args.npm_packages:
+        npm_install()
+        print('Finished installing required packages and dependencies!')
+
     if args.less:
-        print('Compiling less...')
-        compile_less()
+        if args.production_go:
+            print('Compiling production css...')
+            compile_less(development=False)
+        elif args.development_go:
+            print('Compiling development css...')
+            compile_less(development=True)
+        else:
+            sys.exit('-d or -p must be used')
         print('Finished compiling less!')
 
     if args.webpack:
-        print('Compiling javascript using webpack...')
-        webpack()
-        print('Finished compiling javascript using webpack...')
+        if args.production_go:
+            print('Compiling production js using webpack...')
+            webpack(development=False)
+        elif args.development_go:
+            print('Compiling development js using webpack...')
+            webpack(development=True)
+        else:
+            sys.exit('-d or -p must be used')
+        print('Finished compiling js using webpack...')
 
-    if args.go:
-        print('Create go handler files...')
+    if args.production_go:
+        print('Create production go files...')
         for bf in binfiles:
             compile(*bf)
-        print('Finished creating go handler files!')
+        print('Finished creating production go files!')
 
-    if args.go_empty:
-        print('Create empty go handler files...')
+    if args.development_go:
+        print('Create development go files...')
         for bf in binfiles:
             compile(*bf, empty=True)
-        print('Finished creating  empty go handler files!')
+        print('Finished creating development go files!')
 
     if args.build:
-        if args.go:
+        if args.production_go:
             print('Build production binary')
             build(development=False)
-        elif args.go_empty:
+        elif args.development_go:
             print('Build develpment binary')
             build(development=True)
         else:
-            print('Cannot use -b without -e or -g')
-            sys.exit(1)
+            sys.exit('-d or -p must be used')
         print('Finished build!')
 
     if args.build_all:
@@ -237,9 +282,11 @@ if __name__ == '__main__':
         print('Finished building binaries!')
 
     if not any([
-            args.go,
-            args.go_empty,
+            args.npm_packages,
+            args.production_go,
+            args.development_go,
             args.less,
             args.webpack,
+            args.build,
             args.build_all]):
         parser.print_usage()

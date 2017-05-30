@@ -39,16 +39,16 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
 SiriDB HTTP 2.x can be compiled from source or, for most systems, you can simply download a pre-compiled binary.
 
 ### Pre-compiled
-Go to https://github.com/transceptor-technology/siridb-admin/releases/latest and download the binary for your system.
-In this documentation we refer to the binary as `siridb-admin`. On Linux/OSX it might be required to set the execution flag:
+Go to https://github.com/transceptor-technology/siridb-http/releases/latest and download the binary for your system.
+In this documentation we refer to the binary as `siridb-http`. On Linux/OSX it might be required to set the execution flag:
 ```
-$ chmod + x siridb-admin_X.Y.Z_OS_ARCH.bin
+$ chmod + x siridb-http_X.Y.Z_OS_ARCH.bin
 ```
 
 You might want to copy the binary to /usr/local/bin and create a symlink like this:
 ```
-$ sudo cp siridb-admin_X.Y.Z_OS_ARCH.bin /usr/local/bin/
-$ sudo ln -s /usr/local/bin/siridb-admin_X.Y.Z_OS_ARCH.bin /usr/local/bin/siridb-admin
+$ sudo cp siridb-http_X.Y.Z_OS_ARCH.bin /usr/local/bin/
+$ sudo ln -s /usr/local/bin/siridb-http_X.Y.Z_OS_ARCH.bin /usr/local/bin/siridb-http
 ```
 Note: replace `X.Y.Z_OS_ARCH` with your binary, for example `1.1.1_linux_amd64`
 
@@ -58,22 +58,63 @@ Clone the project using git. (we assume git is installed)
 git clone https://github.com/transceptor-technology/siridb-http
 ```
 
-Install required npm packages:
-```
-$ cd siridb-http/src
-$ npm install
-```
-
 Make sure less is installed:
 ```
 $ sudo npm install -g less less-plugin-clean-css
 ```
 
-The gobuild.py script can be
+The gobuild.py script can be used to build the binary:
+```
+$ ./gobuild.py -n -l -w -p -b
+```
 
+Or, if you want the development version which uses original files from /build and /static instead of build-in files:
+```
+$ ./gobuild.py -n -l -w -d -b
+```
 
 ## Configuration
-The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`. By default siridb http will listen on port 8080 but this default can be changed by setting `port` within the `[Configuration]` section in the config file.
+For running SiriDB HTTP a configuration file is required and should be provided using the `-c` or `--config` argument. The easiest way to create a configuration file is to save the output from
+siridb-http to a file:
+
+> Note: you might want to switch to root and later create a service to automically start SiriDB HTTP at startup.
+
+Switch to root or skip this step if you want to save the configuration file with your current user.
+```
+$ sodu su -
+```
+
+Save a template configuration file to for example ~/.siridb-http.conf.
+```
+$ siridb-http > ~/.siridb-http.conf
+```
+
+Now edit the file with you favorite editor and at least set the `user`, `password` and `dbname`.
+When the configuration is saved you can start the server using:
+```
+$ siridb-http -c ~/.siridb-http.conf
+```
+
+### Autorun on startup
+Depending on you OS and subsystem you can create a service to start SiriDB HTTP. This is an example of how to do this using Ubuntu:
+
+[Unit]
+Description=SiriDB {version} Server
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/{package} --config /etc/siridb/siridb.conf --log-level info
+StandardOutput=journal
+LimitNOFILE=65535
+TimeoutStartSec=10
+TimeoutStopSec=300
+
+[Install]
+WantedBy=multi-user.target
+
+sudo /lib/systemd/system/siridb-http.service
+sudo systemctl daemon-reload
+sudo systemctl start siridb-http
 
 ### Multi server support
 SiriDB can scale across multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are members of `pool 0` and sdb03 and sdb04 are members of `pool 1`.

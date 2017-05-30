@@ -210,7 +210,7 @@ func main() {
 	}
 
 	if *xVersion {
-		fmt.Printf("Version: %s\n", AppVersion)
+		fmt.Printf("%s\n", AppVersion)
 		os.Exit(0)
 	}
 
