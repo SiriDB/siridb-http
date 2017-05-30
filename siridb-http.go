@@ -190,6 +190,17 @@ func readString(section *ini.Section, key string) (s string) {
 	return s
 }
 
+type customServer struct {
+	Server *socketio.Server
+}
+
+func (s *customServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	origin := r.Header.Get("Origin")
+	w.Header().Set("Access-Control-Allow-Origin", origin)
+	s.Server.ServeHTTP(w, r)
+}
+
 func main() {
 
 	// parse arguments
@@ -448,7 +459,7 @@ key_file = certificate.key
 			log.Println("error:", err)
 		})
 
-		http.Handle("/socket.io/", server)
+		http.Handle("/socket.io/", &customServer{Server: server})
 	}
 
 	msg := "Serving SiriDB API on http%s://127.0.0.1:%d\n"
