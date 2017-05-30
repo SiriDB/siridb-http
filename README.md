@@ -29,57 +29,35 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
 ## Features
   - Optional Web interface for sending queries and inserting data.
   - SSL (HTTPS) support.
-  - Token Authentication.
-  - Multi user support for the web interface.
-  - Support for JSON, CSV, MsgPack and QPack.
+  - Optional Basic Authentication
+  - Support for JSON, MsgPack, QPack and CSV.
   - IPv6 support.
+  - Socket.io support.
+
 
 ## Installation
-SiriDB HTTP is written in Python but uses C libraries for handling data.
+SiriDB HTTP 2.x can be compiled from source or, for most systems, you can simply download a pre-compiled binary.
 
-### Ubuntu
-For Ubnutu we have a deb package available which can be downloaded [here](https://github.com/transceptor-technology/siridb-http/releases/latest).
+### Pre-compiled
+Go to https://github.com/transceptor-technology/siridb-admin/releases/latest and download the binary for your system.
+In this documentation we refer to the binary as `siridb-admin`. On Linux/OSX it might be required to set the execution flag:
+```
+$ chmod + x siridb-admin_X.Y.Z_OS_ARCH.bin
+```
 
-### From source
+You might want to copy the binary to /usr/local/bin and create a symlink like this:
+```
+$ sudo cp siridb-admin_X.Y.Z_OS_ARCH.bin /usr/local/bin/
+$ sudo ln -s /usr/local/bin/siridb-admin_X.Y.Z_OS_ARCH.bin /usr/local/bin/siridb-admin
+```
+Note: replace `X.Y.Z_OS_ARCH` with your binary, for example `1.1.1_linux_amd64`
+
+### Compile from source
 Clone the project using git. (we assume git is installed)
 ```
 git clone https://github.com/transceptor-technology/siridb-http
 ```
 
-Install Python packages (we assume Python3 and pip are installed)
-```
-cd siridb-http
-pip3 install -f requirements.txt
-```
-
-Install node packages (we assume the node package manager is installed)
-```
-cd src
-npm install
-```
-
-Install less (for compiling less to css)
-```
-npm install -g less less-plugin-clean-css
-```
-
-Compile less and run webpack
-```
-cd ..
-python3 build.py
-```
-
-Copy (and change) the configuration file
-```
-cp siridb-http.conf /etc/siridb/siridb-http.conf
-# now review the file and change values if required for example using vim:
-# vim /etc/siridb/siridb-http.conf
-```
-
-Finished, you can now start SiriDB HTTP
-```
-python3 siridb-http.py
-```
 
 ## Configuration
 The default path for the configuration file is `/etc/siridb/siridb-http.conf`. When another location is preferred you can start SiriDB HTTP with the argument flag `--config <path/file>`. By default siridb http will listen on port 8080 but this default can be changed by setting `port` within the `[Configuration]` section in the config file.
