@@ -160,7 +160,7 @@ The following URIs have support for JSON, MsgPack, QPack and CSV:
 
 In most examples below we use JSON but this format is fully compatible with MsgPack and QPack so it
 should be easy to translate. CSV on the other hand is different and unless explained, each request and
-response can be transfomed to a key,value per line. See the following example:
+response can be transfomed to a key,value per line. See the example below:
 ```json
 {
     "username": "my_username",
@@ -168,7 +168,7 @@ response can be transfomed to a key,value per line. See the following example:
 }
 ```
 
-Translates to this CSV:
+The above translates to the following CSV:
 ```
 username,my_username
 password,my_password
