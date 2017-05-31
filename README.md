@@ -58,7 +58,7 @@ You might want to copy the binary to /usr/local/bin and create a symlink like th
 $ sudo cp siridb-http_X.Y.Z_OS_ARCH.bin /usr/local/bin/
 $ sudo ln -s /usr/local/bin/siridb-http_X.Y.Z_OS_ARCH.bin /usr/local/bin/siridb-http
 ```
-> Note: replace `X.Y.Z_OS_ARCH` with your binary, for example `1.1.1_linux_amd64`
+> Note: replace `X.Y.Z_OS_ARCH` with your binary, for example `2.0.0_linux_amd64`
 
 ### Compile from source
 > Before compiling from source make sure **Go**, **npm** and **git** are installed.
