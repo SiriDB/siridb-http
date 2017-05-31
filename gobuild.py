@@ -111,19 +111,26 @@ def build(development=True):
 
     with subprocess.Popen(
             args,
-            cwd=os.path.dirname(__file__),
+            cwd=path,
             stdout=subprocess.PIPE) as proc:
         print('Building {}...'.format(outfile))
 
 
-def npm_install():
+def install_packages():
     path = os.path.dirname(__file__)
     with subprocess.Popen(
             ['npm', 'install'],
             cwd=os.path.join(path, 'src'),
             stdout=subprocess.PIPE) as proc:
         print(
-            'Installing required packages and dependencies.\n'
+            'Installing required npm packages and dependencies.\n'
+            '(be patient, this can take some time)...')
+    with subprocess.Popen(
+            ['go', 'get', '-d'],
+            cwd=path,
+            stdout=subprocess.PIPE) as proc:
+        print(
+            'Downloading required go packages and dependencies.\n'
             '(be patient, this can take some time)...')
 
 
@@ -176,9 +183,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-n', '--npm-packages',
+        '-i', '--install-packages',
         action='store_true',
-        help='install required npm packages and dependencies')
+        help='install required go and npm packages including dependencies')
 
     parser.add_argument(
         '-l', '--less',
@@ -228,8 +235,8 @@ if __name__ == '__main__':
         print('Cannot use -l without -d or -p')
         sys.exit(1)
 
-    if args.npm_packages:
-        npm_install()
+    if args.install_packages:
+        install_packages()
         print('Finished installing required packages and dependencies!')
 
     if args.less:
@@ -282,7 +289,7 @@ if __name__ == '__main__':
         print('Finished building binaries!')
 
     if not any([
-            args.npm_packages,
+            args.install_packages,
             args.production_go,
             args.development_go,
             args.less,

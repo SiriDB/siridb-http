@@ -61,6 +61,8 @@ $ sudo ln -s /usr/local/bin/siridb-http_X.Y.Z_OS_ARCH.bin /usr/local/bin/siridb-
 > Note: replace `X.Y.Z_OS_ARCH` with your binary, for example `1.1.1_linux_amd64`
 
 ### Compile from source
+> Before compiling from source make sure **Go**, **npm** and **git** are installed.
+
 Clone the project using git. (we assume git is installed)
 ```
 git clone https://github.com/transceptor-technology/siridb-http
@@ -73,12 +75,12 @@ $ sudo npm install -g less less-plugin-clean-css
 
 The gobuild.py script can be used to build the binary:
 ```
-$ ./gobuild.py -n -l -w -p -b
+$ ./gobuild.py -i -l -w -b -p
 ```
 
 Or, if you want the development version which uses original files from /build and /static instead of build-in files:
 ```
-$ ./gobuild.py -n -l -w -d -b
+$ ./gobuild.py -i -l -w -b -d
 ```
 
 ## Configuration
