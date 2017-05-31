@@ -29,7 +29,7 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
       * [CSV](#insert-csv)
         * [List format](#list-format)
         * [Table format](#table-format)
-  * [Socket.io](#socket.io)
+  * [Socket.io](#socketio)
   * [Web Interface](#web-interface)
   * [SSL (HTTPS)](#ssl-https)
 ---------------------------------------
