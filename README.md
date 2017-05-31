@@ -61,7 +61,7 @@ $ sudo ln -s /usr/local/bin/siridb-http_X.Y.Z_OS_ARCH.bin /usr/local/bin/siridb-
 > Note: replace `X.Y.Z_OS_ARCH` with your binary, for example `2.0.0_linux_amd64`
 
 ### Compile from source
-> Before compiling from source make sure **Go**, **npm** and **git** are installed.
+> Before compiling from source make sure **go**, **npm** and **git** are installed.
 
 Clone the project using git. (we assume git is installed)
 ```
