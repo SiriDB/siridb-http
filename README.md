@@ -330,7 +330,9 @@ Example table:
 ```
 
 ## Socket.io
-SiriDB HTTP has socket.io support and the following events are available:
+SiriDB HTTP has socket.io support when `enable_socket_io` is set to `True` in the configuration file. 
+
+For Socket.io the following events are available:
 - `db-info`
 - `auth fetch`
 - `auth login`
