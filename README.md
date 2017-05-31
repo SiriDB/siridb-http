@@ -352,7 +352,7 @@ socket.emit('db-info', null, function (status, data) {
     console.log(status, data);
 });
 
-// login using user iris with password siri
+// authenticate using user iris with password siri
 socket.emit('auth login', {username: "iris", password: "siri"}, function (status, data) {
     console.log(status, data);
 
