@@ -222,7 +222,6 @@ func sendData(w http.ResponseWriter, r *http.Request, data interface{}) {
 	case "application/x-msgpack":
 		sendMsgPack(w, data)
 	default:
-		fmt.Println(data)
 		sendError(w, fmt.Sprintf("unsupported content-type: %s", contentType), http.StatusUnsupportedMediaType)
 	}
 }
