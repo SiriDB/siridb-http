@@ -3,6 +3,9 @@
 
 SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
 
+> Note: The current version is written in Go. For the old Python version you should go to
+> this [release tag](https://github.com/transceptor-technology/siridb-http/tree/1.0.7).
+
 ---------------------------------------
   * [Features](#features)
   * [Installation](#installation)
