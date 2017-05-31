@@ -47,7 +47,7 @@ SiriDB HTTP 2.x can be compiled from source or, for most systems, you can simply
 Go to https://github.com/transceptor-technology/siridb-http/releases/latest and download the binary for your system.
 In this documentation we refer to the binary as `siridb-http`. On Linux/OSX it might be required to set the execution flag:
 ```
-$ chmod + x siridb-http_X.Y.Z_OS_ARCH.bin
+$ chmod +x siridb-http_X.Y.Z_OS_ARCH.bin
 ```
 
 You might want to copy the binary to /usr/local/bin and create a symlink like this:
@@ -55,7 +55,7 @@ You might want to copy the binary to /usr/local/bin and create a symlink like th
 $ sudo cp siridb-http_X.Y.Z_OS_ARCH.bin /usr/local/bin/
 $ sudo ln -s /usr/local/bin/siridb-http_X.Y.Z_OS_ARCH.bin /usr/local/bin/siridb-http
 ```
-Note: replace `X.Y.Z_OS_ARCH` with your binary, for example `1.1.1_linux_amd64`
+> Note: replace `X.Y.Z_OS_ARCH` with your binary, for example `1.1.1_linux_amd64`
 
 ### Compile from source
 Clone the project using git. (we assume git is installed)
@@ -191,7 +191,6 @@ Response:
 ```
 
 > Note that `version` does not guarantee that each SiriDB server in a cluster is running the same version.
-
 
 ### Authentication
 Authentication is required when `require_authentication` is set to `True` in the configuration file. When authentication is not required, the `/insert` and `/query` URIs can be used directly without any authentication as long as the user configured in the configuration file has privileges to perform the request.
@@ -334,8 +333,40 @@ SiriDB HTTP has socket.io support and the following events are available:
 - `query`
 - `insert`
 
-The result for any event is an status code and response object. The status codes are equal to the HTTP variant. For example a valid success code is 200.
+The result for events contains a status code and response object. The status codes are equal to HTTP status codes. For example the success code is 200.
+When the status code is anything other than 200, the response object will be a string representing the error message.
 
+Example of using Socket.io with HTML/JavaScript:
+```html
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+</head>
+<body>
+<script>
+// create socket, assuming SiriDB HTTP is running on localhost and listening to port 5050
+var socket = io.connect("http://127.0.0.1:5050");
+
+// get database and version information
+socket.emit('db-info', null, function (status, data) {
+    console.log(status, data);
+});
+
+// login using user iris with password siri
+socket.emit('auth login', {username: "iris", password: "siri"}, function (status, data) {
+    console.log(status, data);
+
+    // if successful perform a query
+    if (status == 200) {
+        socket.emit('query', {query: "list series limit 5"}, function (status, data) {
+            console.log(status, data);
+        });
+    }
+});
+</script>
+</body>
+</html>
+```
 
 ## Web interface
 SiriDB has an optional web interface that can be enabled by setting `enable_web` to `True`. This web interface will ask for user authentication if `enable_authentication` is set to `True`. Only the `user` that is configured in the configuration file is allowed to login unless `enable_multi_user` is set to `True`.

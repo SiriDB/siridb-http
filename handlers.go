@@ -15,6 +15,9 @@ import (
 	msgpack "gopkg.in/vmihailenco/msgpack.v2"
 )
 
+// StatusUnprocessableEntity is not available in Go 1.6 and older
+const StatusUnprocessableEntity int = 422
+
 type tDb struct {
 	Dbname        string `json:"dbname" qp:"dbname" msgpack:"dbname" csv:"dbname"`
 	TimePrecision string `json:"timePrecision" qp:"timePrecision" msgpack:"timePrecision" csv:"timePrecision"`
@@ -275,14 +278,14 @@ func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
 func onAuthLogin(so *socketio.Socket, req *tAuthLoginReq) (int, interface{}) {
 	if conn := getConnByUser(req.Username); conn != nil {
 		if req.Password != conn.password {
-			return http.StatusUnprocessableEntity, "Username or password incorrect"
+			return StatusUnprocessableEntity, "Username or password incorrect"
 		}
 	} else if base.multiUser {
 		if _, err := addConnection(req.Username, req.Password); err != nil {
-			return http.StatusUnprocessableEntity, err.Error()
+			return StatusUnprocessableEntity, err.Error()
 		}
 	} else {
-		return http.StatusUnprocessableEntity, "Multiple user login is not allowed"
+		return StatusUnprocessableEntity, "Multiple user login is not allowed"
 	}
 
 	base.ssessions[(*so).Id()] = req.Username
@@ -307,16 +310,16 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 
 	if conn := getConnByUser(authLoginReq.Username); conn != nil {
 		if authLoginReq.Password != conn.password {
-			sendError(w, "Username or password incorrect", http.StatusUnprocessableEntity)
+			sendError(w, "Username or password incorrect", StatusUnprocessableEntity)
 			return
 		}
 	} else if base.multiUser {
 		if _, err := addConnection(authLoginReq.Username, authLoginReq.Password); err != nil {
-			sendError(w, err.Error(), http.StatusUnprocessableEntity)
+			sendError(w, err.Error(), StatusUnprocessableEntity)
 			return
 		}
 	} else {
-		sendError(w, "Multiple user login is not allowed", http.StatusUnprocessableEntity)
+		sendError(w, "Multiple user login is not allowed", StatusUnprocessableEntity)
 		return
 	}
 

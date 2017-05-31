@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -435,13 +434,13 @@ key_file = certificate.key
 			so.On("db-info", func(_ string) (int, interface{}) {
 				return onDbInfo(&so)
 			})
-			so.On("auth/fetch", func(_ string) (int, interface{}) {
+			so.On("auth fetch", func(_ string) (int, interface{}) {
 				return onAuthFetch(&so)
 			})
-			so.On("auth/login", func(req tAuthLoginReq) (int, interface{}) {
+			so.On("auth login", func(req tAuthLoginReq) (int, interface{}) {
 				return onAuthLogin(&so, &req)
 			})
-			so.On("auth/logout", func(_ string) (int, interface{}) {
+			so.On("auth logout", func(_ string) (int, interface{}) {
 				return onAuthLogout(&so)
 			})
 			so.On("query", func(req tQuery) (int, interface{}) {
@@ -456,7 +455,7 @@ key_file = certificate.key
 		})
 
 		server.On("error", func(so socketio.Socket, err error) {
-			log.Println("error:", err)
+			base.logCh <- fmt.Sprintf("socket.io error: %s", err.Error())
 		})
 
 		http.Handle("/socket.io/", &customServer{Server: server})

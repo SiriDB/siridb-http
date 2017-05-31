@@ -208,16 +208,16 @@ class Chart extends React.Component {
             .attr('width', this.width - this.props.marginLeft - this.props.marginRight)
             .attr('height', this.height);
 
+        this.g.append('circle')
+            .attr('class', 'ttdot')
+            .attr('display', 'none')
+            .attr('r', 3);
+
         this.line = this.g.append('path')
             .attr('class', 'line');
 
         this.dots = this.g.append('g')
             .attr('class', 'dots');
-
-        this.dots.append('circle')
-            .attr('class', 'ttdot')
-            .attr('display', 'none')
-            .attr('r', 3);
 
         this.dots.append('path')
             .attr('class', 'ttline')
