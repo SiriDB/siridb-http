@@ -340,7 +340,7 @@ For Socket.io the following events are available:
 - `query`
 - `insert`
 
-The result for events contains a status code and response object. The status codes are equal to HTTP status codes. For example the success code is 200.
+The result for an event contains a status code and response object. The status codes are equal to HTTP status codes. For example the success code is 200.
 When the status code is anything other than 200, the response object will be a string representing the error message.
 
 Example of using Socket.io with HTML/JavaScript:
