@@ -6,24 +6,29 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
 ---------------------------------------
   * [Features](#features)
   * [Installation](#installation)
-    * [Ubuntu](#ubuntu)
-    * [From source](#from-source)
+    * [Pre-compiled](#pre-compiled)
+    * [Compile from source](#compile-from-source)
   * [Configuration](#configuration)
+    * [Autorun on startup](#autorun-on-startup)
     * [Multi server support](#multi-server-support)
-  * [API](#api)
+  * [HTTP API](#http-api)
+    * [Content Types](#content-types)
+    * [Database info](#database-info)
     * [Authentication](#authentication)
-      * [Secret](#secret)
-      * [Token](#token)
-      * [Session](#session)
+      * [Session authentication](#session-authentication)
+        * [Fetch](#fetch)
+        * [Login](#login)
+        * [Logout](#logout)
+      * [Basic authentication](#basic-authentication)
     * [Query](#query)
-      * [JSON](#query-json)
-      * [CSV](#query-csv)
-      * [MsgPack](#query-msgpack)
-      * [QPack](#query-qpack)
     * [Insert](#insert)
       * [JSON, MsgPack, QPack](#insert-json)
       * [CSV](#insert-csv)
+        * [List format](#list-format)
+        * [Table format](#table-format)
+  * [Socket.io](#socket-io)
   * [Web Interface](#web-interface)
+  * [SSL (HTTPS)](#ssl-https)
 ---------------------------------------
 
 ## Features
@@ -96,25 +101,33 @@ $ siridb-http -c ~/.siridb-http.conf
 ```
 
 ### Autorun on startup
-Depending on you OS and subsystem you can create a service to start SiriDB HTTP. This is an example of how to do this using Ubuntu:
+Depending on you OS and subsystem you can create a service to start SiriDB HTTP.
+This is an example of how to do this using systemd which is currently the default for Ubuntu:
 
+First create the service file: (you might need to change the ExecStart line)
+```
+$ sudo cat > /lib/systemd/system/siridb-http.service <<EOL
 [Unit]
-Description=SiriDB {version} Server
+Description=SiriDB HTTP Service
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/{package} --config /etc/siridb/siridb.conf --log-level info
+ExecStart=/usr/local/bin/siridb-http --config ~/.siridb-http.conf
 StandardOutput=journal
-LimitNOFILE=65535
-TimeoutStartSec=10
-TimeoutStopSec=300
+TimeoutStartSec=3
+TimeoutStopSec=5
 
 [Install]
 WantedBy=multi-user.target
+EOL
+```
 
-sudo /lib/systemd/system/siridb-http.service
+Now reload the daemon and start the service
+```
 sudo systemctl daemon-reload
-sudo systemctl start siridb-http
+sudo systemctl start siridb-http.service
+```
+
 
 ### Multi server support
 SiriDB can scale across multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are members of `pool 0` and sdb03 and sdb04 are members of `pool 1`.
@@ -124,90 +137,78 @@ We should now configure SiriDB to connect to both servers in pool 0 and/or pool 
 To configure SiriDB HTTP to connect to multiple servers a comma must be used as separator like this:
 ```
 [Database]
-servers = sdb01:9000,sdb02:9000,sdb03:9000,sdb04:9000
+...
+servers = sdb01,sdb02,sdb03,sdb04
 ```
 
 ## API
-SiriDB HTTP has a HTTP api which can be used to insert and query a SiriDB cluster.
+SiriDB HTTP provides both a REST API and Socket.io support which can be used to insert and query a SiriDB cluster.
 
-### Authentication
-Authentication is required when `enable_authentication` is set to `True` in the configuration file. Different methods for authentication can be used, like providing a token in each request or using session authentication with a username/password. When authentication is disabled the `/insert` and `/query` handlers can be used directly without any authentication, privileges are defined by the user and is configured in the configuration file.
+### Content Types
+The following URIs have support for JSON, MsgPack, QPack and CSV:
+- /db-info
+- /auth/fetch
+- /auth/login
+- /auth/logout
+- /query
+- /insert
 
-#### Secret
-A secret can only be used if `[Token]is_required` is set to `False`. A secret can be configured in the configuration file by setting the `secret` variable in section `[Secret]`. If no secret is specified, one will be created automatically and can be found in a hidden file: `.secret` in the application path.
-
-To use the secret we need to set the Authorization header field for each request. This is an example header for when we want to post and receive JSON data using a secret **MySecretString**. (Note that the Authorization field is prefixed with `Secret ` which is required)
-```
-Authorization: 'Secret MySecretString'
-Content-Type:  'application/json'
-```
-
-#### Token
-A static secret cannot be used when `[Token]is_required` is set to `True`. Instead a token can be used which can be requested by using the secret. This is slightly more secure since the secret will be used only once and all other communication is done by rotation tokens.
-
-For receiving a token the following request should be used: (... must be replaced with your secret)
-```
-type:      POST
-uri:       /get-token
-header:    Authorization: 'Secret ...'
-           Content-Type:  'application/json'
-```
-
-This is an example response: (note that the `expiration_time` can be set within the `[Token]` section in the configuration file)
+In most examples below we use JSON but this format is fully compatible with MsgPack and QPack so it
+should be easy to translate. CSV on the other hand is different and unless explained, each request and
+response can be transfomed to a key,value per line. See the following example:
 ```json
 {
-    "token": "a_token_string",
-    "expires_in": 3600,
-    "refresh_token": "a_refresh_token_string"
+    "username": "my_username",
+    "password": "my_password"
 }
 ```
 
-A token can be used by including the `Authorization` field in your header. For example:
+Translates to this CSV:
 ```
-Authorization: 'Token MyTokenString'
-Content-Type:  'application/json'
-```
-
-In case the expiration time is passed the token cannot be used anymore and a new token must be requested using the refresh token. A token refresh can be done by using the following request: (... must be replaced with your refresh token)
-```
-type:      POST
-uri:       /refresh-token
-header:    Authorization: 'Refresh ...'
-           Content-Type:  'application/json'
+username,my_username
+password,my_password
 ```
 
-The response for a refresh token is similar to a get-token request.
+> Note: when a string in CSV contains a comma (,) then the string must be wrapped between double quotes.
+> If double quotes are also required in a string, the double quote should be escaped with a second double quote.
 
-#### Session
-SiriDB HTTP has session support and exposes the following uri's for handling session authentication:
-- /auth/secret
-- /auth/login
+### Database info
+With the `/db-info` URI database and version information can be asked.
+```
+type:      GET or POST
+uri:       /db-info
+header:    Content-Type:  'application/json'
+```
+
+Response:
+```json
+{
+    "dbname": "my_database-name",
+    "timePrecision": "database time precision: s, ms, us or ns",
+    "version": "SiriDB Server version, for example: 2.0.18",
+    "httpServer": "SiriDB HTTP version, for example: 2.0.0"
+}
+```
+
+> Note that `version` does not guarantee that each SiriDB server in a cluster is running the same version.
+
+
+### Authentication
+Authentication is required when `require_authentication` is set to `True` in the configuration file. When authentication is not required, the `/insert` and `/query` URIs can be used directly without any authentication as long as the user configured in the configuration file has privileges to perform the request.
+
+#### Session authentication
+SiriDB HTTP has session support and exposes the following URIs for handling session authentication:
 - /auth/fetch
-- /auth/logoff
+- /auth/login
+- /auth/logout
 
-##### /auth/secret
-This uri can be used to authenticate and create a session using the secret. The authenticated user will be the one specified in the configuration file.
-```
-type:      POST
-uri:       /auth/secret
-header:    Content-Type:  'application/json'
-body:      {"secret": "my-secret-string"}
-```
+> Note: in the examples below we use 'application/json' as Content-Type but the following alternatives
+> are also allowed: 'application/x-msgpack', 'application/x-qpack' and 'application/csv'.
 
-##### /auth/login
-Login can be used to authenticate and create a SiriDB database user. If the option `enable_multi_user` within the section `[Session]` in the configuration file is set to `True`, any database user with at least `show` privileges can be used. In case multi user support is turned off, the only allowed user is the one configured in the configuration file.
-
-```
-type:      POST
-uri:       /auth/login
-header:    Content-Type:  'application/json'
-body:      {"username": "my-username", "password": "my-secret-password"}
-```
-
-##### /auth/fetch
+##### Fetch
 Fetch can be used to retrieve the current session user.
 ```
-type:      GET
+type:      GET or POST
 uri:       /auth/fetch
 header:    Content-Type:  'application/json'
 ```
@@ -216,53 +217,67 @@ The response contains the current user and a boolean value to indicate if authen
 Example response:
 ```json
 {
-    "user": "logged_on_username",
+    "user": "logged_on_username_or_null",
     "authRequired": true
 }
 ```
 
-##### /auth/logoff
+##### Login
+Login can be used to authenticate and create a SiriDB database user. If the option `enable_multi_user` in the configuration file is set to `True`, any database user can be used. In case multi user support is turned off, the only allowed user is the one configured in the configuration file.
+
+```
+type:      POST
+uri:       /auth/login
+header:    Content-Type:  'application/json'
+body:      {"username": <my-username>, "password": <my-secret-password>}
+```
+
+Success response:
+```json
+{
+    "user": "logged_on_username"
+}
+```
+
+In case authentication has failed, error code 422 will be returned and the body will contain an appropriate error message.
+
+##### Logout
 When calling this uri the current session will be cleared.
 ```
-type:      GET
-uri:       /auth/logoff
+type:      GET or POST
+uri:       /auth/logout
 header:    Content-Type:  'application/json'
 ```
 Response:
 ```json
-{"user": null}
+{
+    "user": null
+}
+```
+
+#### Basic authentication
+As an alternative to session authentication it is possible to use basic authentication. To allow basic authentication the option `enable_basic_auth` must be set to `True` in the configuration file.
+
+Example Authorization header for username iris with password siri:
+```
+Authorization: Basic aXJpczpzaXJp
 ```
 
 ### Query
 The `/query` POST handler can be used for querying SiriDB. SiriDB HTTP supports multiple formats that can be used by setting the `Content-Type` in the header.
+```
+type:      POST
+uri:       /query
+header:    Content-Type:  'application/json'
+body:      {"query": <query string>, "timeout": <optional timout in seconds>}
+```
 
-#### Query JSON
-Content-Type: application/json
-Example:
+Example body:
 ```
 {
-    "query": "select mean(1h) => difference() from 'my-series'"
+    "query": "select mean(1h) => difference() from 'my-series'",
 }
 ```
-
-#### Query CSV
-Content-Type: application/csv
-Example:
-```
-"query","select min(1h) prefix 'min-', max(1h) prefix 'max-' from 'my-series'"
-```
-When double quotes are required in a query they can be escaped using two double  quotes, for example:
-```
-"query","select * from ""my-series"" after now - 7d"
-```
-
-#### Query MsgPack
-Content-Type: application/x-msgpack
-The format for msgpack is equal to JSON except that it should be packed using msgpack which results in a byte string.
-
-#### Query QPack
-Content-Type: application/x-qpack
-The format for qpack is equal to JSON except that it should be packed using qpack which results in a byte string.
 
 ### Insert
 The `/insert` POST handler can be used for inserting data into SiriDB. The same content types as for queries are supported. Both MsgPack and QPack are similar to JSON except that the data is packed to a byte string. Therefore we only explain JSON and CSV data here. *(Note: in the examples below we use a second time-precision)*
@@ -290,7 +305,7 @@ Optionally the following format can be used:
 #### Insert CSV
 CSV data is allowed in two formats which we call the list and table format.
 
-##### List CSV format
+##### List format
 When using the list format, each row in the csv should contain a series name, timestamp and value.
 
 Example list:
@@ -300,7 +315,7 @@ Series 003,1440138931,8.0
 Series 001,1440140932,40
 Series 002,1440140932,9.3
 ```
-##### Table CSV format
+##### Table format
 A table format is more compact, especially if multiple series share points with equal timestamps. The csv should start with an empty field that is indicated with the first comma.
 
 Example table:
@@ -310,10 +325,23 @@ Example table:
 1440140932,40,9.3,
 ```
 
+## Socket.io
+SiriDB HTTP has socket.io support and the following events are available:
+- `db-info`
+- `auth fetch`
+- `auth login`
+- `auth logout`
+- `query`
+- `insert`
+
+The result for any event is an status code and response object. The status codes are equal to the HTTP variant. For example a valid success code is 200.
+
+
 ## Web interface
 SiriDB has an optional web interface that can be enabled by setting `enable_web` to `True`. This web interface will ask for user authentication if `enable_authentication` is set to `True`. Only the `user` that is configured in the configuration file is allowed to login unless `enable_multi_user` is set to `True`.
 
 The Web interface allows you to run queries and insert data using JSON format.
 
 ## SSL (HTTPS)
-SSL (HTTPS) support can be enabled by setting `enable_ssl` to `True` in the `[Configuration]` section. When enabled the `crt_file` and `key_file` in section `[SSL]` must be set. As values it's possible to use relative paths. The certificate files will then be searched relative to the application path.
+SSL (HTTPS) support can be enabled by setting `enable_ssl` to `True`. When enabled the `crt_file` and `key_file` in section `[SSL]` must be set.
+

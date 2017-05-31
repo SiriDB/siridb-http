@@ -239,7 +239,7 @@ dbname = <your_database>
 #   10.20.30.40
 #   [::1]:5050,[::1]:5051
 #   2001:0db8:85a3:0000:0000:8a2e:0370:7334
-servers = localhost:9000
+servers = localhost
 
 [Configuration]
 # Listening to TCP port.
@@ -435,13 +435,13 @@ key_file = certificate.key
 			so.On("db-info", func(_ string) (int, interface{}) {
 				return onDbInfo(&so)
 			})
-			so.On("auth fetch", func(_ string) (int, interface{}) {
+			so.On("auth/fetch", func(_ string) (int, interface{}) {
 				return onAuthFetch(&so)
 			})
-			so.On("auth login", func(req tAuthLoginReq) (int, interface{}) {
+			so.On("auth/login", func(req tAuthLoginReq) (int, interface{}) {
 				return onAuthLogin(&so, &req)
 			})
-			so.On("auth logout", func(_ string) (int, interface{}) {
+			so.On("auth/logout", func(_ string) (int, interface{}) {
 				return onAuthLogout(&so)
 			})
 			so.On("query", func(req tQuery) (int, interface{}) {
