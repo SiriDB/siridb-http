@@ -35,12 +35,12 @@ SiriDB HTTP provides an optional web interface and HTTP api for SiriDB.
 ---------------------------------------
 
 ## Features
-  - Optional Web interface for sending queries and inserting data.
-  - SSL (HTTPS) support.
+  - Optional Web interface for sending queries and inserting data
+  - SSL (HTTPS) support
   - Optional Basic Authentication
-  - Support for JSON, MsgPack, QPack and CSV.
-  - IPv6 support.
-  - Socket.io support.
+  - Support for JSON, MsgPack, QPack and CSV
+  - IPv6 support
+  - Socket.io support
 
 
 ## Installation
