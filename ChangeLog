@@ -1,3 +1,9 @@
+siridb-http (2.0.1)
+
+  * Implemented go siridb connector 1.0.5 which fixed a bug for large packages.
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  02 Jun 2017
+
 siridb-http (2.0.0)
 
   * Initial version created with the Go language.
