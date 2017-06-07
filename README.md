@@ -106,7 +106,7 @@ $ siridb-http -c ~/.siridb-http.conf
 ```
 
 ### Autorun on startup
-Depending on you OS and subsystem you can create a service to start SiriDB HTTP.
+Depending on your OS and subsystem you can create a service to start SiriDB HTTP.
 This is an example of how to do this using systemd which is currently the default for Ubuntu:
 
 First create the service file: (you might need to change the ExecStart line)
