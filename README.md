@@ -277,9 +277,9 @@ body:      {"query": <query string>, "timeout": <optional timout in seconds>}
 ```
 
 Example body:
-```
+```json
 {
-    "query": "select mean(1h) => difference() from 'my-series'",
+    "query": "select mean(1h) => difference() from 'my-series'"
 }
 ```
 
