@@ -178,7 +178,7 @@ password,my_password
 > If double quotes are also required in a string, the double quote should be escaped with a second double quote.
 
 ### Database info
-With the `/db-info` URI database and version information can be asked.
+With the `/db-info` URI, database and version information can be asked.
 ```
 type:      GET or POST
 uri:       /db-info
@@ -262,7 +262,7 @@ Response:
 #### Basic authentication
 As an alternative to session authentication it is possible to use basic authentication. To allow basic authentication the option `enable_basic_auth` must be set to `True` in the configuration file.
 
-Example Authorization header for username iris with password siri:
+Example Authorization header for username *iris* with password *siri*:
 ```
 Authorization: Basic aXJpczpzaXJp
 ```
