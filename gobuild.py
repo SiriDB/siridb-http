@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-import argparse
 import os
-import subprocess
 import sys
+import argparse
+import subprocess
 
 template = '''// +build !debug
 
@@ -67,14 +67,18 @@ binfiles = [
 ]
 
 
+GOFILE = 'siridb-http.go'
+TARGET = 'siridb-admin'
+
+
 def get_version(path):
     version = None
-    with open(os.path.join(path, 'siridb-http.go'), 'r') as f:
+    with open(os.path.join(path, GOFILE), 'r') as f:
         for line in f:
             if line.startswith('const AppVersion ='):
                 version = line.split('"')[1]
     if version is None:
-        raise Exception('Cannot find version in siridb-http.go')
+        raise Exception('Cannot find version in {}'.format(GOFILE))
     return version
 
 
@@ -89,8 +93,12 @@ def build_all():
         tmp_env = os.environ.copy()
         tmp_env["GOOS"] = goos
         tmp_env["GOARCH"] = goarch
-        outfile = os.path.join(outpath, 'siridb-http_{}_{}_{}.{}'.format(
-            version, goos, goarch, 'exe' if goos == 'windows' else 'bin'))
+        outfile = os.path.join(outpath, '{}_{}_{}_{}.{}'.format(
+            TARGET,
+            version,
+            goos,
+            goarch,
+            'exe' if goos == 'windows' else 'bin'))
         with subprocess.Popen(
                 ['go', 'build', '-o', outfile],
                 env=tmp_env,
@@ -102,8 +110,8 @@ def build_all():
 def build(development=True):
     path = os.path.dirname(__file__)
     version = get_version(path)
-    outfile = os.path.join(path, 'siridb-http_{}.{}'.format(
-        version, 'exe' if sys.platform.startswith('win') else 'bin'))
+    outfile = os.path.join(path, '{}_{}.{}'.format(
+        TARGET, version, 'exe' if sys.platform.startswith('win') else 'bin'))
     args = ['go', 'build', '-o', outfile]
 
     if development:
@@ -134,21 +142,6 @@ def install_packages():
             '(be patient, this can take some time)...')
 
 
-def compile_less(development=True):
-    path = os.path.dirname(__file__)
-    if development:
-        subprocess.run([
-            'lessc',
-            os.path.join(path, 'src', 'layout.less'),
-            os.path.join(path, 'build', 'layout.css')])
-    else:
-        subprocess.run([
-            'lessc',
-            '--clean-css',
-            os.path.join(path, 'src', 'layout.less'),
-            os.path.join(path, 'build', 'layout.min.css')])
-
-
 def webpack(development=True):
     print('(be patient, this can take some time)...')
     path = os.path.dirname(__file__)
@@ -162,6 +155,21 @@ def webpack(development=True):
             cwd=os.path.join(path, 'src'),
             stdout=subprocess.PIPE) as proc:
         print(proc.stdout.read().decode('utf-8'))
+
+
+def compile_less(development=True):
+    path = os.path.dirname(__file__)
+    if development:
+        subprocess.run([
+            'lessc',
+            os.path.join(path, 'src', 'layout.less'),
+            os.path.join(path, 'build', 'layout.css')])
+    else:
+        subprocess.run([
+            'lessc',
+            '--clean-css',
+            os.path.join(path, 'src', 'layout.less'),
+            os.path.join(path, 'build', 'layout.min.css')])
 
 
 def compile(fn, variable, empty=False):
