@@ -112,10 +112,10 @@ def build_all():
             print('Building {}/{}...'.format(goos, goarch))
 
 
-def build(development=True):
+def build(development=True, output=''):
     path = os.path.dirname(__file__)
     version = get_version(path)
-    outfile = os.path.join(path, '{}_{}.{}'.format(
+    outfile = output if output else os.path.join(path, '{}_{}.{}'.format(
         TARGET, version, 'exe' if sys.platform.startswith('win') else 'bin'))
     args = ['go', 'build', '-o', outfile]
 
@@ -191,6 +191,7 @@ def compile(fn, variable, empty=False):
             base64str=base64.b64encode(data).decode('utf-8')
         ))
 
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -226,6 +227,11 @@ if __name__ == '__main__':
         help='build binary (requires -d or -p)')
 
     parser.add_argument(
+        '-o', '--output',
+        default='',
+        help='alternative output filename (requires -b/--build)')
+
+    parser.add_argument(
         '-a', '--build-all',
         action='store_true',
         help='build production binaries for all goos and goarchs')
@@ -238,6 +244,10 @@ if __name__ == '__main__':
 
     if args.build and not args.production_go and not args.development_go:
         print('Cannot use -b without -d or -p')
+        sys.exit(1)
+
+    if args.output and not args.build:
+        print('Cannot use -o/--output without -b/--build')
         sys.exit(1)
 
     if args.webpack and not args.production_go and not args.development_go:
@@ -289,10 +299,10 @@ if __name__ == '__main__':
     if args.build:
         if args.production_go:
             print('Build production binary')
-            build(development=False)
+            build(development=False, output=args.output)
         elif args.development_go:
             print('Build develpment binary')
-            build(development=True)
+            build(development=True, output=args.output)
         else:
             sys.exit('-d or -p must be used')
         print('Finished build!')
