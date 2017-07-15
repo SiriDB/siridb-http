@@ -18,7 +18,7 @@ import (
 )
 
 // AppVersion exposes version information
-const AppVersion = "2.0.1"
+const AppVersion = "2.0.2"
 
 const retryConnectTime = 5
 
@@ -461,7 +461,7 @@ key_file = certificate.key
 		http.Handle("/socket.io/", &customServer{Server: server})
 	}
 
-	msg := "Serving SiriDB API on http%s://127.0.0.1:%d\n"
+	msg := "Serving SiriDB API on http%s://0.0.0.0:%d\n"
 	if base.enableSSL {
 		fmt.Printf(msg, "s", base.port)
 		if err = http.ListenAndServeTLS(
