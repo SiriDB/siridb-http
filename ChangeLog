@@ -2,7 +2,9 @@ siridb-http (2.0.2)
 
   * Changed text when serving from 127.0.0.1 to 0.0.0.0.
 
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  ...
+  * Fixed buffer bug in go-siridb-connector. (issue #14)
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  20 Jul 2017
 
 siridb-http (2.0.1)
 
