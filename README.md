@@ -91,7 +91,7 @@ siridb-http to a file:
 
 Switch to root or skip this step if you want to save the configuration file with your current user.
 ```
-$ sodu su -
+$ sudo su -
 ```
 
 Save a template configuration file to for example ~/.siridb-http.conf.
