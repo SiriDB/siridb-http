@@ -76,7 +76,7 @@ class Result extends Reflux.Component {
         /**** Count Statement ****/
         let countStatement = [
             'series', 'servers', 'groups', 'shards', 'pools', 'users',
-            'servers_received_points', 'series_length', 'shards_size'
+            'servers_received_points', 'servers_selected_points', 'series_length', 'shards_size'
         ].find((name) => (data[name] !== undefined && typeof data[name] === 'number'));
 
         if (countStatement !== undefined) {
@@ -190,6 +190,7 @@ class Result extends Reflux.Component {
         list_limit: this._fmtLongNumber,
         select_points_limit: this._fmtLongNumber,
         received_points: this._fmtLongNumber,
+        selected_points: this._fmtLongNumber,
         buffer_size: this._fmtSize,
         mem_usage: (val) => this._fmtSize(val * 1024 * 1024),
         drop_threshold: (val) => `${val} (${parseInt(val * 100).toString()}%)`,
@@ -219,6 +220,7 @@ class Result extends Reflux.Component {
 
     _fmtCount = {
         servers_received_points: this._fmtLongNumber,
+        servers_selected_points: this._fmtLongNumber,
         series: this._fmtLongNumber,
         series_length: this._fmtLongNumber,
         shards_size: this._fmtSize,

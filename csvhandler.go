@@ -205,7 +205,7 @@ func tryShow(lines *[]string, m map[string]interface{}) (bool, error) {
 }
 
 func tryCount(lines *[]string, m map[string]interface{}) (bool, error) {
-	cols := [10]string{
+	cols := [11]string{
 		"calc",
 		"series",
 		"servers",
@@ -214,6 +214,7 @@ func tryCount(lines *[]string, m map[string]interface{}) (bool, error) {
 		"pools",
 		"users",
 		"servers_received_points",
+		"servers_selected_points",
 		"series_length",
 		"shards_size"}
 	for _, col := range cols {
