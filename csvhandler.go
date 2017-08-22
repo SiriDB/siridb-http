@@ -243,7 +243,7 @@ func tryList(lines *[]string, m map[string]interface{}) (bool, error) {
 	slice := reflect.ValueOf(columns)
 	n := slice.Len()
 	if n == 0 {
-		return false, fmt.Errorf("zero comuns found")
+		return false, fmt.Errorf("zero columns found")
 	}
 
 	var temp = make([]string, n)
