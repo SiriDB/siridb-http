@@ -371,7 +371,7 @@ func readTable(data *map[string]interface{}, record []string, reader *csv.Reader
 			return fmt.Errorf("expecting a time-stamp in column zero at line %d", n)
 		}
 		for i := 1; i < len(record); i++ {
-			arr[i-1] = append(arr[i-1], [2]interface{}{ts, escapeCsv(record[i])})
+			arr[i-1] = append(arr[i-1], [2]interface{}{ts, parseCsvVal(record[i])})
 		}
 	}
 	return nil
