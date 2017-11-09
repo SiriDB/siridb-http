@@ -18,7 +18,7 @@ import (
 )
 
 // AppVersion exposes version information
-const AppVersion = "2.0.3"
+const AppVersion = "2.0.4"
 
 const retryConnectTime = 5
 
