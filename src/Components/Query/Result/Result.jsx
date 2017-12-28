@@ -100,7 +100,7 @@ class Result extends Reflux.Component {
 
         /**** Calc Statement ****/
         if (data.calc !== undefined && typeof data.calc === 'number') {
-            let seconds = parseInt(data.calc * this.state.factor / 1000);
+            let seconds = Math.floor(data.calc * this.state.factor / 1000);
             let tooltip = <Tooltip id="calc">{(seconds < 315532800) ?
                 moment.duration(seconds, 'seconds').humanize() :
                 this.state.utcFormat(new Date(Math.floor(seconds * this.state.factor)))
@@ -193,7 +193,7 @@ class Result extends Reflux.Component {
         selected_points: this._fmtLongNumber,
         buffer_size: this._fmtSize,
         mem_usage: (val) => this._fmtSize(val * 1024 * 1024),
-        drop_threshold: (val) => `${val} (${parseInt(val * 100).toString()}%)`,
+        drop_threshold: (val) => `${val} (${Math.floor(val * 100).toString()}%)`,
         startup_time: (val) => `${val} second${(val === 1) ? '' : 's'}`,
         uptime: (val) => moment.duration(val, 'seconds').humanize(),
         online: (val) => (val) ? 'yes' : 'no'

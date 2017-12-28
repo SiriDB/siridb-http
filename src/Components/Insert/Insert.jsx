@@ -23,7 +23,7 @@ class Insert extends Reflux.Component {
     }
 
     _now() {
-        return parseInt(moment().format('x') / this.state.factor);
+        return Math.floor(moment().format('x') / this.state.factor);
     }
 
     componentDidMount() {

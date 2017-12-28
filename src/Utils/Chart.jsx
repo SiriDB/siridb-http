@@ -47,8 +47,8 @@ class Chart extends React.Component {
         } else {
             this.g.append('text')
                 .attr('class', 'seriesmsg')
-                .attr('x', parseInt(this.width / 2))
-                .attr('y', parseInt(this.height / 2))
+                .attr('x', Math.floor(this.width / 2))
+                .attr('y', Math.floor(this.height / 2))
                 .text('no points found');
         }
         this._draw(true);
@@ -245,7 +245,7 @@ class Chart extends React.Component {
                 .map((d) => Math.abs(d[0] - inv))
                 .reduce((minIdx, d, i, alist) => d < alist[minIdx] ? i : minIdx, 0);
 
-            var x = parseInt(pos[0] - 170 > 0 ? pos[0] - 170 : pos[0] + 10);
+            var x = Math.floor(pos[0] - 170 > 0 ? pos[0] - 170 : pos[0] + 10);
             var y = pos[1] - 50 > 0 ? pos[1] - 30 : pos[1] + 30;
 
             var pt = this.props.points[idx];
