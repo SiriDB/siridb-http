@@ -9,5 +9,5 @@ RUN apk update && \
 FROM alpine:latest
 COPY --from=0 /tmp/siridb-http/siridb-http /usr/local/bin/
 # Client connections
-EXPOSE 8080
+EXPOSE 5050
 ENTRYPOINT ["/usr/local/bin/siridb-http"]
