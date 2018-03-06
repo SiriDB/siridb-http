@@ -1,14 +1,15 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { render } from 'react-dom';
 
 
 class Table extends React.Component {
 
     static propTypes = {
-        columns: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-        data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
-        caption: React.PropTypes.string,
-        formatters: React.PropTypes.object
+        columns: PropTypes.arrayOf(PropTypes.string).isRequired,
+        data: PropTypes.arrayOf(PropTypes.array).isRequired,
+        caption: PropTypes.string,
+        formatters: PropTypes.object
     };
 
     static defaultProps = {

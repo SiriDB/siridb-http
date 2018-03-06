@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { render } from 'react-dom';
 import * as d3 from 'd3';
 
@@ -8,14 +9,14 @@ const Y_AXIS = 1;
 class Chart extends React.Component {
 
     static propTypes = {
-        name: React.PropTypes.string.isRequired,
-        points: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
-        width: React.PropTypes.number,
-        height: React.PropTypes.number,
-        marginTop: React.PropTypes.number,
-        marginRight: React.PropTypes.number,
-        marginBottom: React.PropTypes.number,
-        marginLeft: React.PropTypes.number,
+        name: PropTypes.string.isRequired,
+        points: PropTypes.arrayOf(PropTypes.array).isRequired,
+        width: PropTypes.number,
+        height: PropTypes.number,
+        marginTop: PropTypes.number,
+        marginRight: PropTypes.number,
+        marginBottom: PropTypes.number,
+        marginLeft: PropTypes.number,
     };
 
     static defaultProps = {

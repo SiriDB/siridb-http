@@ -1,3 +1,11 @@
+siridb-http (2.0.6)
+
+  * Upgrade some npm packages
+
+  * Re-factored React PropTypes
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  06 Mar 2018
+
 siridb-http (2.0.5)
 
   * Replace parseInt with Math.floor()

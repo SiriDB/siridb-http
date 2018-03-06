@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Reflux from 'reflux-edge';
 import { render } from 'react-dom';
 import DatabaseStore from '../../Stores/DatabaseStore.jsx';
@@ -7,8 +8,8 @@ import { Modal } from 'react-bootstrap';
 class InfoModal extends Reflux.Component {
 
     static propTypes = {
-        show: React.PropTypes.bool.isRequired,
-        onHide: React.PropTypes.func.isRequired
+        show: PropTypes.bool.isRequired,
+        onHide: PropTypes.func.isRequired
     };
 
     constructor(props) {

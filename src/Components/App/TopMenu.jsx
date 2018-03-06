@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { render } from 'react-dom';
 import { Link, IndexLink } from 'react-router';
 import AuthActions from '../../Actions/AuthActions.jsx';
@@ -6,8 +7,8 @@ import AuthActions from '../../Actions/AuthActions.jsx';
 class TopMenu extends React.Component {
 
     static propTypes = {
-        onLogoClick: React.PropTypes.func.isRequired,
-        showLogoff: React.PropTypes.bool.isRequired
+        onLogoClick: PropTypes.func.isRequired,
+        showLogoff: PropTypes.bool.isRequired
     };
 
     constructor(props) {

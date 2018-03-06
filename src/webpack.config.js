@@ -1,5 +1,6 @@
-var webpack = require('webpack');
-var path = require('path');
+const webpack = require('webpack');
+const path = require('path');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const BUILD_DIR = path.resolve(__dirname, '../build');
 const APP_DIR = path.resolve(__dirname, '');
@@ -16,7 +17,8 @@ var config = {
             {
                 test: /\.jsx?/,
                 include: APP_DIR,
-                loader: 'babel-loader'
+                loader: 'babel-loader',
+                exclude: /node_modules/
             }
         ]
     },
@@ -33,18 +35,20 @@ var config = {
                 'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
             }
         }),
-    ]
+    ],
+    optimization: {
+        minimizer: [
+            new UglifyJSPlugin({
+                uglifyOptions: {
+                    compress: {
+                        warnings: false
+                    }
+                }
+            })
+        ]
+    }
 };
 
-if (process.env.NODE_ENV === 'production') {
-    config.plugins.push(
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false,
-                screw_ie8: true
-            }
-        })
-    );
-}
+
 
 module.exports = config;

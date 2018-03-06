@@ -70,7 +70,7 @@ git clone https://github.com/transceptor-technology/siridb-http
 
 Make sure less is installed:
 ```
-$ sudo npm install -g less less-plugin-clean-css
+$ sudo npm install -g less@2.7.2 less-plugin-clean-css
 ```
 
 The gobuild.py script can be used to build the binary:

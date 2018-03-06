@@ -1,16 +1,17 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { render } from 'react-dom';
 
 
 class AutoCompletePopup extends React.Component {
 
     static propTypes = {
-        keywords: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-        xpos: React.PropTypes.number.isRequired,
-        wpos: React.PropTypes.number.isRequired,
-        selected: React.PropTypes.number.isRequired,
-        show: React.PropTypes.bool.isRequired,
-        onSelect: React.PropTypes.func.isRequired
+        keywords: PropTypes.arrayOf(PropTypes.string).isRequired,
+        xpos: PropTypes.number.isRequired,
+        wpos: PropTypes.number.isRequired,
+        selected: PropTypes.number.isRequired,
+        show: PropTypes.bool.isRequired,
+        onSelect: PropTypes.func.isRequired
     };
 
     constructor(props) {

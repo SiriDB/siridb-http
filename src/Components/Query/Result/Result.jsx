@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Reflux from 'reflux-edge';
 import { render } from 'react-dom';
 import Table from './Table.jsx';
@@ -12,8 +13,8 @@ import Chart from '../../../Utils/Chart.jsx';
 class Result extends Reflux.Component {
 
     static propTypes = {
-        result: React.PropTypes.object.isRequired,
-        setQuery: React.PropTypes.func.isRequired
+        result: PropTypes.object.isRequired,
+        setQuery: PropTypes.func.isRequired
     };
 
     constructor(props) {
