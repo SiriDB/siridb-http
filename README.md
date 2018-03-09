@@ -1,10 +1,10 @@
 # SiriDB HTTP
 ![alt SiriDB HTTP](/siridb-http.png?raw=true)
 
-SiriDB HTTP provides a HTTP API and optional web interface for [SiriDB](https://github.com/transceptor-technology/siridb-server).
+SiriDB HTTP provides a HTTP API and optional web interface for [SiriDB](https://github.com/SiriDB/siridb-server).
 
 > Note: Since version 2.0.0 SiriDB HTTP is written in Go. For the 1.x version in Python you should go to
-> this [release tag](https://github.com/transceptor-technology/siridb-http/tree/1.0.7).
+> this [release tag](https://github.com/SiriDB/siridb-http/tree/1.0.7).
 
 ---------------------------------------
   * [Features](#features)
@@ -47,7 +47,7 @@ SiriDB HTTP provides a HTTP API and optional web interface for [SiriDB](https://
 SiriDB HTTP 2.x can be compiled from source or, for most systems, you can simply download a pre-compiled binary.
 
 ### Pre-compiled
-Go to https://github.com/transceptor-technology/siridb-http/releases/latest and download the binary for your system.
+Go to https://github.com/SiriDB/siridb-http/releases/latest and download the binary for your system.
 In this documentation we refer to the binary as `siridb-http`. On Linux/OSX it might be required to set the execution flag:
 ```
 $ chmod +x siridb-http_X.Y.Z_OS_ARCH.bin
@@ -65,7 +65,7 @@ $ sudo ln -s /usr/local/bin/siridb-http_X.Y.Z_OS_ARCH.bin /usr/local/bin/siridb-
 
 Clone the project using git. (we assume git is installed)
 ```
-git clone https://github.com/transceptor-technology/siridb-http
+git clone https://github.com/SiriDB/siridb-http
 ```
 
 Make sure less is installed:
