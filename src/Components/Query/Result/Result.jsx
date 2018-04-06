@@ -139,10 +139,21 @@ class Result extends Reflux.Component {
                     Object.entries(data).map(([series, points]) => {
                         npoints += points.length;
                         nseries++;
-                        return <Chart
-                            key={series}
-                            name={series}
-                            points={points.map((point) => [point[0] * this.state.factor, point[1]])} />;
+                        return (points.length <= 1 || typeof points[0][1] === 'string') ?
+                            <div key={series}>
+                                <span className="badge">{series}</span>
+                                {points.length ?
+                                    <Table
+                                        columns={['time', 'value']}
+                                        data={points}
+                                        formatters={this._fmtSelect} /> :
+                                    <span className="badge badge-orange" style={{marginLeft:10}}>no points</span>
+                                }
+                            </div> :
+                            <Chart
+                                key={series}
+                                name={series}
+                                points={points.map((point) => [point[0] * this.state.factor, point[1]])} />;
                     })
                 }
             </div>
@@ -185,6 +196,10 @@ class Result extends Reflux.Component {
         },
         start: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor))),
         end: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor)))
+    }
+
+    _fmtSelect = {
+        time: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor))),
     }
 
     _fmtServer = {
