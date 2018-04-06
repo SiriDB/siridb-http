@@ -1,20 +1,16 @@
-import React from 'react';
+import React from 'react';  // eslint-disable-line
+import ReactDOM from 'react-dom';
 import Reflux from 'reflux-edge';
+import App from './App/App.jsx';
+import {HashRouter as Router, Route} from 'react-router-dom';
+import 'babel-polyfill';
+/* fixes issues on ie */
 
 Reflux.defineReact(React, Reflux);
 
-import { render } from 'react-dom';
-import App from './App/App.jsx';
-import { hashHistory, Router, Route, IndexRoute } from 'react-router';
-import Query from './Query/Query.jsx';
-import Insert from './Insert/Insert.jsx';
-
-render((
-    <Router history={hashHistory}>
-        <Route path="/" component={App}>
-            <IndexRoute component={Query} />
-            <Route path="insert" component={Insert}></Route>
-        </Route>
-    </Router>
-), document.getElementById("app"));
-
+ReactDOM.render(
+    <Router>
+        <Route path="/" component={App} />
+    </Router>,
+    document.getElementById('app')
+);

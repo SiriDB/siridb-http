@@ -1,12 +1,15 @@
 import React from 'react';
 import Reflux from 'reflux-edge';
 import { render } from 'react-dom';
+import {Route, Switch} from 'react-router-dom';
 import TopMenu from './TopMenu.jsx';
 import AppStore from '../../Stores/AppStore.jsx';
 import AuthStore from '../../Stores/AuthStore.jsx';
 import DatabaseStore from '../../Stores/DatabaseStore.jsx';
 import Auth from '../Auth/Auth.jsx';
 import InfoModal from './InfoModal.jsx';
+import Query from '../Query/Query.jsx';
+import Insert from '../Insert/Insert.jsx';
 
 class App extends Reflux.Component {
 
@@ -38,7 +41,11 @@ class App extends Reflux.Component {
                     <InfoModal
                         show={this.state.showInfoModal}
                         onHide={this.onHideInfoModal.bind(this)} />
-                    {this.props.children}
+                    <Switch>
+                        <Route exact path="/" component={Query} />
+                        <Route path="/insert" component={Insert} />
+                        <Route path="*" component={() => <div>Page does not exist</div>} />
+                    </Switch>
                 </div>
                 : (this.state.authRequired === true) ? <Auth /> : null
     }
