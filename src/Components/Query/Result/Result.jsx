@@ -1,10 +1,8 @@
-import React from 'react';
+import React from 'react';  // eslint-disable-line
 import PropTypes from 'prop-types';
 import Reflux from 'reflux-edge';
-import { render } from 'react-dom';
 import Table from './Table.jsx';
 import DatabaseStore from '../../../Stores/DatabaseStore.jsx';
-import * as d3 from 'd3';
 import * as moment from 'moment';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Chart from '../../../Utils/Chart.jsx';
@@ -22,7 +20,7 @@ class Result extends Reflux.Component {
         this.store = DatabaseStore;
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
+    shouldComponentUpdate(nextProps) {
         return (this.props.result !== nextProps.result);
     }
 
@@ -32,18 +30,18 @@ class Result extends Reflux.Component {
         let timeit = (data.__timeit__ !== undefined &&
             data.__timeit__.length &&
             typeof data.__timeit__[0].server === 'string') ? (
-            <div className="alert alert-info alert-timeit">
-                <span>{`Query time: ${data.__timeit__[data.__timeit__.length - 1].time.toFixed(3)} seconds`}</span>
-                <dl className="dl-horizontal">
-                    {
-                        data.__timeit__.reduce((acc, timeit, n) => acc.concat([
-                            <dt key={`dt-${n}`}>{timeit.time.toFixed(3)}</dt>,
-                            <dd key={`dd-${n}`}>{timeit.server}</dd>
-                        ]), [])
-                    }
-                </dl>
-            </div>
-        ) : null;
+                <div className="alert alert-info alert-timeit">
+                    <span>{`Query time: ${data.__timeit__[data.__timeit__.length - 1].time.toFixed(3)} seconds`}</span>
+                    <dl className="dl-horizontal">
+                        {
+                            data.__timeit__.reduce((acc, timeit, n) => acc.concat([
+                                <dt key={`dt-${n}`}>{timeit.time.toFixed(3)}</dt>,
+                                <dd key={`dd-${n}`}>{timeit.server}</dd>
+                            ]), [])
+                        }
+                    </dl>
+                </div>
+            ) : null;
 
         /* Remove timeit */
         delete data.__timeit__;
@@ -53,7 +51,7 @@ class Result extends Reflux.Component {
                 {timeit}
                 {this._getResult(data)}
             </div>
-        )
+        );
     }
 
     _getResult(data) {
@@ -81,9 +79,11 @@ class Result extends Reflux.Component {
         ].find((name) => (data[name] !== undefined && typeof data[name] === 'number'));
 
         if (countStatement !== undefined) {
-            return <div className={'alert alert-info'}>{
-                (this._fmtCount[countStatement] || ((val) => val))(data[countStatement])
-            }</div>
+            return (
+                <div className={'alert alert-info'}>
+                    {(this._fmtCount[countStatement] || ((val) => val))(data[countStatement])}
+                </div>
+            );
         }
 
         /**** Show Statement ****/
@@ -96,7 +96,7 @@ class Result extends Reflux.Component {
                 data={data.data.map((row) => [
                     row.name,
                     (this._fmtServer[row.name] || ((val) => val))(row.value)
-                ])} />
+                ])} />;
         }
 
         /**** Calc Statement ****/
@@ -112,22 +112,22 @@ class Result extends Reflux.Component {
                         <span>{data.calc}</span>
                     </OverlayTrigger>
                 </div>
-            )
+            );
         }
 
         /**** Success Message ****/
         if (data.success_msg !== undefined && typeof data.success_msg === 'string') {
-            return <div className={'alert alert-success'}>{data.success_msg}</div>
+            return <div className={'alert alert-success'}>{data.success_msg}</div>;
         }
 
         /**** Help Statement ****/
         if (data.help !== undefined && typeof data.help === 'string') {
-            return <pre>{data.help}</pre>
+            return <pre>{data.help}</pre>;
         }
 
         /**** Message Of The Day (debug) ****/
         if (data.motd !== undefined && typeof data.motd === 'string') {
-            return <div>{this._lineBreak(data.motd)}</div>
+            return <div>{this._lineBreak(data.motd)}</div>;
         }
 
         /**** Select Statement ****/
@@ -142,12 +142,12 @@ class Result extends Reflux.Component {
                         return <Chart
                             key={series}
                             name={series}
-                            points={points.map((point) => [point[0] * this.state.factor, point[1]])} />
+                            points={points.map((point) => [point[0] * this.state.factor, point[1]])} />;
                     })
                 }
             </div>
-        )
-        console.log(`Rendered ${nseries} series with a total of ${npoints} points`);
+        );
+        window.console.log(`Rendered ${nseries} series with a total of ${npoints} points`);
         return charts;
     }
 
@@ -230,7 +230,7 @@ class Result extends Reflux.Component {
     _lineBreak(content) {
         let regex = /(\n)/g;
         return content.split(regex).map(
-            (line, index) => line.match(regex) ? <br key={"key_" + index} /> : line
+            (line, index) => line.match(regex) ? <br key={'key_' + index} /> : line
         );
     }
 }

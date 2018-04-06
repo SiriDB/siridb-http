@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { render } from 'react-dom';
 import * as d3 from 'd3';
 
 const X_AXIS = 0;
@@ -101,7 +100,7 @@ class Chart extends React.Component {
             this.svg.selectAll('.tt').attr('display', 'none');
             this.svg.selectAll('.ttdot').attr('display', 'none');
             this.svg.selectAll('.ttline').attr('display', 'none');
-        }
+        };
 
         let zoomIn = () => {
 
@@ -118,7 +117,7 @@ class Chart extends React.Component {
             this.xS.domain(span);
             this.g.select('.xbrush').call(this.brush.move, null);
             this._draw(false);
-        }
+        };
 
         let zoomOut = () => {
             d3.event.preventDefault();
@@ -128,7 +127,7 @@ class Chart extends React.Component {
             zoomed = false;
             this.xS.domain(this._getDomain(this.props.points, X_AXIS));
             this._draw(false);
-        }
+        };
 
         this.brush = d3.brushX()
             .extent([[0, 0], [
@@ -295,9 +294,7 @@ class Chart extends React.Component {
     }
 
     render() {
-        return (
-            <div className="chart" ref="chart"></div>
-        )
+        return <div className="chart" ref="chart"></div>;
     }
 }
 

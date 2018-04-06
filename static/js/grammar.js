@@ -5,25 +5,25 @@
  * should be used with the jsleri JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2017-08-14 15:06:00
+ * Created at: 2018-03-30 21:57:58
  */
 
 'use strict';
 
 (function (
+            Repeat,
             Optional,
-            Choice,
-            Prio,
-            Grammar,
-            THIS,
-            Regex,
-            Tokens,
-            Rule,
+            Sequence,
             List,
             Token,
-            Repeat,
-            Sequence,
-            Keyword
+            Regex,
+            Keyword,
+            Rule,
+            THIS,
+            Tokens,
+            Choice,
+            Prio,
+            Grammar
         ) {
     var r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
     var r_integer = Regex('^[-+]?[0-9]+');
@@ -39,6 +39,7 @@
     var k_active_handles = Keyword('active_handles');
     var k_address = Keyword('address');
     var k_after = Keyword('after');
+    var k_all = Keyword('all');
     var k_alter = Keyword('alter');
     var k_and = Keyword('and');
     var k_as = Keyword('as');
@@ -66,6 +67,7 @@
     var k_false = Keyword('false');
     var k_fifo_files = Keyword('fifo_files');
     var k_filter = Keyword('filter');
+    var k_first = Keyword('first');
     var k_float = Keyword('float');
     var k_for = Keyword('for');
     var k_from = Keyword('from');
@@ -86,6 +88,7 @@
         Keyword('intersection')
     );
     var k_ip_support = Keyword('ip_support');
+    var k_last = Keyword('last');
     var k_length = Keyword('length');
     var k_libuv = Keyword('libuv');
     var k_limit = Keyword('limit');
@@ -134,6 +137,7 @@
     var k_start = Keyword('start');
     var k_startup_time = Keyword('startup_time');
     var k_status = Keyword('status');
+    var k_stddev = Keyword('stddev');
     var k_string = Keyword('string');
     var k_suffix = Keyword('suffix');
     var k_sum = Keyword('sum');
@@ -552,6 +556,10 @@
         k_intersection,
         k_symmetric_difference
     );
+    var series_all = Choice(
+        Token('*'),
+        k_all
+    );
     var series_name = Repeat(string, 1, 1);
     var group_name = Repeat(r_grave_str, 1, 1);
     var series_re = Repeat(r_regex, 1, 1);
@@ -561,6 +569,7 @@
     );
     var group_match = Repeat(r_grave_str, 1, 1);
     var series_match = List(Choice(
+        series_all,
         series_name,
         group_match,
         series_re
@@ -592,10 +601,11 @@
         k_suffix,
         string
     );
-    var f_points = Choice(
+    var f_all = Choice(
         Token('*'),
-        k_points
+        k_all
     );
+    var f_points = Repeat(k_points, 1, 1);
     var f_difference = Sequence(
         k_difference,
         Token('('),
@@ -611,61 +621,79 @@
     var f_mean = Sequence(
         k_mean,
         Token('('),
-        time_expr,
+        Optional(time_expr),
         Token(')')
     );
     var f_median = Sequence(
         k_median,
         Token('('),
-        time_expr,
+        Optional(time_expr),
         Token(')')
     );
     var f_median_low = Sequence(
         k_median_low,
         Token('('),
-        time_expr,
+        Optional(time_expr),
         Token(')')
     );
     var f_median_high = Sequence(
         k_median_high,
         Token('('),
-        time_expr,
+        Optional(time_expr),
         Token(')')
     );
     var f_sum = Sequence(
         k_sum,
         Token('('),
-        time_expr,
+        Optional(time_expr),
         Token(')')
     );
     var f_min = Sequence(
         k_min,
         Token('('),
-        time_expr,
+        Optional(time_expr),
         Token(')')
     );
     var f_max = Sequence(
         k_max,
         Token('('),
-        time_expr,
+        Optional(time_expr),
         Token(')')
     );
     var f_count = Sequence(
         k_count,
         Token('('),
-        time_expr,
+        Optional(time_expr),
         Token(')')
     );
     var f_variance = Sequence(
         k_variance,
         Token('('),
-        time_expr,
+        Optional(time_expr),
         Token(')')
     );
     var f_pvariance = Sequence(
         k_pvariance,
         Token('('),
-        time_expr,
+        Optional(time_expr),
+        Token(')')
+    );
+    var f_stddev = Sequence(
+        k_stddev,
+        Token('('),
+        Optional(time_expr),
+        Token(')')
+    );
+    var f_first = Sequence(
+        k_first,
+        Token('('),
+        Optional(time_expr),
+        Token(')')
+    );
+    var f_last = Sequence(
+        k_last,
+        Token('('),
+        Optional(time_expr),
         Token(')')
     );
     var f_filter = Sequence(
@@ -694,12 +722,15 @@
             k_max,
             k_count,
             k_variance,
-            k_pvariance
+            k_pvariance,
+            k_stddev,
+            k_first,
+            k_last
         ),
         Token(')')
     );
     var aggregate_functions = List(Choice(
-        f_points,
+        f_all,
         f_limit,
         f_mean,
         f_sum,
@@ -711,15 +742,20 @@
         f_count,
         f_variance,
         f_pvariance,
+        f_stddev,
+        f_first,
+        f_last,
         f_difference,
         f_derivative,
-        f_filter
+        f_filter,
+        f_points
     ), Token('=>'), 1, undefined, false);
     var select_aggregate = Sequence(
         aggregate_functions,
         Optional(prefix_expr),
         Optional(suffix_expr)
     );
+    var select_aggregates = List(select_aggregate, Token(','), 1, undefined, false);
     var merge_as = Sequence(
         k_merge,
         k_as,
@@ -1022,7 +1058,7 @@
     );
     var select_stmt = Sequence(
         k_select,
-        List(select_aggregate, Token(','), 1, undefined, false),
+        select_aggregates,
         k_from,
         series_match,
         Optional(where_series),
@@ -1070,105 +1106,105 @@
         ), Token(','), 0, undefined, false)
     );
     var timeit_stmt = Repeat(k_timeit, 1, 1);
-    var help_show = Keyword('show');
-    var help_revoke = Keyword('revoke');
-    var help_noaccess = Keyword('noaccess');
-    var help_functions = Keyword('functions');
-    var help_grant = Keyword('grant');
-    var help_access = Keyword('access');
-    var help_list_users = Keyword('users');
-    var help_list_pools = Keyword('pools');
-    var help_list_series = Keyword('series');
-    var help_list_servers = Keyword('servers');
+    var help_select = Keyword('select');
     var help_list_groups = Keyword('groups');
+    var help_list_pools = Keyword('pools');
     var help_list_shards = Keyword('shards');
+    var help_list_users = Keyword('users');
+    var help_list_servers = Keyword('servers');
+    var help_list_series = Keyword('series');
     var help_list = Sequence(
         k_list,
         Optional(Choice(
-            help_list_users,
-            help_list_pools,
-            help_list_series,
-            help_list_servers,
             help_list_groups,
-            help_list_shards
+            help_list_pools,
+            help_list_shards,
+            help_list_users,
+            help_list_servers,
+            help_list_series
         ))
     );
-    var help_alter_database = Keyword('database');
-    var help_alter_group = Keyword('group');
-    var help_alter_servers = Keyword('servers');
-    var help_alter_server = Keyword('server');
-    var help_alter_user = Keyword('user');
-    var help_alter = Sequence(
-        k_alter,
-        Optional(Choice(
-            help_alter_database,
-            help_alter_group,
-            help_alter_servers,
-            help_alter_server,
-            help_alter_user
-        ))
-    );
-    var help_count_series = Keyword('series');
-    var help_count_servers = Keyword('servers');
-    var help_count_groups = Keyword('groups');
-    var help_count_shards = Keyword('shards');
-    var help_count_users = Keyword('users');
-    var help_count_pools = Keyword('pools');
-    var help_count = Sequence(
-        k_count,
-        Optional(Choice(
-            help_count_series,
-            help_count_servers,
-            help_count_groups,
-            help_count_shards,
-            help_count_users,
-            help_count_pools
-        ))
-    );
-    var help_select = Keyword('select');
-    var help_create_group = Keyword('group');
-    var help_create_user = Keyword('user');
-    var help_create = Sequence(
-        k_create,
-        Optional(Choice(
-            help_create_group,
-            help_create_user
-        ))
-    );
-    var help_timezones = Keyword('timezones');
+    var help_access = Keyword('access');
+    var help_revoke = Keyword('revoke');
     var help_drop_group = Keyword('group');
+    var help_drop_series = Keyword('series');
     var help_drop_user = Keyword('user');
     var help_drop_server = Keyword('server');
-    var help_drop_series = Keyword('series');
     var help_drop_shards = Keyword('shards');
     var help_drop = Sequence(
         k_drop,
         Optional(Choice(
             help_drop_group,
+            help_drop_series,
             help_drop_user,
             help_drop_server,
-            help_drop_series,
             help_drop_shards
         ))
     );
+    var help_create_user = Keyword('user');
+    var help_create_group = Keyword('group');
+    var help_create = Sequence(
+        k_create,
+        Optional(Choice(
+            help_create_user,
+            help_create_group
+        ))
+    );
+    var help_count_groups = Keyword('groups');
+    var help_count_pools = Keyword('pools');
+    var help_count_shards = Keyword('shards');
+    var help_count_users = Keyword('users');
+    var help_count_servers = Keyword('servers');
+    var help_count_series = Keyword('series');
+    var help_count = Sequence(
+        k_count,
+        Optional(Choice(
+            help_count_groups,
+            help_count_pools,
+            help_count_shards,
+            help_count_users,
+            help_count_servers,
+            help_count_series
+        ))
+    );
+    var help_noaccess = Keyword('noaccess');
+    var help_alter_server = Keyword('server');
+    var help_alter_database = Keyword('database');
+    var help_alter_group = Keyword('group');
+    var help_alter_servers = Keyword('servers');
+    var help_alter_user = Keyword('user');
+    var help_alter = Sequence(
+        k_alter,
+        Optional(Choice(
+            help_alter_server,
+            help_alter_database,
+            help_alter_group,
+            help_alter_servers,
+            help_alter_user
+        ))
+    );
+    var help_show = Keyword('show');
+    var help_timezones = Keyword('timezones');
     var help_timeit = Keyword('timeit');
+    var help_grant = Keyword('grant');
+    var help_functions = Keyword('functions');
     var help = Sequence(
         k_help,
         Optional(Choice(
-            help_show,
-            help_revoke,
-            help_noaccess,
-            help_functions,
-            help_grant,
-            help_access,
-            help_list,
-            help_alter,
-            help_count,
             help_select,
-            help_create,
-            help_timezones,
+            help_list,
+            help_access,
+            help_revoke,
             help_drop,
-            help_timeit
+            help_create,
+            help_count,
+            help_noaccess,
+            help_alter,
+            help_show,
+            help_timezones,
+            help_timeit,
+            help_grant,
+            help_functions
         ))
     );
     var START = Sequence(
@@ -1192,17 +1228,17 @@
     window.SiriGrammar = Grammar(START, '[a-z_]+');
 
 })(
+    window.jsleri.Repeat,
     window.jsleri.Optional,
-    window.jsleri.Choice,
-    window.jsleri.Prio,
-    window.jsleri.Grammar,
-    window.jsleri.THIS,
-    window.jsleri.Regex,
-    window.jsleri.Tokens,
-    window.jsleri.Rule,
+    window.jsleri.Sequence,
     window.jsleri.List,
     window.jsleri.Token,
-    window.jsleri.Repeat,
-    window.jsleri.Sequence,
-    window.jsleri.Keyword
+    window.jsleri.Regex,
+    window.jsleri.Keyword,
+    window.jsleri.Rule,
+    window.jsleri.THIS,
+    window.jsleri.Tokens,
+    window.jsleri.Choice,
+    window.jsleri.Prio,
+    window.jsleri.Grammar
 );

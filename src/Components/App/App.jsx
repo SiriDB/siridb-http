@@ -1,6 +1,5 @@
-import React from 'react';
+import React from 'react';  // eslint-disable-line
 import Reflux from 'reflux-edge';
-import { render } from 'react-dom';
 import {Route, Switch} from 'react-router-dom';
 import TopMenu from './TopMenu.jsx';
 import AppStore from '../../Stores/AppStore.jsx';
@@ -11,13 +10,14 @@ import InfoModal from './InfoModal.jsx';
 import Query from '../Query/Query.jsx';
 import Insert from '../Insert/Insert.jsx';
 
+
 class App extends Reflux.Component {
 
     constructor(props) {
         super(props);
         this.state = {
             showInfoModal: false
-        }
+        };
         this.stores = [AppStore, DatabaseStore, AuthStore];
     }
 
@@ -47,7 +47,7 @@ class App extends Reflux.Component {
                         <Route path="*" component={() => <div>Page does not exist</div>} />
                     </Switch>
                 </div>
-                : (this.state.authRequired === true) ? <Auth /> : null
+                : (this.state.authRequired === true) ? <Auth /> : null;
     }
 }
 

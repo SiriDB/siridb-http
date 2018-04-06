@@ -1,14 +1,12 @@
-import * as d3 from 'd3';
-
 class JsonRequest {
 
     constructor(type, url, data, isStringified) {
 
-        this.doneCb = function (data) { };
+        this.doneCb = function (data) { };         // eslint-disable-line
         this.failCb = function (error, msg) {
-            console.error(error, msg || 'unknwon error occurred');
+            window.console.error(error, msg || 'unknwon error occurred');
         };
-        this.alwaysCb = function (xhr, data) { };
+        this.alwaysCb = function (xhr, data) { };  // eslint-disable-line
 
         let xhr = new XMLHttpRequest();
         xhr.open(type, url, true);
