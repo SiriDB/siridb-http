@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { render } from 'react-dom';
 
 
 class AutoCompletePopup extends React.Component {
@@ -21,7 +20,7 @@ class AutoCompletePopup extends React.Component {
     render() {
         let style = {
             left: 14 + this.props.xpos * 7.24
-        }
+        };
         return (this.props.show) ? (
             <ul className="autocomplete-popup" style={style}>
                 {
@@ -35,7 +34,7 @@ class AutoCompletePopup extends React.Component {
                     )
                 }
             </ul>
-        ) : null
+        ) : null;
     }
 }
 

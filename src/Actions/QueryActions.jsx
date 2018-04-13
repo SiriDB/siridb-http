@@ -1,2 +1,2 @@
 import Reflux from 'reflux-edge';
-export default Reflux.createActions(["query", "clearAlert", "clearAll"]);
+export default Reflux.createActions(['query', 'clearAlert', 'clearAll']);

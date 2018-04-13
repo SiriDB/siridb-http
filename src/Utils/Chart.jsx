@@ -22,7 +22,7 @@ class Chart extends React.Component {
         marginTop: 14,
         marginRight: 0,
         marginBottom: 20,
-        marginLeft: 80,
+        marginLeft: 52,
     }
 
     constructor(props) {
@@ -36,6 +36,27 @@ class Chart extends React.Component {
     componentDidUpdate() {
         this._init();
     }
+
+    _fmtNumber = (n) => {
+        if (n === 0) {
+            return '0';
+        }
+
+        let e3, t, sign, lookup = 'yzafpnμm KMGTPEZYXWVU';
+
+        if (n < 0) {
+            n = -n;
+            sign = '-';
+        } else {
+            sign = '';
+        }
+
+        t = (n >= 100 && n < 1000) ? 1 : 10;
+        e3 = Math.min(12, Math.max(-8, Math.floor(Math.log(n*t) / Math.log(1000))));
+        n /= Math.pow(1000, e3);
+        t = (n>=10) ? 10 : 100;
+        return sign + (Math.round(n * t) / t) + (e3===0 ? '' : lookup.charAt(e3+8));
+    };
 
     _init() {
         this.width = this.props.with || this.refs.chart.offsetWidth || 600;
@@ -169,7 +190,8 @@ class Chart extends React.Component {
             });
 
         this.yAxisFun = d3.axisLeft(this.yS)
-            .ticks((this.height - this.props.marginTop - this.props.marginBottom) / 30);
+            .ticks((this.height - this.props.marginTop - this.props.marginBottom) / 30)
+            .tickFormat((d) => this._fmtNumber(d));
 
         this.lineFun = d3.line()
             .x((d) => this.xS(d[0]))
@@ -179,16 +201,16 @@ class Chart extends React.Component {
             .attr('viewBox', `0 0 ${this.width} ${this.height}`)
             .datum(this.props.points);
 
-        let seriesHdr = this.svg.append('g')
-            .attr('class', 'serieshdr');
-        seriesHdr.append('rect')
-            .attr('x', this.props.marginLeft)
-            .attr('width', 10)
-            .attr('height', 10);
-        seriesHdr.append('text')
-            .attr('x', this.props.marginLeft + 14)
-            .attr('y', 10)
-            .text(this.props.name);
+        // let seriesHdr = this.svg.append('g')
+        //     .attr('class', 'serieshdr');
+        // seriesHdr.append('rect')
+        //     .attr('x', this.props.marginLeft)
+        //     .attr('width', 10)
+        //     .attr('height', 10);
+        // seriesHdr.append('text')
+        //     .attr('x', this.props.marginLeft + 14)
+        //     .attr('y', 10)
+        //     .text(this.props.name);
 
         this.svg.append('g')
             .attr('class', 'axis xaxis')

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react';  // eslint-disable-line
 import QueryActions from '../Actions/QueryActions.jsx';
 import AuthActions from '../Actions/AuthActions.jsx';
 import BaseStore from './BaseStore.jsx';
@@ -22,7 +22,7 @@ class QueryStore extends BaseStore {
     onQuery(query) {
         this.setState({ sending: true, result: null });
         this.post('/query', { query: query })
-            .always((xhr, data) => {
+            .always(() => {
                 this.setState({ sending: false });
             })
             .done((data) => {

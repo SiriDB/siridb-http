@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { render } from 'react-dom';
 
 
 class Table extends React.Component {
@@ -30,7 +29,7 @@ class Table extends React.Component {
             <table className="table table-striped table-condensed table-result">
                 <thead>
                     <tr>
-                        {this.props.columns.map((column, n) => <th key={n}>{column}</th>)}
+                        {this.props.columns.map((column, n) => <th key={n} style={column==='time' ? {width: 200} : null}>{column}</th>)}
                     </tr>
                 </thead>
                 <tbody>
@@ -43,7 +42,7 @@ class Table extends React.Component {
                     }
                 </tbody>
             </table>
-        )
+        );
     }
 }
 

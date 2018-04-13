@@ -1,6 +1,5 @@
-import React from 'react';
+import React from 'react';  // eslint-disable-line
 import Reflux from 'reflux-edge';
-import { render } from 'react-dom';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import QueryStore from '../../Stores/QueryStore.jsx';
 import QueryActions from '../../Actions/QueryActions.jsx';
@@ -47,6 +46,10 @@ class Query extends Reflux.Component {
         }
     }
 
+    componentWillUnmount() {
+        QueryActions.clearAll();
+    }
+
     setQuery(query) {
         this.setState({
             show: false,
@@ -85,24 +88,25 @@ class Query extends Reflux.Component {
 
         if (this.state.show) {
             switch (event.key) {
-                case 'ArrowUp':
-                    event.preventDefault();
-                    this.setState({
-                        selected: ((--this.state.selected % n) + n) % n
-                    });
-                    break;
-                case 'ArrowDown':
-                    event.preventDefault();
-                    this.setState({
-                        selected: (++this.state.selected) % n
-                    });
-                    break;
-                case 'Tab':
-                    event.preventDefault();
-                case 'Enter':
-                    break;
-                default:
-                    this.setState({ show: false, parseRes: null });
+            case 'ArrowUp':
+                event.preventDefault();
+                this.setState({
+                    selected: ((--this.state.selected % n) + n) % n
+                });
+                break;
+            case 'ArrowDown':
+                event.preventDefault();
+                this.setState({
+                    selected: (++this.state.selected) % n
+                });
+                break;
+            case 'Tab':
+                event.preventDefault();
+                break;
+            case 'Enter':
+                break;
+            default:
+                this.setState({ show: false, parseRes: null });
             }
         } else {
             if (event.key === 'Tab') {
@@ -122,7 +126,7 @@ class Query extends Reflux.Component {
 
     _getWpos(keywords) {
         let wpos;
-        for (wpos = 0; true; wpos++) {
+        for (wpos = 0;; wpos++) {
             let j, p = keywords[0][wpos];
             for (j = 1; j < keywords.length; j++) {
                 if (p !== keywords[j][wpos] || j > keywords[j].length) {
@@ -134,7 +138,7 @@ class Query extends Reflux.Component {
                 break;
             }
         }
-        return wpos
+        return wpos;
     }
 
     onTabPress(event) {
@@ -145,14 +149,14 @@ class Query extends Reflux.Component {
         let lm = left.match(LAST_CHARS);
         let check = (lm) ? lm[0] : '';
         let rest = (check && (rest = right.match(FIRST_CHARS))) ? rest[0] : '';
-        let parseResult = SiriGrammar.parse(left);
+        let parseResult = window.SiriGrammar.parse(left);
         if (lm === null) {
             lm = { index: pos };
         }
         if (parseResult.pos === lm.index) {
             let statement;
             let keywords = parseResult.expecting.filter((element) =>
-                element instanceof jsleri.Keyword &&
+                element instanceof window.jsleri.Keyword &&
                 element.keyword.indexOf(check) === 0
             ).map((kw) => kw.keyword);
             if (keywords.length === 1) {
@@ -280,7 +284,7 @@ class Query extends Reflux.Component {
                     ) : null
                 }
             </div>
-        )
+        );
     }
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Link} from 'react-router-dom';
+import {NavLink} from 'react-router-dom';
 import AuthActions from '../../Actions/AuthActions.jsx';
 
 class TopMenu extends React.Component {
@@ -54,8 +54,8 @@ class TopMenu extends React.Component {
 
                     <div className={`collapse navbar-collapse${navclass}`}>
                         <ul className="nav navbar-nav navbar-right" onClick={this.onItemClick.bind(this)}>
-                            <li><Link to="/" >Query</Link></li>
-                            <li><Link to="/insert" >Insert</Link></li>
+                            <li><NavLink exact={true} to="/" >Query</NavLink></li>
+                            <li><NavLink to="/insert" >Insert</NavLink></li>
                             {logoff}
                         </ul>
                     </div>
