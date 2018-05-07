@@ -87,7 +87,7 @@ $ ./gobuild.py -i -l -w -b -d
 For running SiriDB HTTP a configuration file is required and should be provided using the `-c` or `--config` argument. The easiest way to create a configuration file is to save the output from
 siridb-http to a file:
 
-> Note: you might want to switch to root and later create a service to automically start SiriDB HTTP at startup.
+> Note: you might want to switch to root and later create a service to automatically start SiriDB HTTP at startup.
 
 Switch to root or skip this step if you want to save the configuration file with your current user.
 ```
@@ -132,7 +132,6 @@ Now reload the daemon and start the service
 sudo systemctl daemon-reload
 sudo systemctl start siridb-http.service
 ```
-
 
 ### Multi server support
 SiriDB can scale across multiple pools and can be made high-available by adding two servers to each pool. For example you could have four siridb servers sdb01, sdb02, sdb03 and sdb04 all listening to port 9000. In this example we assume sdb01 and sdb02 are members of `pool 0` and sdb03 and sdb04 are members of `pool 1`.
