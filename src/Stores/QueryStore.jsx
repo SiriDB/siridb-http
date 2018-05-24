@@ -18,28 +18,24 @@ class QueryStore extends BaseStore {
         };
     }
 
-
     onQuery(query) {
         this.setState({ sending: true, result: null });
-        this.post('/query', { query: query })
-            .always(() => {
-                this.setState({ sending: false });
-            })
-            .done((data) => {
-                this.setState({ result: data });
-            })
-            .fail((error, msg) => {
-                if (error.status === 422) {
-                    AuthActions.logoff();
-                } else {
-                    this.setState({
-                        alert: {
-                            severity: (msg) ? 'warning' : 'error',
-                            message: msg || unexpected_msg
-                        }
-                    });
-                }
-            });
+        this.post('/query', { query: query }).always(() => {
+            this.setState({ sending: false });
+        }).done((data) => {
+            this.setState({ result: data });
+        }).fail((error, msg) => {
+            if (error.status === 422) {
+                AuthActions.logoff();
+            } else {
+                this.setState({
+                    alert: {
+                        severity: (msg) ? 'warning' : 'error',
+                        message: msg || unexpected_msg
+                    }
+                });
+            }
+        });
     }
 
     onClearAlert() {

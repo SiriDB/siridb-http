@@ -1,8 +1,9 @@
-import React from 'react';
+import React from 'react';  // eslint-disable-line
 import DatabaseActions from '../Actions/DatabaseActions.jsx';
 import BaseStore from './BaseStore.jsx';
 import AppActions from '../Actions/AppActions.jsx';
 import * as d3 from 'd3';
+
 
 class DatabaseStore extends BaseStore {
 
@@ -20,22 +21,19 @@ class DatabaseStore extends BaseStore {
     }
 
     onFetch() {
-        this.fetch('/db-info')
-        .done((data) => {
+        this.fetch('/db-info').done((data) => {
             data.factor = {
                 s: 1e3,
                 ms: 1e0,
                 us: 1e-3,
                 ns: 1e-6
             }[data.timePrecision];
-            data.utcFormat = d3.utcFormat("%Y-%m-%d %H:%M:%SZ");
+            data.utcFormat = d3.utcFormat('%Y-%m-%d %H:%M:%SZ');
             this.setState(data);
-        })
-        .fail((error, data) => {
+        }).fail(() => {
             AppActions.setError('Oops, an error occurred while loading database info...');
         });
     }
-
 }
 
 export default DatabaseStore;

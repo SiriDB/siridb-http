@@ -1,3 +1,5 @@
+/* global require, __dirname, process, module */
+
 const webpack = require('webpack');
 const path = require('path');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
@@ -22,12 +24,6 @@ var config = {
             }
         ]
     },
-    externals: {
-        'Config': JSON.stringify({
-            serverUrl: "/api",
-            domain: "/"
-        })
-    },
     plugins: [
         new webpack.DefinePlugin({
             // A common mistake is not stringifying the "production" string.
@@ -48,7 +44,5 @@ var config = {
         ]
     }
 };
-
-
 
 module.exports = config;

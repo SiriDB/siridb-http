@@ -1,11 +1,11 @@
 import React from 'react';  // eslint-disable-line
 import Reflux from 'reflux-edge';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import QueryStore from '../../Stores/QueryStore.jsx';
 import QueryActions from '../../Actions/QueryActions.jsx';
 import AutoCompletePopup from './AutoCompletePopup.jsx';
 import ParseError from './ParseError.jsx';
 import Result from './Result/Result.jsx';
+
 
 const LAST_CHARS = /[a-z_]+$/;
 const FIRST_CHARS = /^[a-z_]+/;
@@ -48,6 +48,7 @@ class Query extends Reflux.Component {
 
     componentWillUnmount() {
         QueryActions.clearAll();
+        super.componentWillUnmount();
     }
 
     setQuery(query) {
@@ -229,7 +230,9 @@ class Query extends Reflux.Component {
 
     render() {
         let alert = (this.state.alert !== null) ? (
-            <div className={`alert alert-${this.state.alert.severity}`}>{this.state.alert.message}</div>
+            <div className="alert-wrapper">
+                <div className={`alert alert-${this.state.alert.severity}`}>{this.state.alert.message}</div>
+            </div>
         ) : null;
 
         return (
@@ -267,14 +270,7 @@ class Query extends Reflux.Component {
                             {(this.state.parseRes !== null) ? <ParseError parseRes={this.state.parseRes} /> : null}
                         </div>
                     </div>
-                    <ReactCSSTransitionGroup
-                        component="div"
-                        className="alert-wrapper"
-                        transitionName="alert-animation"
-                        transitionEnterTimeout={300}
-                        transitionLeaveTimeout={500}>
-                        {alert}
-                    </ReactCSSTransitionGroup>
+                    {alert}
                 </div>
                 {
                     (this.state.sending) ? (

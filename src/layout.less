@@ -22,8 +22,11 @@ input[type="password"] {
     background-color: #ff6808
 }
 
-/**** Links ****/
+.pointer {
+    cursor: pointer;
+}
 
+/**** Links ****/
 a {
     cursor: pointer;
     color: #7996a2;
@@ -148,24 +151,6 @@ fieldset[disabled] .btn-default.active {
     border: none;
     border-radius: 0;
     opacity: 0.9;
-
-    &.alert-animation-enter {
-      opacity: 0.01;
-    }
-
-    &.alert-animation-enter.alert-animation-enter-active {
-      opacity: 0.9;
-      transition: opacity 300ms ease-in;
-    }
-
-    &.alert-animation-leave {
-      opacity: 0.9;
-    }
-
-    &.alert-animation-leave.alert-animation-leave-active {
-      opacity: 0.01;
-      transition: opacity 500ms ease-in;
-    }
 
     &.alert-warning {
         color: #785313;
@@ -294,7 +279,7 @@ fieldset[disabled] .btn-default.active {
         white-space: pre;
     }
     >tbody >tr:nth-of-type(2n+1) {
-        background-color: #425760;
+        background-color: rgba(66, 87, 96, 0.5);
     }
     >thead >tr >th {
         border-bottom: 2px solid #77888D;
@@ -309,6 +294,7 @@ fieldset[disabled] .btn-default.active {
 .chart {
     margin-bottom: 20px;
     fill: @text_color;
+    background-color: rgba(66, 87, 96, 0.5);
     .axis {
         text {
             fill: @text_color;

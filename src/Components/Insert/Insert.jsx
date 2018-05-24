@@ -1,7 +1,5 @@
-import React from 'react';
+import React from 'react';  // eslint-disable-line
 import Reflux from 'reflux-edge';
-import { render } from 'react-dom';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import InsertStore from '../../Stores/InsertStore.jsx';
 import InsertActions from '../../Actions/InsertActions.jsx';
 import DatabaseStore from '../../Stores/DatabaseStore.jsx';
@@ -18,7 +16,7 @@ class Insert extends Reflux.Component {
         this.stores = [InsertStore, DatabaseStore];
         this.state = {
             data: ''
-        }
+        };
         this.cursorPos = null;
     }
 
@@ -78,8 +76,10 @@ class Insert extends Reflux.Component {
             hasError = true;
         }
         let alert = (this.state.alert !== null) ? (
-            <div className={`alert alert-${this.state.alert.severity}`}>
-                <a className="close" onClick={InsertActions.clearAlert}>×</a>{this.state.alert.message}
+            <div className="alert-wrapper">
+                <div className={`alert alert-${this.state.alert.severity}`}>
+                    <a className="close" onClick={InsertActions.clearAlert}>×</a>{this.state.alert.message}
+                </div>
             </div>
         ) : null;
         return (
@@ -106,17 +106,10 @@ class Insert extends Reflux.Component {
                             </button>
                         </div>
                     </div>
-                    <ReactCSSTransitionGroup
-                        component="div"
-                        className="alert-wrapper"
-                        transitionName="alert-animation"
-                        transitionEnterTimeout={300}
-                        transitionLeaveTimeout={500}>
-                        {alert}
-                    </ReactCSSTransitionGroup>
+                    {alert}
                 </div>
             </div>
-        )
+        );
     }
 }
 

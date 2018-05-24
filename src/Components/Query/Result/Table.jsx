@@ -8,12 +8,14 @@ class Table extends React.Component {
         columns: PropTypes.arrayOf(PropTypes.string).isRequired,
         data: PropTypes.arrayOf(PropTypes.array).isRequired,
         caption: PropTypes.string,
-        formatters: PropTypes.object
+        formatters: PropTypes.object,
+        hideHeader: PropTypes.bool,
     };
 
     static defaultProps = {
         caption: null,
-        formatters: {}
+        formatters: {},
+        hideHeader: false
     };
 
     constructor(props) {
@@ -28,7 +30,7 @@ class Table extends React.Component {
         return (
             <table className="table table-striped table-condensed table-result">
                 <thead>
-                    <tr>
+                    <tr hidden={this.props.hideHeader}>
                         {this.props.columns.map((column, n) => <th key={n} style={column==='time' ? {width: 200} : null}>{column}</th>)}
                     </tr>
                 </thead>

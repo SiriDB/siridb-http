@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react';  // eslint-disable-line
 import InsertActions from '../Actions/InsertActions.jsx';
 import AuthActions from '../Actions/AuthActions.jsx';
 import BaseStore from './BaseStore.jsx';
@@ -19,30 +19,27 @@ class InsertStore extends BaseStore {
 
     onInsert(data) {
         this.setState({ sending: true, alert: null });
-        this.postraw('/insert', data)
-            .always((xhr, data) => {
-                this.setState({ sending: false });
-            })
-            .done((data) => {
-                this.setState({
-                    alert: {
-                        severity: 'success',
-                        message: data.success_msg || 'message unavailable'
-                    }
-                });
-            })
-            .fail((error, msg) => {
-                if (error.status === 422) {
-                    AuthActions.logoff();
-                } else {
-                    this.setState({
-                        alert: {
-                            severity: (msg) ? 'warning' : 'error',
-                            message: msg || unexpected_msg
-                        }
-                    });
+        this.postraw('/insert', data).always(() => {
+            this.setState({ sending: false });
+        }).done((data) => {
+            this.setState({
+                alert: {
+                    severity: 'success',
+                    message: data.success_msg || 'message unavailable'
                 }
             });
+        }).fail((error, msg) => {
+            if (error.status === 422) {
+                AuthActions.logoff();
+            } else {
+                this.setState({
+                    alert: {
+                        severity: (msg) ? 'warning' : 'error',
+                        message: msg || unexpected_msg
+                    }
+                });
+            }
+        });
     }
 
     onClearAlert() {

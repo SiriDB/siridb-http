@@ -1,5 +1,4 @@
 import Reflux from 'reflux-edge';
-import * as d3 from 'd3';
 import JsonRequest from '../Utils/JsonRequest.jsx';
 
 class BaseStore extends Reflux.Store {

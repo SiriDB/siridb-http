@@ -8,8 +8,10 @@ func handlerMain(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		handlerNotFound(w, r)
 	} else if base.connections[0].client.IsConnected() {
+		w.Header().Set("Content-Type", "text/html")
 		w.Write(FileIndexHTML)
 	} else {
+		w.Header().Set("Content-Type", "text/html")
 		w.Write(FileWaitingHTML)
 	}
 
@@ -24,14 +26,17 @@ func handlerFaviconIco(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerBootstrapCSS(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/css")
 	w.Write(FileBootstrapMinCSS)
 }
 
 func handlerLayout(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/css")
 	w.Write(FileLayoutMinCSS)
 }
 
 func handlerFontAwesomeMinCSS(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/css")
 	w.Write(FileFontAwesomeMinCSS)
 }
 

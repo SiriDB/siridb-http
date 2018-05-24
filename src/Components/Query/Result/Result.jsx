@@ -2,10 +2,10 @@ import React from 'react';  // eslint-disable-line
 import PropTypes from 'prop-types';
 import Reflux from 'reflux-edge';
 import Table from './Table.jsx';
+import Series from './Series.jsx';
 import DatabaseStore from '../../../Stores/DatabaseStore.jsx';
 import * as moment from 'moment';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import Chart from '../../../Utils/Chart.jsx';
 
 
 class Result extends Reflux.Component {
@@ -96,7 +96,8 @@ class Result extends Reflux.Component {
                 data={data.data.map((row) => [
                     row.name,
                     (this._fmtServer[row.name] || ((val) => val))(row.value)
-                ])} />;
+                ])}
+                hideHeader={true} />;
         }
 
         /**** Calc Statement ****/
@@ -136,24 +137,15 @@ class Result extends Reflux.Component {
         let charts = (
             <div>
                 {
-                    Object.entries(data).map(([series, points]) => {
+                    Object.entries(data).map(([name, points]) => {
                         npoints += points.length;
                         nseries++;
-                        return (points.length <= 1 || typeof points[0][1] === 'string') ?
-                            <div key={series}>
-                                <span>{series}</span>
-                                {points.length ?
-                                    <Table
-                                        columns={['time', 'value']}
-                                        data={points}
-                                        formatters={this._fmtSelect} /> :
-                                    <span style={{marginLeft:10}}><em>no points</em></span>
-                                }
-                            </div> :
-                            <Chart
-                                key={series}
-                                name={series}
-                                points={points.map((point) => [point[0] * this.state.factor, point[1]])} />;
+                        return <Series
+                            key={name}
+                            name={name}
+                            points={points}
+                            factor={this.state.factor}
+                            utcFormat={this.state.utcFormat} />;
                     })
                 }
             </div>
@@ -196,10 +188,6 @@ class Result extends Reflux.Component {
         },
         start: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor))),
         end: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor)))
-    }
-
-    _fmtSelect = {
-        time: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor))),
     }
 
     _fmtServer = {
