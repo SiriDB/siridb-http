@@ -1,3 +1,15 @@
+siridb-http (2.0.6)
+
+  * Update SiriDB grammar to version 2.0.27.
+
+  * Added log (string) support.
+
+  * Update npm packages and removed obsolete packages.
+
+  * Added option to switch from charts to tables and back.
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  24 May 2018
+
 siridb-http (2.0.5)
 
   * Replace parseInt with Math.floor()
