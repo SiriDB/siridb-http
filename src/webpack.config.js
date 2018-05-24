@@ -42,6 +42,9 @@ var config = {
                 }
             })
         ]
+    },
+    performance: {
+        hints: false
     }
 };
 

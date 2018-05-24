@@ -196,6 +196,8 @@ class Result extends Reflux.Component {
         received_points: this._fmtLongNumber,
         selected_points: this._fmtLongNumber,
         buffer_size: this._fmtSize,
+        idle_time: (val) => moment.duration(val, 'seconds').humanize(),
+        idle_percentage: (val) => `${val}%`,
         mem_usage: (val) => this._fmtSize(val * 1024 * 1024),
         drop_threshold: (val) => `${val} (${Math.floor(val * 100).toString()}%)`,
         startup_time: (val) => `${val} second${(val === 1) ? '' : 's'}`,
