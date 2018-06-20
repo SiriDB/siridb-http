@@ -5,25 +5,25 @@
  * should be used with the jsleri JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2018-05-16 16:15:46
+ * Created at: 2018-06-14 16:27:16
  */
 
 'use strict';
 
 (function (
             List,
-            Token,
-            Grammar,
-            Prio,
             Rule,
-            Optional,
-            Tokens,
-            Repeat,
-            THIS,
-            Regex,
+            Keyword,
             Choice,
+            Prio,
+            Tokens,
+            Optional,
             Sequence,
-            Keyword
+            THIS,
+            Token,
+            Regex,
+            Grammar,
+            Repeat
         ) {
     var r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
     var r_integer = Regex('^[-+]?[0-9]+');
@@ -82,6 +82,7 @@
     );
     var k_idle_percentage = Keyword('idle_percentage');
     var k_idle_time = Keyword('idle_time');
+    var k_inf = Keyword('inf');
     var k_info = Keyword('info');
     var k_ignore_threshold = Keyword('ignore_threshold');
     var k_insert = Keyword('insert');
@@ -109,7 +110,12 @@
     var k_merge = Keyword('merge');
     var k_min = Keyword('min');
     var k_modify = Keyword('modify');
+    var k_nan = Keyword('nan');
     var k_name = Keyword('name');
+    var k_ninf = Sequence(
+        Token('-'),
+        k_inf
+    );
     var k_now = Keyword('now');
     var k_number = Keyword('number');
     var k_online = Keyword('online');
@@ -712,7 +718,10 @@
         Choice(
             string,
             r_integer,
-            r_float
+            r_float,
+            k_nan,
+            k_inf,
+            k_ninf
         ),
         Token(')')
     );
@@ -1241,16 +1250,16 @@
 
 })(
     window.jsleri.List,
-    window.jsleri.Token,
-    window.jsleri.Grammar,
-    window.jsleri.Prio,
     window.jsleri.Rule,
-    window.jsleri.Optional,
-    window.jsleri.Tokens,
-    window.jsleri.Repeat,
-    window.jsleri.THIS,
-    window.jsleri.Regex,
+    window.jsleri.Keyword,
     window.jsleri.Choice,
+    window.jsleri.Prio,
+    window.jsleri.Tokens,
+    window.jsleri.Optional,
     window.jsleri.Sequence,
-    window.jsleri.Keyword
+    window.jsleri.THIS,
+    window.jsleri.Token,
+    window.jsleri.Regex,
+    window.jsleri.Grammar,
+    window.jsleri.Repeat
 );
