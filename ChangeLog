@@ -1,3 +1,9 @@
+siridb-http (2.0.8)
+
+  * Update SiriDB grammar to version 2.0.29
+
+ -- Jeroen van der Heijden <jeroen@transceptor.technology>  xx xxx xxxx
+
 siridb-http (2.0.7)
 
   * Update SiriDB grammar to version 2.0.28
