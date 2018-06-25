@@ -5,25 +5,25 @@
  * should be used with the jsleri JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2018-06-14 16:27:16
+ * Created at: 2018-06-22 15:10:04
  */
 
 'use strict';
 
 (function (
-            List,
-            Rule,
-            Keyword,
             Choice,
             Prio,
-            Tokens,
-            Optional,
-            Sequence,
             THIS,
+            Repeat,
+            Keyword,
+            List,
+            Optional,
+            Tokens,
+            Rule,
             Token,
-            Regex,
             Grammar,
-            Repeat
+            Regex,
+            Sequence
         ) {
     var r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
     var r_integer = Regex('^[-+]?[0-9]+');
@@ -719,6 +719,7 @@
             string,
             r_integer,
             r_float,
+            r_regex,
             k_nan,
             k_inf,
             k_ninf
@@ -1249,17 +1250,17 @@
     window.SiriGrammar = Grammar(START, '[a-z_]+');
 
 })(
-    window.jsleri.List,
-    window.jsleri.Rule,
-    window.jsleri.Keyword,
     window.jsleri.Choice,
     window.jsleri.Prio,
-    window.jsleri.Tokens,
-    window.jsleri.Optional,
-    window.jsleri.Sequence,
     window.jsleri.THIS,
+    window.jsleri.Repeat,
+    window.jsleri.Keyword,
+    window.jsleri.List,
+    window.jsleri.Optional,
+    window.jsleri.Tokens,
+    window.jsleri.Rule,
     window.jsleri.Token,
-    window.jsleri.Regex,
     window.jsleri.Grammar,
-    window.jsleri.Repeat
+    window.jsleri.Regex,
+    window.jsleri.Sequence
 );
