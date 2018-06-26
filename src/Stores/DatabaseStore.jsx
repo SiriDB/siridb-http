@@ -29,6 +29,7 @@ class DatabaseStore extends BaseStore {
                 ns: 1e-6
             }[data.timePrecision];
             data.utcFormat = d3.utcFormat('%Y-%m-%d %H:%M:%SZ');
+            document.title = data.dbname;
             this.setState(data);
         }).fail(() => {
             AppActions.setError('Oops, an error occurred while loading database info...');
