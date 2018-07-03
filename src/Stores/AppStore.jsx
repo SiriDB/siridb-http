@@ -1,14 +1,11 @@
-import React from 'react';
-import Reflux from 'reflux-edge';
+import Vlow from 'vlow';
 import AppActions from '../Actions/AppActions.jsx';
 
-Reflux.defineReact(React, Reflux);
 
-class AppStore extends Reflux.Store {
+class AppStore extends Vlow.Store {
 
     constructor() {
-        super();
-        this.listenables = AppActions;
+        super(AppActions);
         this.state = {
             appError: null
         };

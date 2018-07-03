@@ -1,6 +1,6 @@
 import React from 'react';  // eslint-disable-line
 import PropTypes from 'prop-types';
-import Reflux from 'reflux-edge';
+import Vlow from 'vlow';
 import Table from './Table.jsx';
 import Series from './Series.jsx';
 import DatabaseStore from '../../../Stores/DatabaseStore.jsx';
@@ -8,7 +8,7 @@ import * as moment from 'moment';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 
-class Result extends Reflux.Component {
+class Result extends Vlow.Component {
 
     static propTypes = {
         result: PropTypes.object.isRequired,
@@ -17,7 +17,7 @@ class Result extends Reflux.Component {
 
     constructor(props) {
         super(props);
-        this.store = DatabaseStore;
+        this.mapStore(DatabaseStore);
     }
 
     shouldComponentUpdate(nextProps) {

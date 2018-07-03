@@ -5,25 +5,26 @@
  * should be used with the jsleri JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2018-06-22 15:10:04
+ * Created at: 2018-06-29 22:48:05
  */
 
 'use strict';
 
 (function (
             Choice,
-            Prio,
-            THIS,
-            Repeat,
-            Keyword,
             List,
-            Optional,
-            Tokens,
-            Rule,
-            Token,
-            Grammar,
+            Sequence,
             Regex,
-            Sequence
+            Tokens,
+            Grammar,
+            Keyword,
+            Token,
+            Rule,
+            THIS,
+            Ref,
+            Optional,
+            Repeat,
+            Prio
         ) {
     var r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
     var r_integer = Regex('^[-+]?[0-9]+');
@@ -1128,6 +1129,24 @@
         ), Token(','), 0, undefined, false)
     );
     var timeit_stmt = Repeat(k_timeit, 1, 1);
+    var help_stmt = Ref(Sequence);
+    var START = Sequence(
+        Optional(timeit_stmt),
+        Optional(Choice(
+            select_stmt,
+            list_stmt,
+            count_stmt,
+            alter_stmt,
+            create_stmt,
+            drop_stmt,
+            grant_stmt,
+            revoke_stmt,
+            show_stmt,
+            calc_stmt,
+            help_stmt
+        )),
+        Optional(r_comment)
+    );
     var help_access = Keyword('access');
     var help_alter_database = Keyword('database');
     var help_alter_group = Keyword('group');
@@ -1210,7 +1229,7 @@
     var help_show = Keyword('show');
     var help_timeit = Keyword('timeit');
     var help_timezones = Keyword('timezones');
-    var help = Sequence(
+    Object.assign(help_stmt, Sequence(
         k_help,
         Optional(Choice(
             help_access,
@@ -1228,39 +1247,23 @@
             help_timeit,
             help_timezones
         ))
-    );
-    var START = Sequence(
-        Optional(timeit_stmt),
-        Optional(Choice(
-            select_stmt,
-            list_stmt,
-            count_stmt,
-            alter_stmt,
-            create_stmt,
-            drop_stmt,
-            grant_stmt,
-            revoke_stmt,
-            show_stmt,
-            calc_stmt,
-            help
-        )),
-        Optional(r_comment)
-    );
+    ));
 
     window.SiriGrammar = Grammar(START, '[a-z_]+');
 
 })(
     window.jsleri.Choice,
-    window.jsleri.Prio,
-    window.jsleri.THIS,
-    window.jsleri.Repeat,
-    window.jsleri.Keyword,
     window.jsleri.List,
-    window.jsleri.Optional,
-    window.jsleri.Tokens,
-    window.jsleri.Rule,
-    window.jsleri.Token,
-    window.jsleri.Grammar,
+    window.jsleri.Sequence,
     window.jsleri.Regex,
-    window.jsleri.Sequence
+    window.jsleri.Tokens,
+    window.jsleri.Grammar,
+    window.jsleri.Keyword,
+    window.jsleri.Token,
+    window.jsleri.Rule,
+    window.jsleri.THIS,
+    window.jsleri.Ref,
+    window.jsleri.Optional,
+    window.jsleri.Repeat,
+    window.jsleri.Prio
 );

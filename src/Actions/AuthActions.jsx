@@ -1,2 +1,8 @@
-import Reflux from 'reflux-edge';
-export default Reflux.createActions(["setAuthError", "clearAuthError", "login", "fetch", "logoff"]);
+import Vlow from 'vlow';
+export default Vlow.createActions([
+    'setAuthError',
+    'clearAuthError',
+    'login',
+    'fetch',
+    'logoff'
+]);

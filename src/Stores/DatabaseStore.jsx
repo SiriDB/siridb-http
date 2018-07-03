@@ -8,8 +8,7 @@ import * as d3 from 'd3';
 class DatabaseStore extends BaseStore {
 
     constructor() {
-        super();
-        this.listenables = DatabaseActions;
+        super(DatabaseActions);
         this.state = {
             version: null,
             dbname: null,

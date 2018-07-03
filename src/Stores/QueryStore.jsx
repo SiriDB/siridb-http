@@ -1,16 +1,13 @@
-import React from 'react';  // eslint-disable-line
 import QueryActions from '../Actions/QueryActions.jsx';
 import AuthActions from '../Actions/AuthActions.jsx';
 import BaseStore from './BaseStore.jsx';
-
 
 const unexpected_msg = 'Oops, some unexpected error has occurred. Please check the console for more details.';
 
 class QueryStore extends BaseStore {
 
     constructor() {
-        super();
-        this.listenables = QueryActions;
+        super(QueryActions);
         this.state = {
             alert: null,
             result: null,

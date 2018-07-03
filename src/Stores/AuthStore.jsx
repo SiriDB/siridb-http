@@ -1,4 +1,3 @@
-import React from 'react';  // eslint-disable-line
 import BaseStore from './BaseStore.jsx';
 import AuthActions from '../Actions/AuthActions.jsx';
 import QueryActions from '../Actions/QueryActions.jsx';
@@ -6,8 +5,7 @@ import QueryActions from '../Actions/QueryActions.jsx';
 class AuthStore extends BaseStore {
 
     constructor() {
-        super();
-        this.listenables = AuthActions;
+        super(AuthActions);
         this.state = {
             user: null,
             authRequired: null,

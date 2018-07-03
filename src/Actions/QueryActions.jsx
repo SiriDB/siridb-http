@@ -1,2 +1,6 @@
-import Reflux from 'reflux-edge';
-export default Reflux.createActions(['query', 'clearAlert', 'clearAll']);
+import Vlow from 'vlow';
+export default Vlow.createActions([
+    'query',
+    'clearAlert',
+    'clearAll'
+]);

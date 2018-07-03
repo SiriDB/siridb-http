@@ -1,2 +1,4 @@
-import Reflux from 'reflux-edge';
-export default Reflux.createActions(["setAppError"]);
+import Vlow from 'vlow';
+export default Vlow.createActions([
+    'setAppError'
+]);

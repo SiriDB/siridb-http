@@ -1,4 +1,3 @@
-import React from 'react';  // eslint-disable-line
 import InsertActions from '../Actions/InsertActions.jsx';
 import AuthActions from '../Actions/AuthActions.jsx';
 import BaseStore from './BaseStore.jsx';
@@ -9,8 +8,7 @@ const unexpected_msg = 'Oops, some unexpected error has occurred. Please check t
 class InsertStore extends BaseStore {
 
     constructor() {
-        super();
-        this.listenables = InsertActions;
+        super(InsertActions);
         this.state = {
             alert: null,
             sending: false
