@@ -1,5 +1,4 @@
 import React from 'react';  // eslint-disable-line
-import Reflux from 'reflux-edge';
 import {Route, Switch} from 'react-router-dom';
 import TopMenu from './TopMenu.jsx';
 import AppStore from '../../Stores/AppStore.jsx';
@@ -9,16 +8,17 @@ import Auth from '../Auth/Auth.jsx';
 import InfoModal from './InfoModal.jsx';
 import Query from '../Query/Query.jsx';
 import Insert from '../Insert/Insert.jsx';
+import Vlow from 'vlow';
 
 
-class App extends Reflux.Component {
+class App extends Vlow.Component {
 
     constructor(props) {
         super(props);
         this.state = {
             showInfoModal: false
         };
-        this.stores = [AppStore, DatabaseStore, AuthStore];
+        this.mapStores([AppStore, DatabaseStore, AuthStore]);
     }
 
     onShowInfoModal() {

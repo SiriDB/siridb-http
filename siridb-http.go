@@ -383,8 +383,6 @@ key_file = certificate.key
 	if base.enableWeb {
 		http.HandleFunc("/", handlerMain)
 		http.HandleFunc("/js/bundle", handlerJsBundle)
-		http.HandleFunc("/js/jsleri", handlerLeriMinJS)
-		http.HandleFunc("/js/grammar", handlerGrammarJS)
 		http.HandleFunc("/css/bootstrap", handlerBootstrapCSS)
 		http.HandleFunc("/css/layout", handlerLayout)
 		http.HandleFunc("/favicon.ico", handlerFaviconIco)

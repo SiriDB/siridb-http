@@ -74,14 +74,6 @@ func handlerLoaderGIF(w http.ResponseWriter, r *http.Request) {
 	handleFileRequest(w, "./static/img/loader.gif", "image/gif")
 }
 
-func handlerLeriMinJS(w http.ResponseWriter, r *http.Request) {
-	handleFileRequest(w, "./static/js/libs/jsleri-1.1.2.js", "text/javascript")
-}
-
-func handlerGrammarJS(w http.ResponseWriter, r *http.Request) {
-	handleFileRequest(w, "./static/js/grammar.js", "text/javascript")
-}
-
 func handleFileRequest(w http.ResponseWriter, fn, ct string) {
 	b, err := ioutil.ReadFile(fn)
 	if err == nil {

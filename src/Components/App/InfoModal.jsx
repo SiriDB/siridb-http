@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Reflux from 'reflux-edge';
-import { render } from 'react-dom';
+import Vlow from 'vlow';
 import DatabaseStore from '../../Stores/DatabaseStore.jsx';
 import { Modal } from 'react-bootstrap';
 
-class InfoModal extends Reflux.Component {
+class InfoModal extends Vlow.Component {
 
     static propTypes = {
         show: PropTypes.bool.isRequired,
@@ -14,7 +13,7 @@ class InfoModal extends Reflux.Component {
 
     constructor(props) {
         super(props);
-        this.store = DatabaseStore;
+        this.mapStore(DatabaseStore);
     }
 
     render() {

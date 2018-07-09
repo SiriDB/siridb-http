@@ -1,22 +1,23 @@
 import React from 'react';  // eslint-disable-line
-import Reflux from 'reflux-edge';
+import Vlow from 'vlow';
 import QueryStore from '../../Stores/QueryStore.jsx';
 import QueryActions from '../../Actions/QueryActions.jsx';
 import AutoCompletePopup from './AutoCompletePopup.jsx';
 import ParseError from './ParseError.jsx';
 import Result from './Result/Result.jsx';
-
+import {Keyword} from 'jsleri';
+import SiriGrammar from '../../Utils/SiriGrammar';
 
 const LAST_CHARS = /[a-z_]+$/;
 const FIRST_CHARS = /^[a-z_]+/;
 const SELECT_ALL = -1;
 const HISTORY_SIZE = 100;
 
-class Query extends Reflux.Component {
+class Query extends Vlow.Component {
 
     constructor(props) {
         super(props);
-        this.store = QueryStore;
+        this.siriGrammar = new SiriGrammar();
         this.state = {
             query: '',
             queries: [],
@@ -31,6 +32,7 @@ class Query extends Reflux.Component {
             /* Error Popup */
             parseRes: null
         };
+        this.mapStore(QueryStore);
         this.cursorPos = null;
         this.queries = JSON.parse(localStorage.getItem('queries')) || [];
         this.idx = this.queries.length;
@@ -150,14 +152,14 @@ class Query extends Reflux.Component {
         let lm = left.match(LAST_CHARS);
         let check = (lm) ? lm[0] : '';
         let rest = (check && (rest = right.match(FIRST_CHARS))) ? rest[0] : '';
-        let parseResult = window.SiriGrammar.parse(left);
+        let parseResult = this.siriGrammar.parse(left);
         if (lm === null) {
             lm = { index: pos };
         }
         if (parseResult.pos === lm.index) {
             let statement;
             let keywords = parseResult.expecting.filter((element) =>
-                element instanceof window.jsleri.Keyword &&
+                element instanceof Keyword &&
                 element.keyword.indexOf(check) === 0
             ).map((kw) => kw.keyword);
             if (keywords.length === 1) {

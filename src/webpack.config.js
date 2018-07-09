@@ -1,6 +1,4 @@
 /* global require, __dirname, process, module */
-
-const webpack = require('webpack');
 const path = require('path');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
@@ -20,18 +18,15 @@ var config = {
                 test: /\.jsx?/,
                 include: APP_DIR,
                 loader: 'babel-loader',
-                exclude: /node_modules/
+                exclude: /node_modules\/(?!vlow)/
             }
         ]
     },
-    plugins: [
-        new webpack.DefinePlugin({
-            // A common mistake is not stringifying the "production" string.
-            'process.env': {
-                'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
-            }
-        }),
-    ],
+    resolve: {
+        alias: {
+            'vlow': path.resolve(__dirname, './node_modules/vlow/index.js')
+        }
+    },
     optimization: {
         minimizer: [
             new UglifyJSPlugin({
@@ -42,9 +37,6 @@ var config = {
                 }
             })
         ]
-    },
-    performance: {
-        hints: false
     }
 };
 

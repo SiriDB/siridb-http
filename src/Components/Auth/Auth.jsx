@@ -1,18 +1,18 @@
 import React from 'react';  // eslint-disable-line
-import Reflux from 'reflux-edge';
+import Vlow from 'vlow';
 import AuthStore from '../../Stores/AuthStore.jsx';
 import AuthActions from '../../Actions/AuthActions.jsx';
 
 
-class Auth extends Reflux.Component {
+class Auth extends Vlow.Component {
 
     constructor(props) {
         super(props);
-        this.store = AuthStore;
         this.state = {
             username: '',
             password: ''
         };
+        this.mapStore(AuthStore);
     }
 
     onLogin() {

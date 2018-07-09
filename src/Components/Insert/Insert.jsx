@@ -1,5 +1,5 @@
 import React from 'react';  // eslint-disable-line
-import Reflux from 'reflux-edge';
+import Vlow from 'vlow';
 import InsertStore from '../../Stores/InsertStore.jsx';
 import InsertActions from '../../Actions/InsertActions.jsx';
 import DatabaseStore from '../../Stores/DatabaseStore.jsx';
@@ -9,14 +9,14 @@ import moment from 'moment';
 const SELECT_ALL = -1;
 
 
-class Insert extends Reflux.Component {
+class Insert extends Vlow.Component {
 
     constructor(props) {
         super(props);
-        this.stores = [InsertStore, DatabaseStore];
         this.state = {
             data: ''
         };
+        this.mapStores([InsertStore, DatabaseStore]);
         this.cursorPos = null;
     }
 

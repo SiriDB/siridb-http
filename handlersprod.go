@@ -86,13 +86,3 @@ func handlerLoaderGIF(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/gif")
 	w.Write(FileLoaderGIF)
 }
-
-func handlerLeriMinJS(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/javascript")
-	w.Write(FileLeriMinJS)
-}
-
-func handlerGrammarJS(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/javascript")
-	w.Write(FileGrammarJS)
-}
