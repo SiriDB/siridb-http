@@ -13,10 +13,6 @@ class AutoCompletePopup extends React.Component {
         onSelect: PropTypes.func.isRequired
     };
 
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         let style = {
             left: 14 + this.props.xpos * 7.24
