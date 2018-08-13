@@ -83,6 +83,26 @@ Or, if you want the development version which uses original files from /build an
 $ ./gobuild.py -i -l -w -b -d
 ```
 
+### Docker
+
+Pull the image from docker hub, then run with:
+
+```sh
+docker run --name siridb-http \
+    -e SIRIDB_USERNAME=user
+    -e SIRIDB_PASSWORD=secret
+    -e SIRIDB_DATABASE=db
+    -e SIRIDB_SERVERS=localhost
+    -e HTTP_PORT=5050
+    siridb-http:latest
+```
+
+If you want to build the docker image locally:
+
+```
+
+```
+
 ## Configuration
 For running SiriDB HTTP a configuration file is required and should be provided using the `-c` or `--config` argument. The easiest way to create a configuration file is to save the output from
 siridb-http to a file:
