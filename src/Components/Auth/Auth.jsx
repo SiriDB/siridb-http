@@ -1,20 +1,18 @@
-import React from 'react';
-import Reflux from 'reflux-edge';
-import { render } from 'react-dom';
+import React from 'react';  // eslint-disable-line
+import Vlow from 'vlow';
 import AuthStore from '../../Stores/AuthStore.jsx';
 import AuthActions from '../../Actions/AuthActions.jsx';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 
-class Auth extends Reflux.Component {
+class Auth extends Vlow.Component {
 
     constructor(props) {
         super(props);
-        this.store = AuthStore;
         this.state = {
             username: '',
             password: ''
         };
+        this.mapStore(AuthStore);
     }
 
     onLogin() {
@@ -43,7 +41,9 @@ class Auth extends Reflux.Component {
 
     render() {
         let error = (this.state.authError !== null) ? (
-            <div className="alert alert-warning">{this.state.authError}</div>
+            <div className="alert-wrapper">
+                <div className="alert alert-warning">{this.state.authError}</div>
+            </div>
         ) : null;
 
         return (
@@ -85,17 +85,10 @@ class Auth extends Reflux.Component {
                             </div>
                         </div>
                     </div>
-                    <ReactCSSTransitionGroup
-                        component="div"
-                        className="alert-wrapper"
-                        transitionName="alert-animation"
-                        transitionEnterTimeout={300}
-                        transitionLeaveTimeout={500}>
-                        {error}
-                    </ReactCSSTransitionGroup>
+                    {error}
                 </div>
             </div>
-        )
+        );
     }
 }
 

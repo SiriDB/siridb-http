@@ -1,13 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { render } from 'react-dom';
 
 class ParseError extends React.Component {
 
     static propTypes = {
-        parseRes: React.PropTypes.shape({
-            isValid: React.PropTypes.bool,
-            expecting: React.PropTypes.array,
-            pos: React.PropTypes.number
+        parseRes: PropTypes.shape({
+            isValid: PropTypes.bool,
+            expecting: PropTypes.array,
+            pos: PropTypes.number
         }).isRequired,
     };
 

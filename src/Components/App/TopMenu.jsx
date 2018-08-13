@@ -1,13 +1,13 @@
 import React from 'react';
-import { render } from 'react-dom';
-import { Link, IndexLink } from 'react-router';
+import PropTypes from 'prop-types';
+import {NavLink} from 'react-router-dom';
 import AuthActions from '../../Actions/AuthActions.jsx';
 
 class TopMenu extends React.Component {
 
     static propTypes = {
-        onLogoClick: React.PropTypes.func.isRequired,
-        showLogoff: React.PropTypes.bool.isRequired
+        onLogoClick: PropTypes.func.isRequired,
+        showLogoff: PropTypes.bool.isRequired
     };
 
     constructor(props) {
@@ -32,7 +32,7 @@ class TopMenu extends React.Component {
     render() {
         let logoff = (this.props.showLogoff) ?
             <li>
-                <Link onClick={AuthActions.logoff} activeClassName="active">Logoff</Link>
+                <a onClick={AuthActions.logoff} >Logoff</a>
             </li> : null;
 
         let navclass = (this.state.in) ? ' in' : '';
@@ -54,14 +54,14 @@ class TopMenu extends React.Component {
 
                     <div className={`collapse navbar-collapse${navclass}`}>
                         <ul className="nav navbar-nav navbar-right" onClick={this.onItemClick.bind(this)}>
-                            <li><IndexLink to="/" activeClassName="active">Query</IndexLink></li>
-                            <li><Link to="insert" activeClassName="active">Insert</Link></li>
+                            <li><NavLink exact={true} to="/" >Query</NavLink></li>
+                            <li><NavLink to="/insert" >Insert</NavLink></li>
                             {logoff}
                         </ul>
                     </div>
                 </div>
             </nav>
-        )
+        );
     }
 }
 

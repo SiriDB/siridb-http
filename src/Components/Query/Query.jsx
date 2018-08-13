@@ -1,23 +1,23 @@
-import React from 'react';
-import Reflux from 'reflux-edge';
-import { render } from 'react-dom';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import React from 'react';  // eslint-disable-line
+import Vlow from 'vlow';
 import QueryStore from '../../Stores/QueryStore.jsx';
 import QueryActions from '../../Actions/QueryActions.jsx';
 import AutoCompletePopup from './AutoCompletePopup.jsx';
 import ParseError from './ParseError.jsx';
 import Result from './Result/Result.jsx';
+import {Keyword} from 'jsleri';
+import SiriGrammar from '../../Utils/SiriGrammar';
 
 const LAST_CHARS = /[a-z_]+$/;
 const FIRST_CHARS = /^[a-z_]+/;
 const SELECT_ALL = -1;
 const HISTORY_SIZE = 100;
 
-class Query extends Reflux.Component {
+class Query extends Vlow.Component {
 
     constructor(props) {
         super(props);
-        this.store = QueryStore;
+        this.siriGrammar = new SiriGrammar();
         this.state = {
             query: '',
             queries: [],
@@ -32,6 +32,7 @@ class Query extends Reflux.Component {
             /* Error Popup */
             parseRes: null
         };
+        this.mapStore(QueryStore);
         this.cursorPos = null;
         this.queries = JSON.parse(localStorage.getItem('queries')) || [];
         this.idx = this.queries.length;
@@ -45,6 +46,11 @@ class Query extends Reflux.Component {
                 this.onQuery();
             }
         }
+    }
+
+    componentWillUnmount() {
+        QueryActions.clearAll();
+        super.componentWillUnmount();
     }
 
     setQuery(query) {
@@ -85,24 +91,25 @@ class Query extends Reflux.Component {
 
         if (this.state.show) {
             switch (event.key) {
-                case 'ArrowUp':
-                    event.preventDefault();
-                    this.setState({
-                        selected: ((--this.state.selected % n) + n) % n
-                    });
-                    break;
-                case 'ArrowDown':
-                    event.preventDefault();
-                    this.setState({
-                        selected: (++this.state.selected) % n
-                    });
-                    break;
-                case 'Tab':
-                    event.preventDefault();
-                case 'Enter':
-                    break;
-                default:
-                    this.setState({ show: false, parseRes: null });
+            case 'ArrowUp':
+                event.preventDefault();
+                this.setState({
+                    selected: ((--this.state.selected % n) + n) % n
+                });
+                break;
+            case 'ArrowDown':
+                event.preventDefault();
+                this.setState({
+                    selected: (++this.state.selected) % n
+                });
+                break;
+            case 'Tab':
+                event.preventDefault();
+                break;
+            case 'Enter':
+                break;
+            default:
+                this.setState({ show: false, parseRes: null });
             }
         } else {
             if (event.key === 'Tab') {
@@ -122,7 +129,7 @@ class Query extends Reflux.Component {
 
     _getWpos(keywords) {
         let wpos;
-        for (wpos = 0; true; wpos++) {
+        for (wpos = 0;; wpos++) {
             let j, p = keywords[0][wpos];
             for (j = 1; j < keywords.length; j++) {
                 if (p !== keywords[j][wpos] || j > keywords[j].length) {
@@ -134,7 +141,7 @@ class Query extends Reflux.Component {
                 break;
             }
         }
-        return wpos
+        return wpos;
     }
 
     onTabPress(event) {
@@ -145,14 +152,14 @@ class Query extends Reflux.Component {
         let lm = left.match(LAST_CHARS);
         let check = (lm) ? lm[0] : '';
         let rest = (check && (rest = right.match(FIRST_CHARS))) ? rest[0] : '';
-        let parseResult = SiriGrammar.parse(left);
+        let parseResult = this.siriGrammar.parse(left);
         if (lm === null) {
             lm = { index: pos };
         }
         if (parseResult.pos === lm.index) {
             let statement;
             let keywords = parseResult.expecting.filter((element) =>
-                element instanceof jsleri.Keyword &&
+                element instanceof Keyword &&
                 element.keyword.indexOf(check) === 0
             ).map((kw) => kw.keyword);
             if (keywords.length === 1) {
@@ -225,7 +232,9 @@ class Query extends Reflux.Component {
 
     render() {
         let alert = (this.state.alert !== null) ? (
-            <div className={`alert alert-${this.state.alert.severity}`}>{this.state.alert.message}</div>
+            <div className="alert-wrapper">
+                <div className={`alert alert-${this.state.alert.severity}`}>{this.state.alert.message}</div>
+            </div>
         ) : null;
 
         return (
@@ -263,14 +272,7 @@ class Query extends Reflux.Component {
                             {(this.state.parseRes !== null) ? <ParseError parseRes={this.state.parseRes} /> : null}
                         </div>
                     </div>
-                    <ReactCSSTransitionGroup
-                        component="div"
-                        className="alert-wrapper"
-                        transitionName="alert-animation"
-                        transitionEnterTimeout={300}
-                        transitionLeaveTimeout={500}>
-                        {alert}
-                    </ReactCSSTransitionGroup>
+                    {alert}
                 </div>
                 {
                     (this.state.sending) ? (
@@ -280,7 +282,7 @@ class Query extends Reflux.Component {
                     ) : null
                 }
             </div>
-        )
+        );
     }
 }
 

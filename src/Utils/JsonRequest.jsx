@@ -1,28 +1,40 @@
-import * as d3 from 'd3';
-
 class JsonRequest {
 
     constructor(type, url, data, isStringified) {
 
-        this.doneCb = function (data) { };
+        this.doneCb = function (data) { };         // eslint-disable-line
         this.failCb = function (error, msg) {
-            console.error(error, msg || 'unknwon error occurred');
+            window.console.error(error, msg || 'unknwon error occurred');
         };
-        this.alwaysCb = function (xhr, data) { };
+        this.alwaysCb = function (xhr, data) { };  // eslint-disable-line
 
-        d3.request(url)
-            .header('Content-Type', 'application/json')
-            .on('error', (error) => {
-                this.alwaysCb(error, error.target.responseText);
-                this.failCb(error.target, error.target.responseText);
-            })
-            .on('load', (xhr) => {
-                let data = JSON.parse(xhr.responseText);
-                this.alwaysCb(xhr, data);
+        let xhr = new XMLHttpRequest();
+        xhr.open(type, url, true);
+        xhr.setRequestHeader('Content-type', 'application/json');
+
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState != XMLHttpRequest.DONE) {
+                return;
+            }
+
+            let data;
+
+            if (xhr.status == 200) {
+                data = JSON.parse(xhr.responseText);
                 this.doneCb(data);
-            })
-            .send(type, (data === undefined || isStringified) ?
-                data : JSON.stringify(data));
+            } else {
+                try {
+                    data = JSON.parse(xhr.responseText);
+                } catch (e) {
+                    data = xhr.responseText;
+                }
+                this.failCb(xhr, data);
+            }
+            this.alwaysCb(xhr, data);
+        };
+
+        xhr.send((data === undefined || isStringified) ?
+            data : JSON.stringify(data));
     }
 
     done(doneCb) {

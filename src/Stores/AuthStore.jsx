@@ -1,4 +1,3 @@
-import React from 'react';
 import BaseStore from './BaseStore.jsx';
 import AuthActions from '../Actions/AuthActions.jsx';
 import QueryActions from '../Actions/QueryActions.jsx';
@@ -6,8 +5,7 @@ import QueryActions from '../Actions/QueryActions.jsx';
 class AuthStore extends BaseStore {
 
     constructor() {
-        super();
-        this.listenables = AuthActions;
+        super(AuthActions);
         this.state = {
             user: null,
             authRequired: null,
@@ -25,19 +23,17 @@ class AuthStore extends BaseStore {
     }
 
     onFetch() {
-        this.fetch('/auth/fetch')
-        .done((data) => {
+        this.fetch('/auth/fetch').done((data) => {
             this.setState(data);
-        })
+        });
     }
 
     onLogoff() {
         localStorage.clear();
         QueryActions.clearAll();
-        this.fetch('/auth/logout')
-        .done((data) => {
+        this.fetch('/auth/logout').done(() => {
             this.setState({user: null});
-        })
+        });
     }
 
     onLogin(username, password) {
@@ -46,13 +42,11 @@ class AuthStore extends BaseStore {
         } else if (!password) {
             AuthActions.setAuthError('Password is required');
         } else {
-            this.post('/auth/login', {username: username, password: password})
-            .done((data) => {
+            this.post('/auth/login', {username: username, password: password}).done((data) => {
                 localStorage.clear();
                 QueryActions.clearAll();
                 this.setState(data);
-            })
-            .fail((error, msg) => {
+            }).fail((error, msg) => {
                 AuthActions.setAuthError(msg || 'Unknown error occurred');
             });
         }

@@ -1,24 +1,18 @@
-import Reflux from 'reflux-edge';
-import * as d3 from 'd3';
+import Vlow from 'vlow';
 import JsonRequest from '../Utils/JsonRequest.jsx';
 
-class BaseStore extends Reflux.Store {
-
-    constructor() {
-        super();
-        this.serverUrl = '';
-    }
+class BaseStore extends Vlow.Store {
 
     fetch(url) {
-        return new JsonRequest('GET', `${this.serverUrl}${url}`);
+        return new JsonRequest('GET', url);
     }
 
     post(url, data) {
-        return new JsonRequest('POST', `${this.serverUrl}${url}`, data);
+        return new JsonRequest('POST', url, data);
     }
 
     postraw(url, raw) {
-        return new JsonRequest('POST', `${this.serverUrl}${url}`, raw, true);
+        return new JsonRequest('POST', url, raw, true);
     }
 }
 

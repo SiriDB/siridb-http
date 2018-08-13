@@ -1,19 +1,21 @@
 import React from 'react';
-import { render } from 'react-dom';
+import PropTypes from 'prop-types';
 
 
 class Table extends React.Component {
 
     static propTypes = {
-        columns: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-        data: React.PropTypes.arrayOf(React.PropTypes.array).isRequired,
-        caption: React.PropTypes.string,
-        formatters: React.PropTypes.object
+        columns: PropTypes.arrayOf(PropTypes.string).isRequired,
+        data: PropTypes.arrayOf(PropTypes.array).isRequired,
+        caption: PropTypes.string,
+        formatters: PropTypes.object,
+        hideHeader: PropTypes.bool,
     };
 
     static defaultProps = {
         caption: null,
-        formatters: {}
+        formatters: {},
+        hideHeader: false
     };
 
     constructor(props) {
@@ -28,8 +30,8 @@ class Table extends React.Component {
         return (
             <table className="table table-striped table-condensed table-result">
                 <thead>
-                    <tr>
-                        {this.props.columns.map((column, n) => <th key={n}>{column}</th>)}
+                    <tr hidden={this.props.hideHeader}>
+                        {this.props.columns.map((column, n) => <th key={n} style={column==='time' ? {width: 200} : null}>{column}</th>)}
                     </tr>
                 </thead>
                 <tbody>
@@ -42,7 +44,7 @@ class Table extends React.Component {
                     }
                 </tbody>
             </table>
-        )
+        );
     }
 }
 
