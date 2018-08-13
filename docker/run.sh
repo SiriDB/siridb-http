@@ -80,4 +80,4 @@ key_file = certificate.key
 #
 EOF
 
-exec /usr/local/bin/siridb-http -c /siridb-http.conf
+exec /usr/local/bin/siridb-http -c "${SIRIDB_HTTP_CONFIG}"
