@@ -89,11 +89,11 @@ Pull the image from docker hub, then run with:
 
 ```sh
 docker run --name siridb-http \
-    -e SIRIDB_USERNAME=user
-    -e SIRIDB_PASSWORD=secret
-    -e SIRIDB_DATABASE=db
-    -e SIRIDB_SERVERS=localhost
-    -e HTTP_PORT=5050
+    -e SIRIDB_USERNAME=user \
+    -e SIRIDB_PASSWORD=secret \
+    -e SIRIDB_DATABASE=db \
+    -e SIRIDB_SERVERS=localhost \
+    -e HTTP_PORT=5050 \
     siridb-http:latest
 ```
 
