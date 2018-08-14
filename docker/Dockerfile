@@ -1,9 +1,8 @@
 FROM golang:alpine
-RUN apk update && \
-    apk upgrade && \
-    apk add git python3 nodejs-npm bash && \
+
+ADD . /tmp/siridb-http
+RUN apk --no-cache add git python3 nodejs-npm && \
     npm install -g less less-plugin-clean-css && \
-    git clone https://github.com/transceptor-technology/siridb-http.git /tmp/siridb-http && \
     cd /tmp/siridb-http && ./gobuild.py -i -l -w -b -p -o siridb-http
 
 FROM alpine:latest

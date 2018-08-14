@@ -4,14 +4,14 @@ cat<<EOF > /siridb-http.conf
 # SiriDB HTTP Configuration file
 [Database]
 # User with at least 'show' privileges.
-user = ${SIRIDB_USERNAME}
+user=${SIRIDB_USERNAME}
 
 # A password is required. To protect the password this file should be placed in
 # a folder where unauthorized users have no access.
-password = ${SIRIDB_PASSWORD}
+password=${SIRIDB_PASSWORD}
 
 # Database to connect to.
-dbname = ${SIRIDB_DATABASE}
+dbname=${SIRIDB_DATABASE}
 
 # Multiple servers are allowed and should be comma separated. When a port
 # is not provided the default 9000 is used. IPv6 address are supported and
@@ -24,11 +24,11 @@ dbname = ${SIRIDB_DATABASE}
 #   10.20.30.40
 #   [::1]:5050,[::1]:5051
 #   2001:0db8:85a3:0000:0000:8a2e:0370:7334
-servers = ${SIRIDB_SERVERS}
+servers=${SIRIDB_SERVERS}
 
 [Configuration]
 # Listening to TCP port.
-port = ${HTTP_PORT}
+port=${HTTP_PORT}
 
 # When disabled no authentication is required. When enabled session
 # authentication or basic authentication is required.
