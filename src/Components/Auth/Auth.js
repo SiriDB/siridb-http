@@ -1,7 +1,8 @@
-import React from 'react';  // eslint-disable-line
+import React from 'react';
 import Vlow from 'vlow';
-import AuthStore from '../../Stores/AuthStore.jsx';
-import AuthActions from '../../Actions/AuthActions.jsx';
+
+import AuthActions from '../../Actions/AuthActions';
+import AuthStore from '../../Stores/AuthStore';
 
 
 class Auth extends Vlow.Component {
@@ -15,41 +16,46 @@ class Auth extends Vlow.Component {
         this.mapStore(AuthStore);
     }
 
-    onLogin() {
+    handleLogin = () => {
         AuthActions.login(this.state.username, this.state.password);
     }
 
-    onUsernameChange(event) {
+    handleUsernameChange = (event) => {
         AuthActions.clearAuthError();
         this.setState({
             username: event.target.value
         });
     }
 
-    onPasswordChange(event) {
+    handlePasswordChange = (event) => {
         AuthActions.clearAuthError();
         this.setState({
             password: event.target.value
         });
     }
 
-    onKeyPress(event) {
+    handleKeyPress = (event) => {
         if (event.key == 'Enter') {
-            this.onLogin();
+            this.handleLogin();
         }
     }
 
     render() {
         let error = (this.state.authError !== null) ? (
             <div className="alert-wrapper">
-                <div className="alert alert-warning">{this.state.authError}</div>
+                <div className="alert alert-warning">
+                    {this.state.authError}
+                </div>
             </div>
         ) : null;
 
         return (
             <div className="container container-start">
                 <div className="row logo">
-                    <img src="/img/siridb-large.png" alt="SiriDB Logo" />
+                    <img
+                        alt="SiriDB Logo"
+                        src="/img/siridb-large.png"
+                    />
                 </div>
                 <div className="row">
                     <div className="form">
@@ -57,29 +63,32 @@ class Auth extends Vlow.Component {
                             <div className="input-group input-group-sm">
                                 <input
                                     autoFocus
-                                    type="text"
                                     className="form-control"
+                                    onChange={this.handleUsernameChange}
+                                    onKeyPress={this.handleKeyPress}
                                     placeholder="your username..."
+                                    type="text"
                                     value={this.state.username}
-                                    onKeyPress={this.onKeyPress.bind(this)}
-                                    onChange={this.onUsernameChange.bind(this)} />
+                                />
                             </div>
                         </div>
                         <div className="form-group">
                             <div className="input-group input-group-sm">
                                 <input
-                                    type="password"
                                     className="form-control"
+                                    onChange={this.handlePasswordChange}
+                                    onKeyPress={this.handleKeyPress}
                                     placeholder="your password..."
+                                    type="password"
                                     value={this.state.password}
-                                    onKeyPress={this.onKeyPress.bind(this)}
-                                    onChange={this.onPasswordChange.bind(this)} />
+                                />
                                 <span className="input-group-btn">
                                     <button
                                         className="btn btn-default"
+                                        onClick={this.handleLogin}
                                         type="button"
-                                        onClick={this.onLogin.bind(this)}>
-                                        <i className="fa fa-sign-in"></i>
+                                    >
+                                        <i className="fa fa-sign-in" />
                                     </button>
                                 </span>
                             </div>

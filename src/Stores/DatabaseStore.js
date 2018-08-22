@@ -1,7 +1,7 @@
 import React from 'react';  // eslint-disable-line
-import DatabaseActions from '../Actions/DatabaseActions.jsx';
-import BaseStore from './BaseStore.jsx';
-import AppActions from '../Actions/AppActions.jsx';
+import DatabaseActions from '../Actions/DatabaseActions';
+import BaseStore from './BaseStore';
+import AppActions from '../Actions/AppActions';
 import * as d3 from 'd3';
 
 
@@ -13,7 +13,7 @@ class DatabaseStore extends BaseStore {
             version: null,
             dbname: null,
             timePrecision: null,
-            factor: null,
+            factor: 1e0,
             utcFormat: null
         };
         DatabaseActions.fetch();

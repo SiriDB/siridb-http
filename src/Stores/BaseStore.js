@@ -1,5 +1,5 @@
 import Vlow from 'vlow';
-import JsonRequest from '../Utils/JsonRequest.jsx';
+import JsonRequest from '../Utils/JsonRequest';
 
 class BaseStore extends Vlow.Store {
 

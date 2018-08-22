@@ -3,7 +3,7 @@ module.exports = {
         "browser": true,
         "es6": true
     },
-    "extends": "eslint:recommended",
+    "extends": ["eslint:recommended", "plugin:react/all"],
     "parserOptions": {
         "ecmaFeatures": {
             "experimentalObjectRestSpread": true,
@@ -32,6 +32,11 @@ module.exports = {
             "error",
             "always"
         ],
-        "react/jsx-uses-vars": [2]
+        "react/display-name": [0],
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+        "react/jsx-max-depth": [2, { "max": 7 }],
+        "react/no-array-index-key": [0],
+        "react/no-multi-comp": [2, { "ignoreStateless": true }],
+        "react/no-set-state": [0],
     }
 };

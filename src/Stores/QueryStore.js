@@ -1,31 +1,26 @@
-import InsertActions from '../Actions/InsertActions.jsx';
-import AuthActions from '../Actions/AuthActions.jsx';
-import BaseStore from './BaseStore.jsx';
-
+import QueryActions from '../Actions/QueryActions';
+import AuthActions from '../Actions/AuthActions';
+import BaseStore from './BaseStore';
 
 const unexpected_msg = 'Oops, some unexpected error has occurred. Please check the console for more details.';
 
-class InsertStore extends BaseStore {
+class QueryStore extends BaseStore {
 
     constructor() {
-        super(InsertActions);
+        super(QueryActions);
         this.state = {
             alert: null,
+            result: null,
             sending: false
         };
     }
 
-    onInsert(data) {
-        this.setState({ sending: true, alert: null });
-        this.postraw('/insert', data).always(() => {
+    onQuery(query) {
+        this.setState({ sending: true, result: null });
+        this.post('/query', { query: query }).always(() => {
             this.setState({ sending: false });
         }).done((data) => {
-            this.setState({
-                alert: {
-                    severity: 'success',
-                    message: data.success_msg || 'message unavailable'
-                }
-            });
+            this.setState({ result: data });
         }).fail((error, msg) => {
             if (error.status === 422) {
                 AuthActions.logoff();
@@ -41,8 +36,16 @@ class InsertStore extends BaseStore {
     }
 
     onClearAlert() {
-        this.setState({alert: null});
+        this.setState({ alert: null });
+    }
+
+    onClearAll() {
+        this.setState({
+            alert: null,
+            result: null,
+            sending: false
+        });
     }
 }
 
-export default InsertStore;
+export default QueryStore;

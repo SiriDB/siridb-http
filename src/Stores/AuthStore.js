@@ -1,6 +1,6 @@
-import BaseStore from './BaseStore.jsx';
-import AuthActions from '../Actions/AuthActions.jsx';
-import QueryActions from '../Actions/QueryActions.jsx';
+import BaseStore from './BaseStore';
+import AuthActions from '../Actions/AuthActions';
+import QueryActions from '../Actions/QueryActions';
 
 class AuthStore extends BaseStore {
 

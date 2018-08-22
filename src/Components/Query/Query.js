@@ -1,10 +1,10 @@
-import React from 'react';  // eslint-disable-line
+import React from 'react';
 import Vlow from 'vlow';
-import QueryStore from '../../Stores/QueryStore.jsx';
-import QueryActions from '../../Actions/QueryActions.jsx';
-import AutoCompletePopup from './AutoCompletePopup.jsx';
-import ParseError from './ParseError.jsx';
-import Result from './Result/Result.jsx';
+import QueryStore from '../../Stores/QueryStore';
+import QueryActions from '../../Actions/QueryActions';
+import AutoCompletePopup from './AutoCompletePopup';
+import ParseError from './ParseError';
+import Result from './Result/Result';
 import {Keyword} from 'jsleri';
 import SiriGrammar from '../../Utils/SiriGrammar';
 
@@ -38,12 +38,12 @@ class Query extends Vlow.Component {
         this.idx = this.queries.length;
     }
 
-    onKeyPress(event) {
+    handleKeyPress = (event) => {
         if (event.key === 'Enter') {
             if (this.state.show) {
-                this.onAutoCompleteSelect(this.state.selected);
+                this.handleAutoCompleteSelect(this.state.selected);
             } else {
-                this.onQuery();
+                this.handleQuery();
             }
         }
     }
@@ -53,7 +53,7 @@ class Query extends Vlow.Component {
         super.componentWillUnmount();
     }
 
-    setQuery(query) {
+    setQuery = (query) => {
         this.setState({
             show: false,
             parseRes: null,
@@ -66,19 +66,23 @@ class Query extends Vlow.Component {
         this.setState({ show: false, parseRes: null });
     }
 
-    onAutoCompleteSelect(selected) {
-        let text = this.state.keywords[selected].substring(this.state.wpos);
-        let pos = this.refs.inp.selectionStart;
-        let s = this.state.query;
-        this.setState({
-            show: false,
-            parseRes: null,
-            query: s.slice(0, pos) + text + s.slice(pos),
+    handleAutoCompleteSelect = (selected) => {
+        this.setState((prevState) => {
+            let text = prevState.keywords[selected].substring(prevState.wpos);
+            let pos = this.inp.selectionStart;
+            let s = prevState.query;
+
+            this.cursorPos = pos + text.length;
+
+            return {
+                show: false,
+                parseRes: null,
+                query: s.slice(0, pos) + text + s.slice(pos)
+            };
         });
-        this.cursorPos = pos + text.length;
     }
 
-    onKeyDown(event) {
+    handleKeyDown = (event) => {
         if (this.state.alert !== null) {
             QueryActions.clearAlert();
         }
@@ -93,15 +97,15 @@ class Query extends Vlow.Component {
             switch (event.key) {
             case 'ArrowUp':
                 event.preventDefault();
-                this.setState({
-                    selected: ((--this.state.selected % n) + n) % n
-                });
+                this.setState((prevState) => ({
+                    selected: ((--prevState.selected % n) + n) % n
+                }));
                 break;
             case 'ArrowDown':
                 event.preventDefault();
-                this.setState({
-                    selected: (++this.state.selected) % n
-                });
+                this.setState((prevState) => ({
+                    selected: (++prevState.selected) % n
+                }));
                 break;
             case 'Tab':
                 event.preventDefault();
@@ -146,7 +150,7 @@ class Query extends Vlow.Component {
 
     onTabPress(event) {
         event.preventDefault();
-        let pos = this.refs.inp.selectionStart;
+        let pos = this.inp.selectionStart;
         let left = this.state.query.substring(0, pos);
         let right = this.state.query.substring(pos);
         let lm = left.match(LAST_CHARS);
@@ -164,9 +168,9 @@ class Query extends Vlow.Component {
             ).map((kw) => kw.keyword);
             if (keywords.length === 1) {
                 statement = keywords[0].substring(check.length);
-                this.setState({
-                    query: this.state.query.slice(0, pos) + statement + this.state.query.slice(pos + rest.length)
-                });
+                this.setState((prevState) => ({
+                    query: prevState.query.slice(0, pos) + statement + prevState.query.slice(pos + rest.length)
+                }));
                 this.cursorPos = pos + statement.length;
                 return;
             }
@@ -176,14 +180,14 @@ class Query extends Vlow.Component {
                 let wpos = this._getWpos(keywords);
                 statement = keywords[0].substring(0, wpos);
                 this.cursorPos = pos + statement.length - check.length;
-                this.setState({
-                    query: this.state.query.slice(0, pos) + statement.slice(check.length) + this.state.query.slice(pos + rest.length),
+                this.setState((prevState) => ({
+                    query: prevState.query.slice(0, pos) + statement.slice(check.length) + prevState.query.slice(pos + rest.length),
                     keywords: keywords,
                     xpos: this.cursorPos,
                     wpos: wpos,
                     show: true,
                     selected: 0
-                });
+                }));
                 return;
             }
         }
@@ -194,17 +198,17 @@ class Query extends Vlow.Component {
 
     componentDidUpdate() {
         if (this.cursorPos !== null) {
-            this.refs.inp.focus();
+            this.inp.focus();
             if (this.cursorPos === SELECT_ALL) {
-                this.refs.inp.selectionStart = 0;
+                this.inp.selectionStart = 0;
             } else {
-                this.refs.inp.selectionStart = this.refs.inp.selectionEnd = this.cursorPos;
+                this.inp.selectionStart = this.inp.selectionEnd = this.cursorPos;
             }
             this.cursorPos = null;
         }
     }
 
-    onInpChange(event) {
+    handleInpChange = (event) => {
         this.setState({
             query: event.target.value,
             parseRes: null,
@@ -212,7 +216,7 @@ class Query extends Vlow.Component {
         });
     }
 
-    onQuery() {
+    handleQuery = () => {
         if (this.state.alert !== null) {
             QueryActions.clearAlert();
         }
@@ -230,10 +234,16 @@ class Query extends Vlow.Component {
         QueryActions.query(this.state.query);
     }
 
+    mapRefInp = (el) => {
+        this.inp = el;
+    }
+
     render() {
         let alert = (this.state.alert !== null) ? (
             <div className="alert-wrapper">
-                <div className={`alert alert-${this.state.alert.severity}`}>{this.state.alert.message}</div>
+                <div className={`alert alert-${this.state.alert.severity}`}>
+                    {this.state.alert.message}
+                </div>
             </div>
         ) : null;
 
@@ -244,31 +254,34 @@ class Query extends Vlow.Component {
                         <div className="input-group input-group-sm">
                             <input
                                 autoFocus
-                                readOnly={this.state.sending}
-                                type="text"
-                                ref="inp"
                                 className="form-control"
+                                onChange={this.handleInpChange}
+                                onKeyDown={this.handleKeyDown}
+                                onKeyPress={this.handleKeyPress}
                                 placeholder="your query..."
+                                readOnly={this.state.sending}
+                                ref={this.mapRefInp}
+                                type="text"
                                 value={this.state.query}
-                                onKeyPress={this.onKeyPress.bind(this)}
-                                onKeyDown={this.onKeyDown.bind(this)}
-                                onChange={this.onInpChange.bind(this)} />
+                            />
                             <span className="input-group-btn">
                                 <button
-                                    disabled={this.state.sending}
                                     className="btn btn-default"
+                                    disabled={this.state.sending}
+                                    onClick={this.handleQuery}
                                     type="button"
-                                    onClick={this.onQuery.bind(this)}>
-                                    <i className="fa fa-play"></i>
+                                >
+                                    <i className="fa fa-play" />
                                 </button>
                             </span>
                             <AutoCompletePopup
                                 keywords={this.state.keywords}
-                                xpos={this.state.xpos}
-                                wpos={this.state.wpos}
+                                onSelect={this.handleAutoCompleteSelect}
                                 selected={this.state.selected}
                                 show={this.state.show}
-                                onSelect={this.onAutoCompleteSelect.bind(this)} />
+                                wpos={this.state.wpos}
+                                xpos={this.state.xpos}
+                            />
                             {(this.state.parseRes !== null) ? <ParseError parseRes={this.state.parseRes} /> : null}
                         </div>
                     </div>
@@ -276,9 +289,16 @@ class Query extends Vlow.Component {
                 </div>
                 {
                     (this.state.sending) ? (
-                        <img src="/img/loader.gif" alt="Loading bar" style={{ width: 20, height: 10 }} />
+                        <img
+                            alt="Loading bar"
+                            src="/img/loader.gif"
+                            style={{ width: 20, height: 10 }}
+                        />
                     ) : (this.state.result) ? (
-                        <Result result={this.state.result} setQuery={this.setQuery.bind(this)} />
+                        <Result
+                            result={this.state.result}
+                            setQuery={this.setQuery}
+                        />
                     ) : null
                 }
             </div>

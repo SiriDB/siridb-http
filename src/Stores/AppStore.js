@@ -1,5 +1,5 @@
 import Vlow from 'vlow';
-import AppActions from '../Actions/AppActions.jsx';
+import AppActions from '../Actions/AppActions';
 
 
 class AppStore extends Vlow.Store {
