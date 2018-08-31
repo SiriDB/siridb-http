@@ -1,7 +1,6 @@
 import * as moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
-import {OverlayTrigger, Tooltip} from 'react-bootstrap';
 import {withVlow} from 'vlow';
 
 import DatabaseStore from '../../../Stores/DatabaseStore';

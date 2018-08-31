@@ -383,19 +383,10 @@ key_file = certificate.key
 	if base.enableWeb {
 		http.HandleFunc("/", handlerMain)
 		http.HandleFunc("/js/bundle", handlerJsBundle)
-		http.HandleFunc("/css/bootstrap", handlerBootstrapCSS)
-		http.HandleFunc("/css/layout", handlerLayout)
 		http.HandleFunc("/favicon.ico", handlerFaviconIco)
 		http.HandleFunc("/img/siridb-large.png", handlerSiriDBLargePNG)
 		http.HandleFunc("/img/siridb-small.png", handlerSiriDBSmallPNG)
 		http.HandleFunc("/img/loader.gif", handlerLoaderGIF)
-		http.HandleFunc("/css/font-awesome.min.css", handlerFontAwesomeMinCSS)
-		http.HandleFunc("/fonts/FontAwesome.otf", handlerFontsFaOTF)
-		http.HandleFunc("/fonts/fontawesome-webfont.eot", handlerFontsFaEOT)
-		http.HandleFunc("/fonts/fontawesome-webfont.svg", handlerFontsFaSVG)
-		http.HandleFunc("/fonts/fontawesome-webfont.ttf", handlerFontsFaTTF)
-		http.HandleFunc("/fonts/fontawesome-webfont.woff", handlerFontsFaWOFF)
-		http.HandleFunc("/fonts/fontawesome-webfont.woff2", handlerFontsFaWOFF2)
 	}
 
 	http.HandleFunc("/db-info", handlerDbInfo)

@@ -9,17 +9,8 @@ class AuthStore extends BaseStore {
         this.state = {
             user: null,
             authRequired: null,
-            authError: null
         };
         AuthActions.fetch();
-    }
-
-    onSetAuthError(errorMsg) {
-        this.setState({authError: errorMsg});
-    }
-
-    onClearAuthError() {
-        this.setState({authError: null});
     }
 
     onFetch() {
@@ -36,20 +27,12 @@ class AuthStore extends BaseStore {
         });
     }
 
-    onLogin(username, password) {
-        if (!username) {
-            AuthActions.setAuthError('Username is required');
-        } else if (!password) {
-            AuthActions.setAuthError('Password is required');
-        } else {
-            this.post('/auth/login', {username: username, password: password}).done((data) => {
-                localStorage.clear();
-                QueryActions.clearAll();
-                this.setState(data);
-            }).fail((error, msg) => {
-                AuthActions.setAuthError(msg || 'Unknown error occurred');
-            });
-        }
+    onLogin(credentials, onError) {
+        this.post('/auth/login', credentials).done((data) => {
+            localStorage.clear();
+            QueryActions.clearAll();
+            this.setState(data);
+        }).fail((_, msg) => {console.log(msg); onError(msg || 'Unknown error occurred');});
     }
 }
 

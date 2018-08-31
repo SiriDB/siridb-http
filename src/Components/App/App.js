@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import {withVlow} from 'vlow';
 import {Route, Switch} from 'react-router-dom';
+import {Redirect} from 'react-router';
 
 import AppStore from '../../Stores/AppStore';
-import Auth from '../Auth/Auth';
 import AuthStore from '../../Stores/AuthStore';
 import DatabaseStore from '../../Stores/DatabaseStore';
 import InfoModal from './InfoModal';
@@ -74,7 +74,7 @@ class App extends React.Component {
                         />
                     </Switch>
                 </div>
-                : (authRequired === true) ? <Auth /> : null;
+                : (authRequired === true) ? <Redirect to='/login' /> : null;
     }
 }
 

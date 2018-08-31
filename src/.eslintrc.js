@@ -39,5 +39,6 @@ module.exports = {
         "react/no-multi-comp": [2, { "ignoreStateless": true }],
         "react/no-set-state": [0],
         "react/sort-prop-types": [0],
+        "react/forbid-component-props": [0],
     }
 };

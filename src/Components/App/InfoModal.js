@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {withVlow} from 'vlow';
 import DatabaseStore from '../../Stores/DatabaseStore';
-import {Modal} from 'react-bootstrap';
 
 
 const InfoModal = ({onHide, show, dbname, version, httpServer}) => (

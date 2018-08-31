@@ -86,7 +86,6 @@ ENV/
 # Rope project settings
 .ropeproject
 
-
 # dummy scripts
 test.py
 
@@ -101,10 +100,6 @@ style.min.css
 # Compiled jsx
 static/js/bundle.js
 static/js/bundle.min.js
-
-# Compiled less
-static/css/layout.css
-static/css/layout.min.css
 
 # Secret
 .secret

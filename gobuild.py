@@ -160,20 +160,6 @@ def webpack(development=True):
         print(proc.stdout.read().decode('utf-8'))
 
 
-def compile_less(development=True):
-    path = os.path.dirname(__file__)
-    if development:
-        subprocess.run([
-            'lessc',
-            os.path.join(path, 'src', 'layout.less'),
-            os.path.join(path, 'build', 'layout.css')])
-    else:
-        subprocess.run([
-            'lessc',
-            '--clean-css',
-            os.path.join(path, 'src', 'layout.less'),
-            os.path.join(path, 'build', 'layout.min.css')])
-
 
 def compile(fn, variable, empty=False):
     if empty:
@@ -198,11 +184,6 @@ if __name__ == '__main__':
         '-i', '--install-packages',
         action='store_true',
         help='install required go and npm packages including dependencies')
-
-    parser.add_argument(
-        '-l', '--less',
-        action='store_true',
-        help='compile less (requires -d or -p)')
 
     parser.add_argument(
         '-w', '--webpack',
@@ -252,24 +233,9 @@ if __name__ == '__main__':
         print('Cannot use -w without -d or -p')
         sys.exit(1)
 
-    if args.less and not args.production_go and not args.development_go:
-        print('Cannot use -l without -d or -p')
-        sys.exit(1)
-
     if args.install_packages:
         install_packages()
         print('Finished installing required packages and dependencies!')
-
-    if args.less:
-        if args.production_go:
-            print('Compiling production css...')
-            compile_less(development=False)
-        elif args.development_go:
-            print('Compiling development css...')
-            compile_less(development=True)
-        else:
-            sys.exit('-d or -p must be used')
-        print('Finished compiling less!')
 
     if args.webpack:
         if args.production_go:
@@ -313,7 +279,6 @@ if __name__ == '__main__':
             args.install_packages,
             args.production_go,
             args.development_go,
-            args.less,
             args.webpack,
             args.build,
             args.build_all]):

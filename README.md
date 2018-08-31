@@ -68,19 +68,14 @@ Clone the project using git. (we assume git is installed)
 git clone https://github.com/SiriDB/siridb-http
 ```
 
-Make sure less is installed:
-```
-$ sudo npm install -g less less-plugin-clean-css
-```
-
 The gobuild.py script can be used to build the binary:
 ```
-$ ./gobuild.py -i -l -w -b -p
+$ ./gobuild.py -i -w -b -p
 ```
 
 Or, if you want the development version which uses original files from /build and /static instead of build-in files:
 ```
-$ ./gobuild.py -i -l -w -b -d
+$ ./gobuild.py -i -w -b -d
 ```
 
 ## Configuration
