@@ -1,27 +1,34 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import Vlow from 'vlow';
-import Table from './Table';
-import Series from './Series';
-import DatabaseStore from '../../../Stores/DatabaseStore';
 import * as moment from 'moment';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import QuerySeriesLnk from './QuerySeriesLnk';
-import QueryGroupLnk from './QueryGroupLnk';
+import PropTypes from 'prop-types';
+import React from 'react';
+import {OverlayTrigger, Tooltip} from 'react-bootstrap';
+import {withVlow} from 'vlow';
 
-class Result extends Vlow.Component {
+import DatabaseStore from '../../../Stores/DatabaseStore';
+import QueryGroupLnk from './QueryGroupLnk';
+import QuerySeriesLnk from './QuerySeriesLnk';
+import Series from './Series';
+import Table from './Table';
+
+
+class Result extends React.Component {
 
     static propTypes = {
-        result: PropTypes.object.isRequired,  /* eslint-disable-line react/forbid-prop-types */
-        setQuery: PropTypes.func.isRequired
+        result: PropTypes.objectOf(PropTypes.any).isRequired,
+        setQuery: PropTypes.func.isRequired,
+
+        /* DatabaseStore properties */
+        factor: PropTypes.number.isRequired,
+        utcFormat: PropTypes.func.isRequired,
     };
 
-    constructor(props) {
-        super(props);
-        this.mapStore(DatabaseStore);
+    shouldComponentUpdate(nextProps) {
+        const {result} = this.props;
+        return (result !== nextProps.result);
     }
 
     _getResult(data) {
+        const {factor, utcFormat, setQuery} = this.props;
 
         /**** List Statement ****/
         if (data.columns !== undefined && typeof data.columns[0] === 'string') {
@@ -29,7 +36,7 @@ class Result extends Vlow.Component {
                 <Table
                     columns={data.columns}
                     data={data.series}
-                    formatters={this.getFmtSeries(this.props)}
+                    formatters={this.getFmtSeries(setQuery, utcFormat, factor)}
                 />
                 : (data.servers !== undefined) ?
                     <Table
@@ -41,13 +48,13 @@ class Result extends Vlow.Component {
                         <Table
                             columns={data.columns}
                             data={data.groups}
-                            formatters={this.getFmtGroup(this.props)}
+                            formatters={this.getFmtGroup(setQuery)}
                         />
                         : (data.shards !== undefined) ?
                             <Table
                                 columns={data.columns}
                                 data={data.shards}
-                                formatters={this._fmtShard}
+                                formatters={this.getFmtShard(utcFormat, factor)}
                             />
                             : (data.pools !== undefined) ?
                                 <Table
@@ -94,12 +101,12 @@ class Result extends Vlow.Component {
 
         /**** Calc Statement ****/
         if (data.calc !== undefined && typeof data.calc === 'number') {
-            let seconds = Math.floor(data.calc * this.state.factor / 1000);
+            let seconds = Math.floor(data.calc * factor / 1000);
             let tooltip = (
                 <Tooltip id="calc">
                     {(seconds < 315532800)
                         ? moment.duration(seconds, 'seconds').humanize()
-                        : this.state.utcFormat(new Date(Math.floor(seconds * this.state.factor)))
+                        : utcFormat(new Date(Math.floor(seconds * factor)))
                     }
                 </Tooltip>
             );
@@ -155,11 +162,11 @@ class Result extends Vlow.Component {
                         nseries++;
                         return (
                             <Series
-                                factor={this.state.factor}
+                                factor={factor}
                                 key={name}
                                 name={name}
                                 points={points}
-                                utcFormat={this.state.utcFormat}
+                                utcFormat={utcFormat}
                             />
                         );
                     })
@@ -191,15 +198,15 @@ class Result extends Vlow.Component {
         return n;
     }
 
-    getFmtSeries = ({setQuery}) => ({
+    getFmtSeries = (setQuery, utcFormat, factor) => ({
         name: (val) => (
             <QuerySeriesLnk
                 seriesName={val}
                 setQuery={setQuery}
             />
         ),
-        start: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor))),
-        end: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor)))
+        start: (val) => utcFormat(new Date(Math.floor(val * factor))),
+        end: (val) => utcFormat(new Date(Math.floor(val * factor)))
     })
 
     _fmtServer = {
@@ -217,7 +224,7 @@ class Result extends Vlow.Component {
         online: (val) => (val) ? 'yes' : 'no'
     }
 
-    getFmtGroup = ({setQuery}) => ({
+    getFmtGroup = (setQuery) => ({
         name: (val) => (
             <QueryGroupLnk
                 groupName={val}
@@ -226,11 +233,11 @@ class Result extends Vlow.Component {
         )
     })
 
-    _fmtShard = {
+    getFmtShard = (utcFormat, factor) => ({
         size: this._fmtSize,
-        start: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor))),
-        end: (val) => this.state.utcFormat(new Date(Math.floor(val * this.state.factor)))
-    }
+        start: (val) => utcFormat(new Date(Math.floor(val * factor))),
+        end: (val) => utcFormat(new Date(Math.floor(val * factor)))
+    })
 
     _fmtCount = {
         servers_received_points: this._fmtLongNumber,
@@ -247,23 +254,19 @@ class Result extends Vlow.Component {
         );
     }
 
-    shouldComponentUpdate(nextProps) {
-        return (this.props.result !== nextProps.result);
-    }
-
     render() {
-        let data = this.props.result;
+        const {result} = this.props;
 
-        let timeit = (data.__timeit__ !== undefined &&
-            data.__timeit__.length &&
-            typeof data.__timeit__[0].server === 'string') ? (
+        let timeit = (result.__timeit__ !== undefined &&
+            result.__timeit__.length &&
+            typeof result.__timeit__[0].server === 'string') ? (
                 <div className="alert alert-info alert-timeit">
                     <span>
-                        {`Query time: ${data.__timeit__[data.__timeit__.length - 1].time.toFixed(3)} seconds`}
+                        {`Query time: ${result.__timeit__[result.__timeit__.length - 1].time.toFixed(3)} seconds`}
                     </span>
                     <dl className="dl-horizontal">
                         {
-                            data.__timeit__.reduce((acc, timeit) => acc.concat([
+                            result.__timeit__.reduce((acc, timeit) => acc.concat([
                                 <dt key={`dt-${timeit.server}`}>
                                     {timeit.time.toFixed(3)}
                                 </dt>,
@@ -277,15 +280,18 @@ class Result extends Vlow.Component {
             ) : null;
 
         /* Remove timeit */
-        delete data.__timeit__;
+        delete result.__timeit__;
 
         return (
             <div>
                 {timeit}
-                {this._getResult(data)}
+                {this._getResult(result)}
             </div>
         );
     }
 }
 
-export default Result;
+export default withVlow({
+    store: DatabaseStore,
+    keys: ['factor', 'utcFormat'],
+}, Result);

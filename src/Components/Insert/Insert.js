@@ -1,5 +1,6 @@
+import PropTypes from 'prop-types';
 import React from 'react';
-import Vlow from 'vlow';
+import {withVlow} from 'vlow';
 import moment from 'moment';
 
 import InsertStore from '../../Stores/InsertStore';
@@ -10,7 +11,23 @@ import DatabaseStore from '../../Stores/DatabaseStore';
 const SELECT_ALL = -1;
 
 
-class Insert extends Vlow.Component {
+class Insert extends React.Component {
+
+    static propTypes = {
+        /* DatabaseStore properties */
+        factor: PropTypes.number.isRequired,
+
+        /* InsertStore properties */
+        alert: PropTypes.shape({
+            severity: PropTypes.oneOf(['success', 'warning', 'error']),
+            message: PropTypes.string,
+        }),
+        sending: PropTypes.bool.isRequired,
+    }
+
+    static defaultProps = {
+        alert: null,
+    }
 
     constructor(props) {
         super(props);
@@ -24,8 +41,21 @@ class Insert extends Vlow.Component {
         this.cursorPos = null;
     }
 
+    componentDidUpdate() {
+        if (this.cursorPos !== null) {
+            this.inp.focus();
+            if (this.cursorPos === SELECT_ALL) {
+                this.inp.selectionStart = 0;
+            } else {
+                this.inp.selectionStart = this.inp.selectionEnd = this.cursorPos;
+            }
+            this.cursorPos = null;
+        }
+    }
+
     _now() {
-        return Math.floor(moment().format('x') / this.state.factor);
+        const {factor} = this.props;
+        return Math.floor(moment().format('x') / factor);
     }
 
     handleInpChange = (event) => {
@@ -46,8 +76,9 @@ class Insert extends Vlow.Component {
     }
 
     handleInsert = () => {
+        const {data} = this.state;
         this.cursorPos = SELECT_ALL;
-        InsertActions.insert(this.state.data);
+        InsertActions.insert(data);
     }
 
     handleClearAlert = InsertActions.clearAlert;
@@ -56,35 +87,25 @@ class Insert extends Vlow.Component {
         this.inp = el;
     }
 
-    componentDidUpdate() {
-        if (this.cursorPos !== null) {
-            this.inp.focus();
-            if (this.cursorPos === SELECT_ALL) {
-                this.inp.selectionStart = 0;
-            } else {
-                this.inp.selectionStart = this.inp.selectionEnd = this.cursorPos;
-            }
-            this.cursorPos = null;
-        }
-    }
-
     render() {
+        const {alert, sending} = this.props;
+        const {data} = this.state;
         let hasError = false;
         try {
-            JSON.parse(this.state.data || '{}');
+            JSON.parse(data || '{}');
         } catch (e) {
             hasError = true;
         }
-        let alert = (this.state.alert !== null) ? (
+        const alertComp = (alert !== null) ? (
             <div className="alert-wrapper">
-                <div className={`alert alert-${this.state.alert.severity}`}>
+                <div className={`alert alert-${alert.severity}`}>
                     <a
                         className="close"
                         onClick={this.handleClearAlert}
                     >
                         {'×'}
                     </a>
-                    {this.state.alert.message}
+                    {alert.message}
                 </div>
             </div>
         ) : null;
@@ -100,13 +121,13 @@ class Insert extends Vlow.Component {
                                 ref={this.mapRef}
                                 spellCheck={false}
                                 type="text"
-                                value={this.state.data}
+                                value={data}
                             />
                         </div>
                         <div className="input-group input-group-sm">
                             <button
                                 className="btn btn-default"
-                                disabled={hasError || this.state.sending}
+                                disabled={hasError || sending}
                                 onClick={this.handleInsert}
                                 type="button"
                             >
@@ -115,11 +136,11 @@ class Insert extends Vlow.Component {
                             </button>
                         </div>
                     </div>
-                    {alert}
+                    {alertComp}
                 </div>
             </div>
         );
     }
 }
 
-export default Insert;
+export default withVlow([InsertStore, DatabaseStore], Insert);

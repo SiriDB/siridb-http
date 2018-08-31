@@ -1,5 +1,6 @@
+import PropTypes from 'prop-types';
 import React from 'react';
-import Vlow from 'vlow';
+import {withVlow} from 'vlow';
 import QueryStore from '../../Stores/QueryStore';
 import QueryActions from '../../Actions/QueryActions';
 import AutoCompletePopup from './AutoCompletePopup';
@@ -13,14 +14,29 @@ const FIRST_CHARS = /^[a-z_]+/;
 const SELECT_ALL = -1;
 const HISTORY_SIZE = 100;
 
-class Query extends Vlow.Component {
+
+class Query extends React.Component {
+
+    static propTypes = {
+        /* QueryStore properties */
+        alert: PropTypes.shape({
+            severity: PropTypes.oneOf(['success', 'warning', 'error']),
+            message: PropTypes.string,
+        }),
+        sending: PropTypes.bool.isRequired,
+        result: PropTypes.objectOf(PropTypes.any),
+    }
+
+    static defaultProps = {
+        alert: null,
+        result: null,
+    }
 
     constructor(props) {
         super(props);
         this.siriGrammar = new SiriGrammar();
         this.state = {
             query: '',
-            queries: [],
 
             /* Auto Completion */
             keywords: [],
@@ -38,19 +54,32 @@ class Query extends Vlow.Component {
         this.idx = this.queries.length;
     }
 
-    handleKeyPress = (event) => {
-        if (event.key === 'Enter') {
-            if (this.state.show) {
-                this.handleAutoCompleteSelect(this.state.selected);
+    componentDidUpdate() {
+        if (this.cursorPos !== null) {
+            this.inp.focus();
+            if (this.cursorPos === SELECT_ALL) {
+                this.inp.selectionStart = 0;
             } else {
-                this.handleQuery();
+                this.inp.selectionStart = this.inp.selectionEnd = this.cursorPos;
             }
+            this.cursorPos = null;
         }
     }
 
     componentWillUnmount() {
         QueryActions.clearAll();
         super.componentWillUnmount();
+    }
+
+    handleKeyPress = (event) => {
+        const {show, selected} = this.state;
+        if (event.key === 'Enter') {
+            if (show) {
+                this.handleAutoCompleteSelect(selected);
+            } else {
+                this.handleQuery();
+            }
+        }
     }
 
     setQuery = (query) => {
@@ -83,17 +112,19 @@ class Query extends Vlow.Component {
     }
 
     handleKeyDown = (event) => {
-        if (this.state.alert !== null) {
+        const {alert} = this.props;
+        const {parseRes, keywords, show} = this.state;
+        if (alert !== null) {
             QueryActions.clearAlert();
         }
 
-        if (this.state.parseRes) {
+        if (parseRes) {
             this.setState({ parseRes: null });
         }
 
-        let n = this.state.keywords.length;
+        let n = keywords.length;
 
-        if (this.state.show) {
+        if (show) {
             switch (event.key) {
             case 'ArrowUp':
                 event.preventDefault();
@@ -149,10 +180,11 @@ class Query extends Vlow.Component {
     }
 
     onTabPress(event) {
+        const {query} = this.state;
         event.preventDefault();
         let pos = this.inp.selectionStart;
-        let left = this.state.query.substring(0, pos);
-        let right = this.state.query.substring(pos);
+        let left = query.substring(0, pos);
+        let right = query.substring(pos);
         let lm = left.match(LAST_CHARS);
         let check = (lm) ? lm[0] : '';
         let rest = (check && (rest = right.match(FIRST_CHARS))) ? rest[0] : '';
@@ -196,17 +228,7 @@ class Query extends Vlow.Component {
         }
     }
 
-    componentDidUpdate() {
-        if (this.cursorPos !== null) {
-            this.inp.focus();
-            if (this.cursorPos === SELECT_ALL) {
-                this.inp.selectionStart = 0;
-            } else {
-                this.inp.selectionStart = this.inp.selectionEnd = this.cursorPos;
-            }
-            this.cursorPos = null;
-        }
-    }
+
 
     handleInpChange = (event) => {
         this.setState({
@@ -217,13 +239,15 @@ class Query extends Vlow.Component {
     }
 
     handleQuery = () => {
-        if (this.state.alert !== null) {
+        const {alert} = this.props;
+        const {query} = this.state;
+        if (alert !== null) {
             QueryActions.clearAlert();
         }
-        if (this.state.query != this.queries[this.idx] &&
-            this.state.query != this.queries[this.queries.length - 1]) {
+        if (query != this.queries[this.idx] &&
+            query != this.queries[this.queries.length - 1]) {
             this.idx = this.queries.length;
-            this.queries.push(this.state.query);
+            this.queries.push(query);
             if (this.queries.length > HISTORY_SIZE) {
                 this.queries.shift();
                 this.idx--;
@@ -231,7 +255,7 @@ class Query extends Vlow.Component {
             localStorage.setItem('queries', JSON.stringify(this.queries));
         }
         this.cursorPos = SELECT_ALL;
-        QueryActions.query(this.state.query);
+        QueryActions.query(query);
     }
 
     mapRefInp = (el) => {
@@ -239,10 +263,12 @@ class Query extends Vlow.Component {
     }
 
     render() {
-        let alert = (this.state.alert !== null) ? (
+        const {alert, sending, result} = this.props;
+        const {query, keywords, show, selected, xpos, wpos, parseRes} = this.state;
+        let alertComp = (alert !== null) ? (
             <div className="alert-wrapper">
-                <div className={`alert alert-${this.state.alert.severity}`}>
-                    {this.state.alert.message}
+                <div className={`alert alert-${alert.severity}`}>
+                    {alert.message}
                 </div>
             </div>
         ) : null;
@@ -259,15 +285,15 @@ class Query extends Vlow.Component {
                                 onKeyDown={this.handleKeyDown}
                                 onKeyPress={this.handleKeyPress}
                                 placeholder="your query..."
-                                readOnly={this.state.sending}
+                                readOnly={sending}
                                 ref={this.mapRefInp}
                                 type="text"
-                                value={this.state.query}
+                                value={query}
                             />
                             <span className="input-group-btn">
                                 <button
                                     className="btn btn-default"
-                                    disabled={this.state.sending}
+                                    disabled={sending}
                                     onClick={this.handleQuery}
                                     type="button"
                                 >
@@ -275,28 +301,28 @@ class Query extends Vlow.Component {
                                 </button>
                             </span>
                             <AutoCompletePopup
-                                keywords={this.state.keywords}
+                                keywords={keywords}
                                 onSelect={this.handleAutoCompleteSelect}
-                                selected={this.state.selected}
-                                show={this.state.show}
-                                wpos={this.state.wpos}
-                                xpos={this.state.xpos}
+                                selected={selected}
+                                show={show}
+                                wpos={wpos}
+                                xpos={xpos}
                             />
-                            {(this.state.parseRes !== null) ? <ParseError parseRes={this.state.parseRes} /> : null}
+                            {(parseRes !== null) ? <ParseError parseRes={parseRes} /> : null}
                         </div>
                     </div>
-                    {alert}
+                    {alertComp}
                 </div>
                 {
-                    (this.state.sending) ? (
+                    (sending) ? (
                         <img
                             alt="Loading bar"
                             src="/img/loader.gif"
                             style={{ width: 20, height: 10 }}
                         />
-                    ) : (this.state.result) ? (
+                    ) : result ? (
                         <Result
-                            result={this.state.result}
+                            result={result}
                             setQuery={this.setQuery}
                         />
                     ) : null
@@ -306,4 +332,4 @@ class Query extends Vlow.Component {
     }
 }
 
-export default Query;
+export default withVlow(QueryStore, Query);

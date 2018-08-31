@@ -1,58 +1,53 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Vlow from 'vlow';
+import {withVlow} from 'vlow';
 import DatabaseStore from '../../Stores/DatabaseStore';
-import { Modal } from 'react-bootstrap';
+import {Modal} from 'react-bootstrap';
 
-class InfoModal extends Vlow.Component {
 
-    static propTypes = {
-        onHide: PropTypes.func.isRequired,
-        show: PropTypes.bool.isRequired,
-    };
+const InfoModal = ({onHide, show, dbname, version, httpServer}) => (
+    <Modal
+        onHide={onHide}
+        show={show}
+    >
+        <Modal.Header closeButton />
+        <Modal.Body>
+            <img
+                alt="SiriDB Logo"
+                src="/img/siridb-large.png"
+            />
+            <dl className="dl-horizontal">
+                <dt>
+                    {'Database:'}
+                </dt>
+                <dd>
+                    {dbname}
+                </dd>
+                <dt>
+                    {'SiriDB:'}
+                </dt>
+                <dd>
+                    {version}
+                </dd>
+                <dt>
+                    {'HTTP Server:'}
+                </dt>
+                <dd>
+                    {httpServer}
+                </dd>
+            </dl>
+        </Modal.Body>
+    </Modal>
+);
 
-    constructor(props) {
-        super(props);
-        this.mapStore(DatabaseStore);
-    }
+InfoModal.propTypes = {
+    onHide: PropTypes.func.isRequired,
+    show: PropTypes.bool.isRequired,
 
-    render() {
-        const {onHide} = this.props;
-        return  (
-            <Modal
-                onHide={onHide}
-                show={this.props.show}
-            >
-                <Modal.Header closeButton />
-                <Modal.Body>
-                    <img
-                        alt="SiriDB Logo"
-                        src="/img/siridb-large.png"
-                    />
-                    <dl className="dl-horizontal">
-                        <dt>
-                            {'Database:'}
-                        </dt>
-                        <dd>
-                            {this.state.dbname}
-                        </dd>
-                        <dt>
-                            {'SiriDB:'}
-                        </dt>
-                        <dd>
-                            {this.state.version}
-                        </dd>
-                        <dt>
-                            {'HTTP Server:'}
-                        </dt>
-                        <dd>
-                            {this.state.httpServer}
-                        </dd>
-                    </dl>
-                </Modal.Body>
-            </Modal>
-        );
-    }
-}
+    /* DatabaseStore properties */
+    dbname: PropTypes.string.isRequired,
+    httpServer: PropTypes.string.isRequired,
+    version: PropTypes.string.isRequired,
+};
 
-export default InfoModal;
+export default withVlow(DatabaseStore, InfoModal);

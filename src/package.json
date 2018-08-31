@@ -1,6 +1,6 @@
 {
   "name": "siridb-http",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "SiriDB HTTP Server",
   "main": "index.js",
   "license": "MIT",
@@ -20,32 +20,33 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
-    "d3": "^5.6.0",
+    "d3": "^5.7.0",
+    "enzyme": "^3.5.0",
     "es6-mixins": "^1.0.2",
     "history": "^4.7.2",
-    "jsleri": "^1.1.4",
+    "jsleri": "^1.1.5",
     "moment": "^2.22.2",
     "react": "^16.4.2",
     "react-bootstrap": "^0.32.3",
     "react-dom": "^16.4.2",
     "react-router": "4.3.1",
     "react-router-dom": "^4.3.1",
-    "vlow": "^1.0.4",
-    "webpack": "^4.17.0",
+    "vlow": "^1.1.1",
+    "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.6",
+    "babel-eslint": "^9.0.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-entries": "^1.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "eslint": "^5.4.0",
-    "eslint-config-standard": "^11.0.0",
+    "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^7.0.1",
     "eslint-plugin-promise": "^4.0.0",
     "eslint-plugin-react": "^7.11.1",
-    "eslint-plugin-standard": "^3.1.0"
+    "eslint-plugin-standard": "^4.0.0"
   }
 }

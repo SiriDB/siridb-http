@@ -1,23 +1,30 @@
+import PropTypes from 'prop-types';
 import React from 'react';
-import Vlow from 'vlow';
+import {withVlow} from 'vlow';
 
 import AuthActions from '../../Actions/AuthActions';
 import AuthStore from '../../Stores/AuthStore';
 
 
-class Auth extends Vlow.Component {
+class Auth extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            username: '',
-            password: ''
-        };
-        this.mapStore(AuthStore);
+    static propTypes = {
+        /* AuthStore properties */
+        authError: PropTypes.string,
     }
 
+    static defaultProps = {
+        authError: null,
+    }
+
+    state = {
+        username: '',
+        password: ''
+    };
+
     handleLogin = () => {
-        AuthActions.login(this.state.username, this.state.password);
+        const {username, password} = this.state;
+        AuthActions.login(username, password);
     }
 
     handleUsernameChange = (event) => {
@@ -41,10 +48,12 @@ class Auth extends Vlow.Component {
     }
 
     render() {
-        let error = (this.state.authError !== null) ? (
+        const {authError} = this.props;
+        const {username, password} = this.state;
+        let error = (authError !== null) ? (
             <div className="alert-wrapper">
                 <div className="alert alert-warning">
-                    {this.state.authError}
+                    {authError}
                 </div>
             </div>
         ) : null;
@@ -68,7 +77,7 @@ class Auth extends Vlow.Component {
                                     onKeyPress={this.handleKeyPress}
                                     placeholder="your username..."
                                     type="text"
-                                    value={this.state.username}
+                                    value={username}
                                 />
                             </div>
                         </div>
@@ -80,7 +89,7 @@ class Auth extends Vlow.Component {
                                     onKeyPress={this.handleKeyPress}
                                     placeholder="your password..."
                                     type="password"
-                                    value={this.state.password}
+                                    value={password}
                                 />
                                 <span className="input-group-btn">
                                     <button
@@ -101,4 +110,4 @@ class Auth extends Vlow.Component {
     }
 }
 
-export default Auth;
+export default withVlow(AuthStore, Auth);

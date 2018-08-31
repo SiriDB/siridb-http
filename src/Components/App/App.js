@@ -1,5 +1,6 @@
+import PropTypes from 'prop-types';
 import React from 'react';
-import Vlow from 'vlow';
+import {withVlow} from 'vlow';
 import {Route, Switch} from 'react-router-dom';
 
 import AppStore from '../../Stores/AppStore';
@@ -13,15 +14,23 @@ import Query from '../Query/Query';
 import TopMenu from './TopMenu';
 
 
-class App extends Vlow.Component {
+class App extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            showInfoModal: false
-        };
-        this.mapStores([AppStore, DatabaseStore, AuthStore]);
+    static propTypes = {
+        appError: PropTypes.string,
+        authRequired: PropTypes.bool,
+        user: PropTypes.string,
     }
+
+    static defaultProps = {
+        appError: null,
+        authRequired: null,
+        user: null,
+    }
+
+    state = {
+        showInfoModal: false
+    };
 
     handleShowInfoModal = () => {
         this.setState({ showInfoModal: true });
@@ -32,20 +41,22 @@ class App extends Vlow.Component {
     }
 
     render() {
+        const {appError, user, authRequired} = this.props;
+        const {showInfoModal} = this.state;
 
-        return (this.state.appError !== null) ?
+        return (appError !== null) ?
             <div>
-                {this.state.appError}
+                {appError}
             </div>
-            : (this.state.user !== null) ?
+            : (user !== null) ?
                 <div className="container">
                     <TopMenu
                         onLogoClick={this.handleShowInfoModal}
-                        showLogoff={this.state.authRequired}
+                        showLogoff={authRequired}
                     />
                     <InfoModal
                         onHide={this.handleHideInfoModal}
-                        show={this.state.showInfoModal}
+                        show={showInfoModal}
                     />
                     <Switch>
                         <Route
@@ -63,8 +74,8 @@ class App extends Vlow.Component {
                         />
                     </Switch>
                 </div>
-                : (this.state.authRequired === true) ? <Auth /> : null;
+                : (authRequired === true) ? <Auth /> : null;
     }
 }
 
-export default App;
+export default withVlow([AppStore, DatabaseStore, AuthStore], App);

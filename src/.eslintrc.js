@@ -38,5 +38,6 @@ module.exports = {
         "react/no-array-index-key": [0],
         "react/no-multi-comp": [2, { "ignoreStateless": true }],
         "react/no-set-state": [0],
+        "react/sort-prop-types": [0],
     }
 };

@@ -1,4 +1,8 @@
-siridb-http (2.0.8)
+**siridb-http (2.0.9)**
+
+  * Using `withVlow` instead of Vlow.Components.
+
+**siridb-http (2.0.8)**
 
   * Update SiriDB grammar to version 2.0.29
 
@@ -6,15 +10,11 @@ siridb-http (2.0.8)
 
   * Replace Reflux with Vlow
 
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  09 Jul 2018
-
-siridb-http (2.0.7)
+**siridb-http (2.0.7)**
 
   * Update SiriDB grammar to version 2.0.28
 
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  20 Jun 2018
-
-siridb-http (2.0.6)
+**siridb-http (2.0.6)**
 
   * Update SiriDB grammar to version 2.0.27
 
@@ -24,9 +24,7 @@ siridb-http (2.0.6)
 
   * Added option to switch from charts to tables and back.
 
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  24 May 2018
-
-siridb-http (2.0.5)
+**siridb-http (2.0.5)**
 
   * Replace parseInt with Math.floor()
 
@@ -34,39 +32,27 @@ siridb-http (2.0.5)
 
   * Re-factored React PropTypes
 
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  06 Mar 2018
-
-siridb-http (2.0.4)
+**siridb-http (2.0.4)**
 
   * Update to Go SiriDB Connector
 
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  09 Nov 2017
-
-siridb-http (2.0.3)
+**siridb-http (2.0.3)**
 
   * Update grammar with new properties (issue #16)
 
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  15 Aug 2017
-
-siridb-http (2.0.2)
+**siridb-http (2.0.2)**
 
   * Changed text when serving from 127.0.0.1 to 0.0.0.0.
 
   * Fixed buffer bug in go-siridb-connector. (issue #14)
 
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  20 Jul 2017
-
-siridb-http (2.0.1)
+**siridb-http (2.0.1)**
 
   * Implemented go siridb connector 1.0.5 which fixed a bug for large packages.
 
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  02 Jun 2017
-
-siridb-http (2.0.0)
+**siridb-http (2.0.0)**
 
   * Initial version created with the Go language.
 
   * See archive for changes to the 1.x Python versions.
-
- -- Jeroen van der Heijden <jeroen@transceptor.technology>  31 May 2017
 
