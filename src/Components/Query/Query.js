@@ -265,6 +265,7 @@ class Query extends React.Component {
     render() {
         const {alert, sending, result} = this.props;
         const {query, keywords, show, selected, xpos, wpos, parseRes} = this.state;
+
         let alertComp = (alert !== null) ? (
             <div className="alert-wrapper">
                 <div className={`alert alert-${alert.severity}`}>

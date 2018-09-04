@@ -13,14 +13,15 @@ var config = {
         filename: process.env.NODE_ENV === 'production' ? 'bundle.min.js' : 'bundle.js',
     },
     module: {
-        rules: [
-            {
-                test: /\.jsx?/,
-                include: APP_DIR,
-                loader: 'babel-loader',
-                exclude: /node_modules/
-            }
-        ]
+        rules: [{
+            test: /\.jsx?/,
+            include: APP_DIR,
+            loader: 'babel-loader',
+            exclude: /node_modules/
+        }, {
+            test: /\.css$/,
+            use: 'css-loader/locals'
+        }]
     },
     plugins: [
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)

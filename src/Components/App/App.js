@@ -7,7 +7,7 @@ import {Redirect} from 'react-router';
 import AppStore from '../../Stores/AppStore';
 import AuthStore from '../../Stores/AuthStore';
 import DatabaseStore from '../../Stores/DatabaseStore';
-import InfoModal from './InfoModal';
+import InfoDialog from './InfoDialog';
 import Insert from '../Insert/Insert';
 import PageDoesNotExist from './PageDoesNotExist';
 import Query from '../Query/Query';
@@ -29,36 +29,32 @@ class App extends React.Component {
     }
 
     state = {
-        showInfoModal: false
+        openInfoDialog: false
     };
 
-    handleShowInfoModal = () => {
-        this.setState({ showInfoModal: true });
-    }
+    handleOpenInfoDialog = () => { this.setState({ openInfoDialog: true }); }
 
-    handleHideInfoModal = () => {
-        this.setState({ showInfoModal: false });
-    }
+    handleCloseInfoDialog = () => { this.setState({ openInfoDialog: false }); }
 
     render() {
         const {appError, user, authRequired} = this.props;
-        const {showInfoModal} = this.state;
+        const {openInfoDialog} = this.state;
 
         return (appError !== null) ?
             <div>
                 {appError}
             </div>
             : (user !== null) ?
-                <div className="container">
+                <div>
                     <TopMenu
-                        onLogoClick={this.handleShowInfoModal}
+                        onLogoClick={this.handleOpenInfoDialog}
                         showLogoff={authRequired}
                     />
-                    <InfoModal
-                        onHide={this.handleHideInfoModal}
-                        show={showInfoModal}
+                    <InfoDialog
+                        onClose={this.handleCloseInfoDialog}
+                        open={openInfoDialog}
                     />
-                    <Switch>
+                    {/* <Switch>
                         <Route
                             component={Query}
                             exact
@@ -72,7 +68,7 @@ class App extends React.Component {
                             component={PageDoesNotExist}
                             path="*"
                         />
-                    </Switch>
+                    </Switch> */}
                 </div>
                 : (authRequired === true) ? <Redirect to='/login' /> : null;
     }

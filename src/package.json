@@ -15,12 +15,13 @@
   },
   "author": "Jeroen van der Heijden",
   "dependencies": {
+    "@material-ui/core": "^3.0.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
-    "@material-ui/core": "^3.0.1",
+    "css-loader": "1.0.0",
     "d3": "^5.7.0",
     "es6-mixins": "^1.0.2",
     "history": "^4.7.2",
@@ -30,6 +31,7 @@
     "react-dom": "^16.4.2",
     "react-router": "4.3.1",
     "react-router-dom": "^4.3.1",
+    "typeface-roboto": "^0.0.54",
     "vlow": "^1.1.1",
     "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0"

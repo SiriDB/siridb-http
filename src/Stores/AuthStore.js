@@ -32,7 +32,7 @@ class AuthStore extends BaseStore {
             localStorage.clear();
             QueryActions.clearAll();
             this.setState(data);
-        }).fail((_, msg) => {console.log(msg); onError(msg || 'Unknown error occurred');});
+        }).fail((_, msg) => onError(msg || 'Unknown error occurred'));
     }
 }
 

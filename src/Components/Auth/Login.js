@@ -51,11 +51,12 @@ class Login extends React.Component {
 
         /* AuthStore properties */
         user: PropTypes.string,
-        authRequired: PropTypes.bool.isRequired,
+        authRequired: PropTypes.bool,
     }
 
     static defaultProps = {
         user: null,
+        authRequired: true,
     }
 
     state = {
@@ -95,9 +96,8 @@ class Login extends React.Component {
     }
 
     render() {
-        const {user, authRequired} = this.props;
+        const {user, authRequired, classes} = this.props;
         const {username, password, error} = this.state;
-        const {classes} = this.props;
 
         return (user !== null || authRequired === false) ? <Redirect to='/' /> : (
             <Grid
