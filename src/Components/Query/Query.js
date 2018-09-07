@@ -48,7 +48,6 @@ class Query extends React.Component {
             /* Error Popup */
             parseRes: null
         };
-        this.mapStore(QueryStore);
         this.cursorPos = null;
         this.queries = JSON.parse(localStorage.getItem('queries')) || [];
         this.idx = this.queries.length;
@@ -68,7 +67,6 @@ class Query extends React.Component {
 
     componentWillUnmount() {
         QueryActions.clearAll();
-        super.componentWillUnmount();
     }
 
     handleKeyPress = (event) => {
@@ -332,4 +330,4 @@ class Query extends React.Component {
     }
 }
 
-export default withVlow(QueryStore, Query);
+export default withVlow(QueryStore)(Query);

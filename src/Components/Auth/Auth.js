@@ -6,6 +6,9 @@ import AuthActions from '../../Actions/AuthActions';
 import AuthStore from '../../Stores/AuthStore';
 
 
+const withStores = withVlow(AuthStore);
+
+
 class Auth extends React.Component {
 
     static propTypes = {
@@ -110,4 +113,4 @@ class Auth extends React.Component {
     }
 }
 
-export default withVlow(AuthStore, Auth);
+export default withStores(Auth);

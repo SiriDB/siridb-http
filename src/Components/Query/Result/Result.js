@@ -294,4 +294,4 @@ class Result extends React.Component {
 export default withVlow({
     store: DatabaseStore,
     keys: ['factor', 'utcFormat'],
-}, Result);
+})(Result);

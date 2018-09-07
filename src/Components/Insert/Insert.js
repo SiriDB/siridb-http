@@ -31,11 +31,13 @@ class Insert extends React.Component {
 
     constructor(props) {
         super(props);
-        this.mapStores([InsertStore, DatabaseStore]);
 
         // set initial value, this.state.factor is required
-        let val = Math.floor((Math.random() * 100) + 1);
-        this.state.data = `{\n\t"series-001": [\n\t\t[${this._now()}, ${val}]\n\t]\n}`;
+        const val = Math.floor((Math.random() * 100) + 1);
+
+        this.state = {
+            data: `{\n\t"series-001": [\n\t\t[${this._now()}, ${val}]\n\t]\n}`
+        };
 
         // set inital cursor pos
         this.cursorPos = null;
@@ -143,4 +145,4 @@ class Insert extends React.Component {
     }
 }
 
-export default withVlow([InsertStore, DatabaseStore], Insert);
+export default withVlow([InsertStore, DatabaseStore])(Insert);

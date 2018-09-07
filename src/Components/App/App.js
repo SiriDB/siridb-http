@@ -78,4 +78,4 @@ class App extends React.Component {
     }
 }
 
-export default withVlow([AppStore, DatabaseStore, AuthStore], App);
+export default withVlow([AppStore, DatabaseStore, AuthStore])(App);

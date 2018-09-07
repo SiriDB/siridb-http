@@ -45,9 +45,15 @@ InfoModal.propTypes = {
     show: PropTypes.bool.isRequired,
 
     /* DatabaseStore properties */
-    dbname: PropTypes.string.isRequired,
-    httpServer: PropTypes.string.isRequired,
-    version: PropTypes.string.isRequired,
+    dbname: PropTypes.string,
+    httpServer: PropTypes.string,
+    version: PropTypes.string,
 };
 
-export default withVlow(DatabaseStore, InfoModal);
+InfoModal.defaultProps = {
+    dbname: '',
+    httpServer: '',
+    version: '',
+};
+
+export default withVlow(DatabaseStore)(InfoModal);
