@@ -9,7 +9,7 @@ import DatabaseStore from '../../Stores/DatabaseStore';
 
 
 const SELECT_ALL = -1;
-
+const withStores = withVlow([InsertStore, DatabaseStore]);
 
 class Insert extends React.Component {
 
@@ -145,4 +145,4 @@ class Insert extends React.Component {
     }
 }
 
-export default withVlow([InsertStore, DatabaseStore])(Insert);
+export default withStores(Insert);

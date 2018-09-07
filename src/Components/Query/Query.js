@@ -13,7 +13,7 @@ const LAST_CHARS = /[a-z_]+$/;
 const FIRST_CHARS = /^[a-z_]+/;
 const SELECT_ALL = -1;
 const HISTORY_SIZE = 100;
-
+const withStores = withVlow(QueryStore);
 
 class Query extends React.Component {
 
@@ -226,8 +226,6 @@ class Query extends React.Component {
         }
     }
 
-
-
     handleInpChange = (event) => {
         this.setState({
             query: event.target.value,
@@ -330,4 +328,4 @@ class Query extends React.Component {
     }
 }
 
-export default withVlow(QueryStore)(Query);
+export default withStores(Query);

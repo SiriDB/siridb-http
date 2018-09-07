@@ -1,10 +1,11 @@
+/* eslint no-console: ["error", { allow: ["warn", "error"] }] */
 class JsonRequest {
 
     constructor(type, url, data, isStringified) {
 
         this.doneCb = function (data) { };         // eslint-disable-line
         this.failCb = function (error, msg) {
-            window.console.error(error, msg || 'unknwon error occurred');
+            console.error(error, msg || 'unknwon error occurred');
         };
         this.alwaysCb = function (xhr, data) { };  // eslint-disable-line
 

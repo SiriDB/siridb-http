@@ -5,7 +5,6 @@ import AppActions from '../Actions/AppActions';
 class AppStore extends Vlow.Store {
 
     constructor() {
-        console.log('AppStore!!');
         super(AppActions);
         this.state = {
             appError: null

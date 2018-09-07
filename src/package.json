@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "./node_modules/.bin/eslint './**/*.js' --color",
     "analyze": "NODE_ENV='analyze' ./node_modules/.bin/webpack -p --progress --profile --colors",
     "build:dev": "./node_modules/.bin/webpack -d --progress --profile --colors --watch",
     "build:prod": "NODE_ENV='production' ./node_modules/.bin/webpack -p"

@@ -5,6 +5,9 @@ import DatabaseStore from '../../Stores/DatabaseStore';
 import {Modal} from 'react-bootstrap';
 
 
+const withStores = withVlow(DatabaseStore);
+
+
 const InfoModal = ({onHide, show, dbname, version, httpServer}) => (
     <Modal
         onHide={onHide}
@@ -56,4 +59,4 @@ InfoModal.defaultProps = {
     version: '',
 };
 
-export default withVlow(DatabaseStore)(InfoModal);
+export default withStores(InfoModal);

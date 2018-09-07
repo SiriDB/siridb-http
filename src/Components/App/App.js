@@ -14,6 +14,9 @@ import Query from '../Query/Query';
 import TopMenu from './TopMenu';
 
 
+const withStores = withVlow([AppStore, DatabaseStore, AuthStore]);
+
+
 class App extends React.Component {
 
     static propTypes = {
@@ -78,4 +81,4 @@ class App extends React.Component {
     }
 }
 
-export default withVlow([AppStore, DatabaseStore, AuthStore])(App);
+export default withStores(App);
