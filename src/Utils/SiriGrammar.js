@@ -3,10 +3,10 @@
  * should be used with the `jsleri` JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2018-07-09 13:21:28
+ * Created at: 2018-10-29 10:52:57
  */
 
-import { Sequence, Prio, Token, Regex, Repeat, Grammar, Choice, Tokens, List, Optional, Ref, Keyword, THIS } from 'jsleri';
+import { Regex, Choice, Tokens, Ref, Keyword, List, Repeat, Optional, Sequence, Prio, Token, THIS, Grammar } from 'jsleri';
 
 class SiriGrammar extends Grammar {
     static r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
@@ -139,6 +139,7 @@ class SiriGrammar extends Grammar {
         Keyword('symmetric_difference')
     );
     static k_sync_progress = Keyword('sync_progress');
+    static k_tee_pipe_name = Keyword('tee_pipe_name');
     static k_timeit = Keyword('timeit');
     static k_timezone = Keyword('timezone');
     static k_time_precision = Keyword('time_precision');
@@ -270,6 +271,7 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_reindex_progress,
         SiriGrammar.k_selected_points,
         SiriGrammar.k_sync_progress,
+        SiriGrammar.k_tee_pipe_name,
         SiriGrammar.k_uptime
     ), Token(','), 1, undefined, false);
     static group_columns = List(Choice(
@@ -434,7 +436,8 @@ class SiriGrammar extends Grammar {
                     SiriGrammar.k_version,
                     SiriGrammar.k_status,
                     SiriGrammar.k_reindex_progress,
-                    SiriGrammar.k_sync_progress
+                    SiriGrammar.k_sync_progress,
+                    SiriGrammar.k_tee_pipe_name
                 ),
                 SiriGrammar.str_operator,
                 SiriGrammar.string
@@ -773,6 +776,14 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_address,
         SiriGrammar.string
     );
+    static set_tee_pipe_name = Sequence(
+        SiriGrammar.k_set,
+        SiriGrammar.k_tee_pipe_name,
+        Choice(
+            SiriGrammar.k_false,
+            SiriGrammar.string
+        )
+    );
     static set_backup_mode = Sequence(
         SiriGrammar.k_set,
         SiriGrammar.k_backup_mode,
@@ -851,6 +862,7 @@ class SiriGrammar extends Grammar {
         Choice(
             SiriGrammar.set_log_level,
             SiriGrammar.set_backup_mode,
+            SiriGrammar.set_tee_pipe_name,
             SiriGrammar.set_address,
             SiriGrammar.set_port
         )
@@ -858,7 +870,10 @@ class SiriGrammar extends Grammar {
     static alter_servers = Sequence(
         SiriGrammar.k_servers,
         Optional(SiriGrammar.where_server),
-        SiriGrammar.set_log_level
+        Choice(
+            SiriGrammar.set_log_level,
+            SiriGrammar.set_tee_pipe_name
+        )
     );
     static alter_user = Sequence(
         SiriGrammar.k_user,
@@ -1103,6 +1118,7 @@ class SiriGrammar extends Grammar {
             SiriGrammar.k_startup_time,
             SiriGrammar.k_status,
             SiriGrammar.k_sync_progress,
+            SiriGrammar.k_tee_pipe_name,
             SiriGrammar.k_time_precision,
             SiriGrammar.k_timezone,
             SiriGrammar.k_uptime,
