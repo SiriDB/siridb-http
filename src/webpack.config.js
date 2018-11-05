@@ -5,6 +5,7 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const BUILD_DIR = path.resolve(__dirname, '../build');
 const APP_DIR = path.resolve(__dirname, '');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 var config = {
     entry: APP_DIR + '/Components/index.js',
@@ -24,7 +25,15 @@ var config = {
         }]
     },
     plugins: [
-        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+        new BundleAnalyzerPlugin({
+            /* Usage:
+                *      NODE_ENV='analyze' ./node_modules/.bin/webpack -p
+                *      or
+                *      npm run analyze
+                */
+            'analyzerMode': process.env.NODE_ENV === 'analyze' ? 'static' : 'disabled'
+        })
     ],
     optimization: {
         minimizer: [

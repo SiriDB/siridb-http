@@ -7,12 +7,13 @@ const unexpected_msg = 'Oops, some unexpected error has occurred. Please check t
 
 class InsertStore extends BaseStore {
 
+    state = {
+        alert: null,
+        sending: false
+    };
+
     constructor() {
         super(InsertActions);
-        this.state = {
-            alert: null,
-            sending: false
-        };
     }
 
     onInsert(data) {

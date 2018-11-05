@@ -55,8 +55,8 @@ class Login extends React.Component {
     }
 
     static defaultProps = {
-        user: null,
         authRequired: true,
+        user: null,
     }
 
     state = {

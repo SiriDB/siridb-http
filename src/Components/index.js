@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'babel-polyfill';    // ie and old browser compatibility
+import '@babel/polyfill';    // ie and old browser compatibility
 import 'typeface-roboto';   // for the roboto font
 import {HashRouter as Router, Route, Switch} from 'react-router-dom';
 import App from './App/App';

@@ -1,5 +1,8 @@
 import Vlow from 'vlow';
-export default Vlow.createActions([
+
+const InsertActions = Vlow.createActions([
     'insert',
     'clearAlert'
 ]);
+
+export default InsertActions;

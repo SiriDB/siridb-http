@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - "node"
+
+before_script:
+  - cd src
+
+script:
+  - npm install
+  - npm run lint
+

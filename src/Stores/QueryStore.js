@@ -6,13 +6,14 @@ const unexpected_msg = 'Oops, some unexpected error has occurred. Please check t
 
 class QueryStore extends BaseStore {
 
+    state = {
+        alert: null,
+        result: null,
+        sending: false
+    };
+
     constructor() {
         super(QueryActions);
-        this.state = {
-            alert: null,
-            result: null,
-            sending: false
-        };
     }
 
     onQuery(query) {

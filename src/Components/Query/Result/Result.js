@@ -1,3 +1,4 @@
+/* eslint no-console: ["error", { allow: ["warn", "error", "log"] }] */
 import * as moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -8,6 +9,12 @@ import QueryGroupLnk from './QueryGroupLnk';
 import QuerySeriesLnk from './QuerySeriesLnk';
 import Series from './Series';
 import Table from './Table';
+
+
+const withStores = withVlow({
+    store: DatabaseStore,
+    keys: ['factor', 'utcFormat'],
+});
 
 
 class Result extends React.Component {
@@ -172,7 +179,7 @@ class Result extends React.Component {
                 }
             </div>
         );
-        window.console.log(`Rendered ${nseries} series with a total of ${npoints} points`);
+        console.log(`Rendered ${nseries} series with a total of ${npoints} points`);
         return charts;
     }
 
@@ -290,7 +297,4 @@ class Result extends React.Component {
     }
 }
 
-export default withVlow({
-    store: DatabaseStore,
-    keys: ['factor', 'utcFormat'],
-}, Result);
+export default withStores(Result);
