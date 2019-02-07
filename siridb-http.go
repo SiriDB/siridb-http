@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
+	siridb "github.com/SiriDB/go-siridb-connector"
 	"github.com/astaxie/beego/session"
-	siridb "github.com/transceptor-technology/go-siridb-connector"
 	"github.com/transceptor-technology/go-socket.io"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	ini "gopkg.in/ini.v1"

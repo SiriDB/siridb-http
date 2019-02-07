@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	siridb "github.com/SiriDB/go-siridb-connector"
 	qpack "github.com/transceptor-technology/go-qpack"
-	siridb "github.com/transceptor-technology/go-siridb-connector"
 	"github.com/transceptor-technology/go-socket.io"
 	msgpack "gopkg.in/vmihailenco/msgpack.v2"
 )

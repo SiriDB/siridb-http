@@ -3,10 +3,10 @@
  * should be used with the `jsleri` JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2018-10-29 10:52:57
+ * Created at: 2019-01-10 13:20:05
  */
 
-import { Regex, Choice, Tokens, Ref, Keyword, List, Repeat, Optional, Sequence, Prio, Token, THIS, Grammar } from 'jsleri';
+import { Choice, List, Optional, THIS, Ref, Keyword, Grammar, Repeat, Token, Tokens, Regex, Prio, Sequence } from 'jsleri';
 
 class SiriGrammar extends Grammar {
     static r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
@@ -552,11 +552,16 @@ class SiriGrammar extends Grammar {
             )
         )
     );
-    static series_sep = Choice(
+    static series_setopr = Choice(
         SiriGrammar.k_union,
         SiriGrammar.c_difference,
         SiriGrammar.k_intersection,
         SiriGrammar.k_symmetric_difference
+    );
+    static series_parentheses = Sequence(
+        Token('('),
+        THIS,
+        Token(')')
     );
     static series_all = Choice(
         Token('*'),
@@ -570,12 +575,20 @@ class SiriGrammar extends Grammar {
         SiriGrammar.string
     );
     static group_match = Repeat(SiriGrammar.r_grave_str, 1, 1);
-    static series_match = List(Choice(
-        SiriGrammar.series_all,
-        SiriGrammar.series_name,
-        SiriGrammar.group_match,
-        SiriGrammar.series_re
-    ), SiriGrammar.series_sep, 1, undefined, false);
+    static series_match = Prio(
+        Choice(
+            SiriGrammar.series_all,
+            SiriGrammar.series_name,
+            SiriGrammar.group_match,
+            SiriGrammar.series_re
+        ),
+        SiriGrammar.series_parentheses,
+        Sequence(
+            THIS,
+            SiriGrammar.series_setopr,
+            THIS
+        )
+    );
     static limit_expr = Sequence(
         SiriGrammar.k_limit,
         SiriGrammar.int_expr

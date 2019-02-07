@@ -1,6 +1,7 @@
 **siridb-http (2.0.9)**
 
   * Using `withVlow` instead of Vlow.Components.
+  * Update SiriDB grammar to version 2.0.31
 
 **siridb-http (2.0.8)**
 
