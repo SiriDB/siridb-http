@@ -1,3 +1,9 @@
+**siridb-http (2.0.10)**
+
+  * Update npm packages
+  * Fixed lint errors
+  * Changed js minimizer
+
 **siridb-http (2.0.9)**
 
   * Using `withVlow` instead of Vlow.Components.
