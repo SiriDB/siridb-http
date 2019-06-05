@@ -31,9 +31,13 @@ class App extends React.Component {
         user: null,
     }
 
-    state = {
-        showInfoModal: false
-    };
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            showInfoModal: false
+        };
+    }
 
     handleShowInfoModal = () => {
         this.setState({ showInfoModal: true });

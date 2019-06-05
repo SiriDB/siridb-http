@@ -1,8 +1,7 @@
 /* global require, __dirname, process, module */
 const path = require('path');
 const webpack = require('webpack');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-
+const TerserPlugin = require('terser-webpack-plugin');
 const BUILD_DIR = path.resolve(__dirname, '../build');
 const APP_DIR = path.resolve(__dirname, '');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
@@ -36,13 +35,12 @@ var config = {
     ],
     optimization: {
         minimizer: [
-            new UglifyJSPlugin({
-                uglifyOptions: {
-                    compress: {
-                        warnings: false
-                    }
-                }
-            })
+            new TerserPlugin({
+                parallel: true,
+                terserOptions: {
+                    ecma: 5,
+                },
+            }),
         ]
     }
 };

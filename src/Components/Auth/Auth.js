@@ -20,10 +20,14 @@ class Auth extends React.Component {
         authError: null,
     }
 
-    state = {
-        username: '',
-        password: ''
-    };
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            username: '',
+            password: ''
+        };
+    }
 
     handleLogin = () => {
         const {username, password} = this.state;
