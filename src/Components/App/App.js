@@ -39,6 +39,10 @@ class App extends React.Component {
         };
     }
 
+    shouldComponentUpdate () {
+        return true;
+    }
+
     handleShowInfoModal = () => {
         this.setState({ showInfoModal: true });
     }

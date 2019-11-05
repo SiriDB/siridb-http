@@ -1,36 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class AutoCompleteItem extends React.Component {
-    static propTypes = {
-        isSelected: PropTypes.bool.isRequired,
-        itemIdx: PropTypes.number.isRequired,
-        keyword: PropTypes.string.isRequired,
-        onSelect: PropTypes.func.isRequired,
-        wpos: PropTypes.number.isRequired,
-    }
-
-    handleClick = () => {
-        const {onSelect, itemIdx} = this.props;
+const AutoCompleteItem = ({isSelected, itemIdx, keyword, onSelect, wpos}) => {
+    function handleClick () {
         onSelect(itemIdx);
     }
 
-    render() {
-        const {isSelected, keyword, wpos} = this.props;
-        return (
-            <li
-                className={isSelected ? 'selected' : ''}
-                onClick={this.handleClick}
-            >
-                <span className="grey">
-                    {keyword.substring(0, wpos)}
-                </span>
-                <span>
-                    {keyword.substring(wpos)}
-                </span>
-            </li>
-        );
-    }
-}
+    return (
+        <li
+            className={isSelected ? 'selected' : ''}
+            onClick={handleClick}
+        >
+            <span className="grey">
+                {keyword.substring(0, wpos)}
+            </span>
+            <span>
+                {keyword.substring(wpos)}
+            </span>
+        </li>
+    );
+};
+
+AutoCompleteItem.propTypes = {
+    isSelected: PropTypes.bool.isRequired,
+    itemIdx: PropTypes.number.isRequired,
+    keyword: PropTypes.string.isRequired,
+    onSelect: PropTypes.func.isRequired,
+    wpos: PropTypes.number.isRequired,
+};
 
 export default AutoCompleteItem;

@@ -17,7 +17,7 @@ module.exports = {
     ],
     "settings": {
         "react": {
-            "version": "16.4"
+            "version": "16.8.1"
         }
     },
     "rules": {
@@ -38,6 +38,7 @@ module.exports = {
             "always"
         ],
         "react/display-name": [0],
+        "react/jsx-curly-brace-presence": [0],
         "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
         "react/jsx-max-depth": [2, { "max": 7 }],
         "react/no-array-index-key": [0],
