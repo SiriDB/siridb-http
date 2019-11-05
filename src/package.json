@@ -1,6 +1,6 @@
 {
   "name": "siridb-http",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "SiriDB HTTP Server",
   "main": "index.js",
   "license": "MIT",
