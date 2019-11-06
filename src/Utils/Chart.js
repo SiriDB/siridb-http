@@ -30,6 +30,10 @@ class Chart extends React.Component {
         this._init();
     }
 
+    shouldComponentUpdate() {
+        return true;
+    }
+
     componentDidUpdate() {
         this._init();
     }

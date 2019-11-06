@@ -19,6 +19,10 @@ class TopMenu extends React.Component {
         };
     }
 
+    shouldComponentUpdate() {
+        return true;
+    }
+
     handleToggleClick = () => {
         /* eslint-disable react/no-set-state */
         this.setState((prevState) => ({

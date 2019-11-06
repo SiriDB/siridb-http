@@ -53,6 +53,10 @@ class Query extends React.Component {
         this.idx = this.queries.length;
     }
 
+    shouldComponentUpdate() {
+        return true;
+    }
+
     componentDidUpdate() {
         if (this.cursorPos !== null) {
             this.inp.focus();

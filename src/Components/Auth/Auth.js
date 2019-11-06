@@ -29,6 +29,10 @@ class Auth extends React.Component {
         };
     }
 
+    shouldComponentUpdate() {
+        return true;
+    }
+
     handleLogin = () => {
         const {username, password} = this.state;
         AuthActions.login(username, password);

@@ -113,8 +113,7 @@ class Result extends React.Component {
                 <Tooltip id="calc">
                     {(seconds < 315532800)
                         ? moment.duration(seconds, 'seconds').humanize()
-                        : utcFormat(new Date(Math.floor(seconds * factor)))
-                    }
+                        : utcFormat(new Date(Math.floor(seconds * factor)))}
                 </Tooltip>
             );
             return (

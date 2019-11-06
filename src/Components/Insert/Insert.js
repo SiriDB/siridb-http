@@ -43,6 +43,10 @@ class Insert extends React.Component {
         this.cursorPos = null;
     }
 
+    shouldComponentUpdate() {
+        return true;
+    }
+
     componentDidUpdate() {
         if (this.cursorPos !== null) {
             this.inp.focus();

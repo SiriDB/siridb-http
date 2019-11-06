@@ -6,13 +6,6 @@ import Chart from '../../../Utils/Chart';
 
 class Series extends React.Component {
 
-    static fmtSelect = {
-        time: (val) => {
-            const {utcFormat, factor} = this.props;
-            return utcFormat(new Date(Math.floor(val * factor)));
-        }
-    }
-
     static propTypes = {
         factor: PropTypes.number.isRequired,
         name: PropTypes.string.isRequired,
@@ -27,6 +20,17 @@ class Series extends React.Component {
         this.state = {
             asChart: this.vtype !== 'string' && points.length > 1
         };
+    }
+
+    shouldComponentUpdate() {
+        return true;
+    }
+
+    fmtSelect = {
+        time: (val) => {
+            const {utcFormat, factor} = this.props;
+            return utcFormat(new Date(Math.floor(val * factor)));
+        }
     }
 
     handleToggle = () => {
