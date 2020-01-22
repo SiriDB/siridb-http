@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	siridb "github.com/SiriDB/go-siridb-connector"
+	socketio "github.com/googollee/go-socket.io"
 	qpack "github.com/transceptor-technology/go-qpack"
-	"github.com/transceptor-technology/go-socket.io"
 	msgpack "gopkg.in/vmihailenco/msgpack.v2"
 )
 
@@ -69,8 +69,8 @@ func checkBasicAuth(r *http.Request) (conn *Conn) {
 	return conn
 }
 
-func getConnBySIO(so *socketio.Socket) (conn *Conn, err error) {
-	if user, ok := base.ssessions[(*so).Id()]; ok {
+func getConnBySIO(so *socketio.Conn) (conn *Conn, err error) {
+	if user, ok := base.ssessions[(*so).ID()]; ok {
 		conn = getConnByUser(user)
 		if conn == nil {
 			err = fmt.Errorf("no connection for user '%s' found, please try to login again", user)
@@ -191,7 +191,7 @@ func handlerNotFound(w http.ResponseWriter, r *http.Request) {
 	sendError(w, "404 not found", http.StatusNotFound)
 }
 
-func onDbInfo(so *socketio.Socket) (int, interface{}) {
+func onDbInfo(so *socketio.Conn) (int, interface{}) {
 	db := tDb{
 		Dbname:        base.dbname,
 		TimePrecision: base.timePrecision,
@@ -245,10 +245,10 @@ func readBody(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	}
 }
 
-func onAuthFetch(so *socketio.Socket) (int, interface{}) {
+func onAuthFetch(so *socketio.Conn) (int, interface{}) {
 	authFetch := tAuthFetch{User: nil, AuthRequired: base.reqAuth}
 
-	if user, ok := base.ssessions[(*so).Id()]; ok && getConnByUser(user) != nil {
+	if user, ok := base.ssessions[(*so).ID()]; ok && getConnByUser(user) != nil {
 		authFetch.User = user
 	} else if !base.reqAuth {
 		authFetch.User = base.connections[0].user
@@ -274,7 +274,7 @@ func handlerAuthFetch(w http.ResponseWriter, r *http.Request) {
 	sendData(w, r, authFetch)
 }
 
-func onAuthLogin(so *socketio.Socket, req *tAuthLoginReq) (int, interface{}) {
+func onAuthLogin(so *socketio.Conn, req *tAuthLoginReq) (int, interface{}) {
 	if conn := getConnByUser(req.Username); conn != nil {
 		if req.Password != conn.password {
 			return StatusUnprocessableEntity, "Username or password incorrect"
@@ -287,7 +287,7 @@ func onAuthLogin(so *socketio.Socket, req *tAuthLoginReq) (int, interface{}) {
 		return StatusUnprocessableEntity, "Multiple user login is not allowed"
 	}
 
-	base.ssessions[(*so).Id()] = req.Username
+	base.ssessions[(*so).ID()] = req.Username
 	authLoginRes := tAuthLoginRes{User: req.Username}
 
 	return http.StatusOK, authLoginRes
@@ -327,9 +327,9 @@ func handlerAuthLogin(w http.ResponseWriter, r *http.Request) {
 	sendData(w, r, authLoginRes)
 }
 
-func onAuthLogout(so *socketio.Socket) (int, interface{}) {
+func onAuthLogout(so *socketio.Conn) (int, interface{}) {
 	authLogoff := tAuthLogoff{User: nil}
-	delete(base.ssessions, (*so).Id())
+	delete(base.ssessions, (*so).ID())
 	return http.StatusOK, authLogoff
 }
 
@@ -350,7 +350,7 @@ func handlerAuthLogout(w http.ResponseWriter, r *http.Request) {
 	sendData(w, r, authLogoff)
 }
 
-func onQuery(so *socketio.Socket, req *tQuery) (int, interface{}) {
+func onQuery(so *socketio.Conn, req *tQuery) (int, interface{}) {
 	conn, err := getConnBySIO(so)
 	if err != nil {
 		return http.StatusUnauthorized, err.Error()
@@ -396,7 +396,7 @@ func handlerQuery(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func onInsert(so *socketio.Socket, insert *interface{}) (int, interface{}) {
+func onInsert(so *socketio.Conn, insert *interface{}) (int, interface{}) {
 	conn, err := getConnBySIO(so)
 	if err != nil {
 		return http.StatusUnauthorized, err.Error()

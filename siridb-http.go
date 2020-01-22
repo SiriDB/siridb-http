@@ -12,13 +12,13 @@ import (
 
 	siridb "github.com/SiriDB/go-siridb-connector"
 	"github.com/astaxie/beego/session"
-	"github.com/transceptor-technology/go-socket.io"
+	socketio "github.com/googollee/go-socket.io"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	ini "gopkg.in/ini.v1"
 )
 
 // AppVersion exposes version information
-const AppVersion = "2.0.10"
+const AppVersion = "2.0.12"
 
 const retryConnectTime = 5
 
@@ -428,33 +428,36 @@ key_file = certificate.key
 			quit(err)
 		}
 
-		server.On("connection", func(so socketio.Socket) {
-			so.On("db-info", func(_ string) (int, interface{}) {
-				return onDbInfo(&so)
-			})
-			so.On("auth fetch", func(_ string) (int, interface{}) {
-				return onAuthFetch(&so)
-			})
-			so.On("auth login", func(req tAuthLoginReq) (int, interface{}) {
-				return onAuthLogin(&so, &req)
-			})
-			so.On("auth logout", func(_ string) (int, interface{}) {
-				return onAuthLogout(&so)
-			})
-			so.On("query", func(req tQuery) (int, interface{}) {
-				return onQuery(&so, &req)
-			})
-			so.On("insert", func(req interface{}) (int, interface{}) {
-				return onInsert(&so, &req)
-			})
-			so.On("disconnection", func() {
-				delete(base.ssessions, so.Id())
-			})
+		server.OnConnect("/", func(s socketio.Conn) error {
+			s.SetContext("/")
+			return nil
 		})
 
-		server.On("error", func(so socketio.Socket, err error) {
+		server.OnEvent("/", "db-info", func(so socketio.Conn, _ string) (int, interface{}) {
+			return onDbInfo(&so)
+		})
+		server.OnEvent("/", "auth fetch", func(so socketio.Conn, _ string) (int, interface{}) {
+			return onAuthFetch(&so)
+		})
+		server.OnEvent("/", "auth login", func(so socketio.Conn, req tAuthLoginReq) (int, interface{}) {
+			return onAuthLogin(&so, &req)
+		})
+		server.OnEvent("/", "query", func(so socketio.Conn, req tQuery) (int, interface{}) {
+			return onQuery(&so, &req)
+		})
+		server.OnEvent("/", "insert", func(so socketio.Conn, req interface{}) (int, interface{}) {
+			return onInsert(&so, &req)
+		})
+		server.OnDisconnect("disconnection", func(so socketio.Conn, _ string) {
+			delete(base.ssessions, so.ID())
+		})
+
+		server.OnError("error", func(so socketio.Conn, err error) {
 			base.logCh <- fmt.Sprintf("socket.io error: %s", err.Error())
 		})
+
+		go server.Serve()
+		defer server.Close()
 
 		http.Handle("/socket.io/", &customServer{Server: server})
 	}
