@@ -45,5 +45,6 @@ module.exports = {
         "react/no-multi-comp": [2, { "ignoreStateless": true }],
         "react/no-set-state": [0],
         "react/sort-prop-types": [0],
+        "react/function-component-definition": [0],
     }
 };
