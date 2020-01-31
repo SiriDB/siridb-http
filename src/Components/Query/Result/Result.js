@@ -227,7 +227,9 @@ class Result extends React.Component {
         drop_threshold: (val) => `${val} (${Math.floor(val * 100).toString()}%)`,
         startup_time: (val) => `${val} second${(val === 1) ? '' : 's'}`,
         uptime: (val) => moment.duration(val, 'seconds').humanize(),
-        online: (val) => (val) ? 'yes' : 'no'
+        online: (val) => (val) ? 'yes' : 'no',
+        expiration_log: (val) => (val) ? moment.duration(val, 'seconds').humanize() : 'never',
+        expiration_num: (val) => (val) ? moment.duration(val, 'seconds').humanize() : 'never',
     }
 
     getFmtGroup = (setQuery) => ({

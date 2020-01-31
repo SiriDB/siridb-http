@@ -3,10 +3,10 @@
  * should be used with the `jsleri` JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2019-01-10 13:20:05
+ * Created at: 2020-01-23 14:08:47
  */
 
-import { Choice, List, Optional, THIS, Ref, Keyword, Grammar, Repeat, Token, Tokens, Regex, Prio, Sequence } from 'jsleri';
+import { List, THIS, Token, Choice, Ref, Keyword, Sequence, Tokens, Prio, Grammar, Regex, Repeat, Optional } from 'jsleri';
 
 class SiriGrammar extends Grammar {
     static r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
@@ -88,14 +88,14 @@ class SiriGrammar extends Grammar {
     static k_max_open_files = Keyword('max_open_files');
     static k_mean = Keyword('mean');
     static k_median = Keyword('median');
-    static k_median_low = Keyword('median_low');
     static k_median_high = Keyword('median_high');
+    static k_median_low = Keyword('median_low');
     static k_mem_usage = Keyword('mem_usage');
     static k_merge = Keyword('merge');
     static k_min = Keyword('min');
     static k_modify = Keyword('modify');
-    static k_nan = Keyword('nan');
     static k_name = Keyword('name');
+    static k_nan = Keyword('nan');
     static k_ninf = Sequence(
         Token('-'),
         SiriGrammar.k_inf
@@ -123,9 +123,11 @@ class SiriGrammar extends Grammar {
     static k_server = Keyword('server');
     static k_servers = Keyword('servers');
     static k_set = Keyword('set');
-    static k_sid = Keyword('sid');
+    static k_expiration_log = Keyword('expiration_log');
+    static k_expiration_num = Keyword('expiration_num');
     static k_shards = Keyword('shards');
     static k_show = Keyword('show');
+    static k_sid = Keyword('sid');
     static k_size = Keyword('size');
     static k_start = Keyword('start');
     static k_startup_time = Keyword('startup_time');
@@ -576,6 +578,12 @@ class SiriGrammar extends Grammar {
     );
     static group_match = Repeat(SiriGrammar.r_grave_str, 1, 1);
     static series_match = Prio(
+        List(Choice(
+            SiriGrammar.series_all,
+            SiriGrammar.series_name,
+            SiriGrammar.group_match,
+            SiriGrammar.series_re
+        ), SiriGrammar.series_setopr, 1, undefined, false),
         Choice(
             SiriGrammar.series_all,
             SiriGrammar.series_name,
@@ -852,13 +860,27 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_timezone,
         SiriGrammar.string
     );
+    static set_expiration_num = Sequence(
+        SiriGrammar.k_set,
+        SiriGrammar.k_expiration_num,
+        SiriGrammar.time_expr,
+        Optional(SiriGrammar.set_ignore_threshold)
+    );
+    static set_expiration_log = Sequence(
+        SiriGrammar.k_set,
+        SiriGrammar.k_expiration_log,
+        SiriGrammar.time_expr,
+        Optional(SiriGrammar.set_ignore_threshold)
+    );
     static alter_database = Sequence(
         SiriGrammar.k_database,
         Choice(
             SiriGrammar.set_drop_threshold,
             SiriGrammar.set_list_limit,
             SiriGrammar.set_select_points_limit,
-            SiriGrammar.set_timezone
+            SiriGrammar.set_timezone,
+            SiriGrammar.set_expiration_num,
+            SiriGrammar.set_expiration_log
         )
     );
     static alter_group = Sequence(
@@ -1113,6 +1135,8 @@ class SiriGrammar extends Grammar {
             SiriGrammar.k_duration_log,
             SiriGrammar.k_duration_num,
             SiriGrammar.k_fifo_files,
+            SiriGrammar.k_expiration_log,
+            SiriGrammar.k_expiration_num,
             SiriGrammar.k_idle_percentage,
             SiriGrammar.k_idle_time,
             SiriGrammar.k_ip_support,
