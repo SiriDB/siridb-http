@@ -8,6 +8,7 @@ import {withVlow} from 'vlow';
 import DatabaseStore from '../../../Stores/DatabaseStore';
 import QueryGroupLnk from './QueryGroupLnk';
 import QuerySeriesLnk from './QuerySeriesLnk';
+import QueryTagLnk from './QueryTagLnk';
 import Series from './Series';
 import Table from './Table';
 
@@ -57,27 +58,33 @@ class Result extends React.Component {
                             data={data.groups}
                             formatters={this.getFmtGroup(setQuery)}
                         />
-                        : (data.shards !== undefined) ?
+                        : (data.tags !== undefined) ?
                             <Table
                                 columns={data.columns}
-                                data={data.shards}
-                                formatters={this.getFmtShard(utcFormat, factor)}
+                                data={data.tags}
+                                formatters={this.getFmtTag(setQuery)}
                             />
-                            : (data.pools !== undefined) ?
+                            : (data.shards !== undefined) ?
                                 <Table
                                     columns={data.columns}
-                                    data={data.pools}
+                                    data={data.shards}
+                                    formatters={this.getFmtShard(utcFormat, factor)}
                                 />
-                                : (data.users !== undefined) ?
+                                : (data.pools !== undefined) ?
                                     <Table
                                         columns={data.columns}
-                                        data={data.users}
-                                    /> : null;
+                                        data={data.pools}
+                                    />
+                                    : (data.users !== undefined) ?
+                                        <Table
+                                            columns={data.columns}
+                                            data={data.users}
+                                        /> : null;
         }
 
         /**** Count Statement ****/
         let countStatement = [
-            'series', 'servers', 'groups', 'shards', 'pools', 'users',
+            'series', 'servers', 'groups', 'shards', 'pools', 'tags', 'users',
             'servers_received_points', 'servers_selected_points', 'series_length', 'shards_size'
         ].find((name) => (data[name] !== undefined && typeof data[name] === 'number'));
 
@@ -236,6 +243,15 @@ class Result extends React.Component {
         name: (val) => (
             <QueryGroupLnk
                 groupName={val}
+                setQuery={setQuery}
+            />
+        )
+    })
+
+    getFmtTag = (setQuery) => ({
+        name: (val) => (
+            <QueryTagLnk
+                tagName={val}
                 setQuery={setQuery}
             />
         )

@@ -205,13 +205,14 @@ func tryShow(lines *[]string, m map[string]interface{}) (bool, error) {
 }
 
 func tryCount(lines *[]string, m map[string]interface{}) (bool, error) {
-	cols := [11]string{
+	cols := [12]string{
 		"calc",
 		"series",
 		"servers",
 		"groups",
 		"shards",
 		"pools",
+		"tags",
 		"users",
 		"servers_received_points",
 		"servers_selected_points",

@@ -3,10 +3,10 @@
  * should be used with the `jsleri` JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2020-01-23 14:08:47
+ * Created at: 2020-07-30 10:55:51
  */
 
-import { List, THIS, Token, Choice, Ref, Keyword, Sequence, Tokens, Prio, Grammar, Regex, Repeat, Optional } from 'jsleri';
+import { Repeat, Optional, Regex, Token, Sequence, Choice, Tokens, Ref, List, THIS, Keyword, Prio, Grammar } from 'jsleri';
 
 class SiriGrammar extends Grammar {
     static r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
@@ -141,6 +141,8 @@ class SiriGrammar extends Grammar {
         Keyword('symmetric_difference')
     );
     static k_sync_progress = Keyword('sync_progress');
+    static k_tag = Keyword('tag');
+    static k_tags = Keyword('tags');
     static k_tee_pipe_name = Keyword('tee_pipe_name');
     static k_timeit = Keyword('timeit');
     static k_timezone = Keyword('timezone');
@@ -152,6 +154,7 @@ class SiriGrammar extends Grammar {
         Tokens(', |'),
         Keyword('union')
     );
+    static k_untag = Keyword('untag');
     static k_uptime = Keyword('uptime');
     static k_user = Keyword('user');
     static k_users = Keyword('users');
@@ -285,6 +288,10 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_name,
         SiriGrammar.k_access
     ), Token(','), 1, undefined, false);
+    static tag_columns = List(Choice(
+        SiriGrammar.k_name,
+        SiriGrammar.k_series
+    ), Token(','), 1, undefined, false);
     static pool_props = Choice(
         SiriGrammar.k_pool,
         SiriGrammar.k_servers,
@@ -309,6 +316,36 @@ class SiriGrammar extends Grammar {
                 ),
                 SiriGrammar.str_operator,
                 SiriGrammar.string
+            ),
+            Sequence(
+                Token('('),
+                THIS,
+                Token(')')
+            ),
+            Sequence(
+                THIS,
+                SiriGrammar.k_and,
+                THIS
+            ),
+            Sequence(
+                THIS,
+                SiriGrammar.k_or,
+                THIS
+            )
+        )
+    );
+    static where_tag = Sequence(
+        SiriGrammar.k_where,
+        Prio(
+            Sequence(
+                SiriGrammar.k_name,
+                SiriGrammar.str_operator,
+                SiriGrammar.string
+            ),
+            Sequence(
+                SiriGrammar.k_series,
+                SiriGrammar.int_operator,
+                SiriGrammar.int_expr
             ),
             Sequence(
                 Token('('),
@@ -571,23 +608,24 @@ class SiriGrammar extends Grammar {
     );
     static series_name = Repeat(SiriGrammar.string, 1, 1);
     static group_name = Repeat(SiriGrammar.r_grave_str, 1, 1);
+    static tag_name = Repeat(SiriGrammar.r_grave_str, 1, 1);
     static series_re = Repeat(SiriGrammar.r_regex, 1, 1);
     static uuid = Choice(
         SiriGrammar.r_uuid_str,
         SiriGrammar.string
     );
-    static group_match = Repeat(SiriGrammar.r_grave_str, 1, 1);
+    static group_tag_match = Repeat(SiriGrammar.r_grave_str, 1, 1);
     static series_match = Prio(
         List(Choice(
             SiriGrammar.series_all,
             SiriGrammar.series_name,
-            SiriGrammar.group_match,
+            SiriGrammar.group_tag_match,
             SiriGrammar.series_re
         ), SiriGrammar.series_setopr, 1, undefined, false),
         Choice(
             SiriGrammar.series_all,
             SiriGrammar.series_name,
-            SiriGrammar.group_match,
+            SiriGrammar.group_tag_match,
             SiriGrammar.series_re
         ),
         SiriGrammar.series_parentheses,
@@ -860,6 +898,14 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_timezone,
         SiriGrammar.string
     );
+    static tag_series = Sequence(
+        SiriGrammar.k_tag,
+        SiriGrammar.tag_name
+    );
+    static untag_series = Sequence(
+        SiriGrammar.k_untag,
+        SiriGrammar.tag_name
+    );
     static set_expiration_num = Sequence(
         SiriGrammar.k_set,
         SiriGrammar.k_expiration_num,
@@ -918,9 +964,22 @@ class SiriGrammar extends Grammar {
             SiriGrammar.set_name
         )
     );
+    static alter_series = Sequence(
+        SiriGrammar.k_series,
+        SiriGrammar.series_match,
+        Optional(SiriGrammar.where_series),
+        Choice(
+            SiriGrammar.tag_series,
+            SiriGrammar.untag_series
+        )
+    );
     static count_groups = Sequence(
         SiriGrammar.k_groups,
         Optional(SiriGrammar.where_group)
+    );
+    static count_tags = Sequence(
+        SiriGrammar.k_tags,
+        Optional(SiriGrammar.where_tag)
     );
     static count_pools = Sequence(
         SiriGrammar.k_pools,
@@ -979,6 +1038,10 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_group,
         SiriGrammar.group_name
     );
+    static drop_tag = Sequence(
+        SiriGrammar.k_tag,
+        SiriGrammar.tag_name
+    );
     static drop_series = Sequence(
         SiriGrammar.k_series,
         Optional(SiriGrammar.series_match),
@@ -1007,6 +1070,11 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_groups,
         Optional(SiriGrammar.group_columns),
         Optional(SiriGrammar.where_group)
+    );
+    static list_tags = Sequence(
+        SiriGrammar.k_tags,
+        Optional(SiriGrammar.tag_columns),
+        Optional(SiriGrammar.where_tag)
     );
     static list_pools = Sequence(
         SiriGrammar.k_pools,
@@ -1041,6 +1109,7 @@ class SiriGrammar extends Grammar {
     static alter_stmt = Sequence(
         SiriGrammar.k_alter,
         Choice(
+            SiriGrammar.alter_series,
             SiriGrammar.alter_user,
             SiriGrammar.alter_group,
             SiriGrammar.alter_server,
@@ -1061,6 +1130,7 @@ class SiriGrammar extends Grammar {
             SiriGrammar.count_shards,
             SiriGrammar.count_shards_size,
             SiriGrammar.count_users,
+            SiriGrammar.count_tags,
             SiriGrammar.count_series_length
         )
     );
@@ -1075,6 +1145,7 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_drop,
         Choice(
             SiriGrammar.drop_group,
+            SiriGrammar.drop_tag,
             SiriGrammar.drop_series,
             SiriGrammar.drop_shards,
             SiriGrammar.drop_server,
@@ -1093,6 +1164,7 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_list,
         Choice(
             SiriGrammar.list_series,
+            SiriGrammar.list_tags,
             SiriGrammar.list_users,
             SiriGrammar.list_shards,
             SiriGrammar.list_groups,
