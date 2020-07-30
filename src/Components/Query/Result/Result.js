@@ -14,8 +14,8 @@ import Table from './Table';
 
 
 const withStores = withVlow({
-    store: DatabaseStore,
     keys: ['factor', 'utcFormat'],
+    store: DatabaseStore,
 });
 
 
@@ -251,8 +251,8 @@ class Result extends React.Component {
     getFmtTag = (setQuery) => ({
         name: (val) => (
             <QueryTagLnk
-                tagName={val}
                 setQuery={setQuery}
+                tagName={val}
             />
         )
     })
