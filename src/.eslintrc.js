@@ -46,5 +46,6 @@ module.exports = {
         "react/no-set-state": [0],
         "react/sort-prop-types": [0],
         "react/function-component-definition": [0],
+        "react/forbid-prop-types": [0]
     }
 };
