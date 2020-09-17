@@ -3,10 +3,10 @@
  * should be used with the `jsleri` JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2020-07-30 10:55:51
+ * Created at: 2020-09-15 15:01:47
  */
 
-import { Repeat, Optional, Regex, Token, Sequence, Choice, Tokens, Ref, List, THIS, Keyword, Prio, Grammar } from 'jsleri';
+import { Repeat, Token, Grammar, Prio, Choice, Regex, Keyword, Tokens, THIS, Optional, List, Sequence, Ref } from 'jsleri';
 
 class SiriGrammar extends Grammar {
     static r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
@@ -75,6 +75,7 @@ class SiriGrammar extends Grammar {
         Token('&'),
         Keyword('intersection')
     );
+    static k_interval = Keyword('interval');
     static k_ip_support = Keyword('ip_support');
     static k_last = Keyword('last');
     static k_length = Keyword('length');
@@ -144,9 +145,10 @@ class SiriGrammar extends Grammar {
     static k_tag = Keyword('tag');
     static k_tags = Keyword('tags');
     static k_tee_pipe_name = Keyword('tee_pipe_name');
-    static k_timeit = Keyword('timeit');
-    static k_timezone = Keyword('timezone');
     static k_time_precision = Keyword('time_precision');
+    static k_timeit = Keyword('timeit');
+    static k_timeval = Keyword('timeval');
+    static k_timezone = Keyword('timezone');
     static k_to = Keyword('to');
     static k_true = Keyword('true');
     static k_type = Keyword('type');
@@ -757,6 +759,16 @@ class SiriGrammar extends Grammar {
         Optional(SiriGrammar.time_expr),
         Token(')')
     );
+    static f_timeval = Sequence(
+        SiriGrammar.k_timeval,
+        Token('('),
+        Token(')')
+    );
+    static f_interval = Sequence(
+        SiriGrammar.k_interval,
+        Token('('),
+        Token(')')
+    );
     static f_filter = Sequence(
         SiriGrammar.k_filter,
         Token('('),
@@ -810,6 +822,8 @@ class SiriGrammar extends Grammar {
         SiriGrammar.f_stddev,
         SiriGrammar.f_first,
         SiriGrammar.f_last,
+        SiriGrammar.f_timeval,
+        SiriGrammar.f_interval,
         SiriGrammar.f_difference,
         SiriGrammar.f_derivative,
         SiriGrammar.f_filter,

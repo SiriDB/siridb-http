@@ -86,7 +86,7 @@ def get_version(path):
 
 
 def build_all():
-    path = os.path.dirname(__file__)
+    path = os.path.abspath(os.path.dirname(__file__))
     version = get_version(path)
     outpath = os.path.join(path, 'bin', version)
     if not os.path.exists(outpath):
@@ -111,7 +111,7 @@ def build_all():
 
 
 def build(development=True, output=''):
-    path = os.path.dirname(__file__)
+    path = os.path.abspath(os.path.dirname(__file__))
     version = get_version(path)
     outfile = output if output else os.path.join(path, '{}_{}.{}'.format(
         TARGET, version, 'exe' if sys.platform.startswith('win') else 'bin'))
@@ -128,7 +128,7 @@ def build(development=True, output=''):
 
 
 def install_packages():
-    path = os.path.dirname(__file__)
+    path = os.path.abspath(os.path.dirname(__file__))
     with subprocess.Popen(
             ['npm', 'install'],
             cwd=os.path.join(path, 'src'),
@@ -147,7 +147,7 @@ def install_packages():
 
 def webpack(development=True):
     print('(be patient, this can take some time)...')
-    path = os.path.dirname(__file__)
+    path = os.path.abspath(os.path.dirname(__file__))
     env = os.environ
     if not development:
         env['NODE_ENV'] = 'production'
@@ -161,7 +161,7 @@ def webpack(development=True):
 
 
 def compile_less(development=True):
-    path = os.path.dirname(__file__)
+    path = os.path.abspath(os.path.dirname(__file__))
     if development:
         subprocess.run([
             'lessc',
