@@ -219,7 +219,23 @@ class Result extends React.Component {
             />
         ),
         start: (val) => utcFormat(new Date(Math.floor(val * factor))),
-        end: (val) => utcFormat(new Date(Math.floor(val * factor)))
+        end: (val) => utcFormat(new Date(Math.floor(val * factor))),
+        shard_duration: (val) => {
+            val = moment.duration(val, 'seconds');
+            let arr = [];
+
+            const days = Math.floor(val.asDays());
+            if (days) {
+                arr.push(`${days}d`);
+            }
+
+            const hours = val.hours();
+            if (hours) {
+                arr.push(`${hours}h`);
+            }
+
+            return arr.join(' ');
+        },
     })
 
     _fmtServer = {

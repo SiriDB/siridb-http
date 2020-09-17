@@ -3,10 +3,10 @@
  * should be used with the `jsleri` JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2020-09-15 15:01:47
+ * Created at: 2020-09-17 11:38:57
  */
 
-import { Repeat, Token, Grammar, Prio, Choice, Regex, Keyword, Tokens, THIS, Optional, List, Sequence, Ref } from 'jsleri';
+import { Grammar, Choice, List, Keyword, Ref, Optional, Tokens, Sequence, Regex, Prio, Repeat, THIS, Token } from 'jsleri';
 
 class SiriGrammar extends Grammar {
     static r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
@@ -48,6 +48,8 @@ class SiriGrammar extends Grammar {
     static k_duration_num = Keyword('duration_num');
     static k_end = Keyword('end');
     static k_error = Keyword('error');
+    static k_expiration_log = Keyword('expiration_log');
+    static k_expiration_num = Keyword('expiration_num');
     static k_expression = Keyword('expression');
     static k_false = Keyword('false');
     static k_fifo_files = Keyword('fifo_files');
@@ -124,8 +126,7 @@ class SiriGrammar extends Grammar {
     static k_server = Keyword('server');
     static k_servers = Keyword('servers');
     static k_set = Keyword('set');
-    static k_expiration_log = Keyword('expiration_log');
-    static k_expiration_num = Keyword('expiration_num');
+    static k_shard_duration = Keyword('shard_duration');
     static k_shards = Keyword('shards');
     static k_show = Keyword('show');
     static k_sid = Keyword('sid');
@@ -238,6 +239,7 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_length,
         SiriGrammar.k_start,
         SiriGrammar.k_end,
+        SiriGrammar.k_shard_duration,
         SiriGrammar.k_pool
     ), Token(','), 1, undefined, false);
     static shard_columns = List(Choice(
@@ -410,7 +412,8 @@ class SiriGrammar extends Grammar {
             Sequence(
                 Choice(
                     SiriGrammar.k_start,
-                    SiriGrammar.k_end
+                    SiriGrammar.k_end,
+                    SiriGrammar.k_shard_duration
                 ),
                 SiriGrammar.int_operator,
                 SiriGrammar.time_expr
