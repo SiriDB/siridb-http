@@ -221,7 +221,7 @@ class Result extends React.Component {
         start: (val) => utcFormat(new Date(Math.floor(val * factor))),
         end: (val) => utcFormat(new Date(Math.floor(val * factor))),
         shard_duration: (val) => {
-            val = moment.duration(val, 'seconds');
+            val = moment.duration(val * factor / 1000, 'seconds');
             let arr = [];
 
             const days = Math.floor(val.asDays());
