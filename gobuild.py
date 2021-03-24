@@ -152,8 +152,8 @@ def webpack(development=True):
     if not development:
         env['NODE_ENV'] = 'production'
     with subprocess.Popen([
-            os.path.join('.', 'node_modules', '.bin', 'webpack'),
-            '-d' if development else '-p'],
+                os.path.join('.', 'node_modules', '.bin', 'webpack'),
+            ],
             env=env,
             cwd=os.path.join(path, 'src'),
             stdout=subprocess.PIPE) as proc:

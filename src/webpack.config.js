@@ -1,4 +1,3 @@
-/* global require, __dirname, process, module */
 const path = require('path');
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -23,6 +22,9 @@ var config = {
         ]
     },
     plugins: [
+        new webpack.ProvidePlugin({
+            process: 'process/browser',
+        }),
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
         new BundleAnalyzerPlugin({
             /* Usage:
@@ -46,7 +48,8 @@ var config = {
     performance: {
         maxEntrypointSize: 500000,
         maxAssetSize: 500000
-    }
+    },
+    mode: process.env.NODE_ENV === 'production' ? 'production' : 'development'
 };
 
 module.exports = config;

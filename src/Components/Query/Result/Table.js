@@ -21,6 +21,7 @@ const Table = ({columns, data, formatters, hideHeader}) => {
                     }
                 </tr>
             </thead>
+
             <tbody>
                 {
                     data.map((row, r) => (
