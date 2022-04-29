@@ -3,10 +3,10 @@
  * should be used with the `jsleri` JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2020-09-17 11:38:57
+ * Created at: 2022-04-15 12:10:03
  */
 
-import { Grammar, Choice, List, Keyword, Ref, Optional, Tokens, Sequence, Regex, Prio, Repeat, THIS, Token } from 'jsleri';
+import { Grammar, THIS, Ref, Keyword, List, Regex, Prio, Optional, Sequence, Token, Repeat, Choice, Tokens } from 'jsleri';
 
 class SiriGrammar extends Grammar {
     static r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
@@ -145,7 +145,7 @@ class SiriGrammar extends Grammar {
     static k_sync_progress = Keyword('sync_progress');
     static k_tag = Keyword('tag');
     static k_tags = Keyword('tags');
-    static k_tee_pipe_name = Keyword('tee_pipe_name');
+    static k_tee = Keyword('tee');
     static k_time_precision = Keyword('time_precision');
     static k_timeit = Keyword('timeit');
     static k_timeval = Keyword('timeval');
@@ -280,7 +280,6 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_reindex_progress,
         SiriGrammar.k_selected_points,
         SiriGrammar.k_sync_progress,
-        SiriGrammar.k_tee_pipe_name,
         SiriGrammar.k_uptime
     ), Token(','), 1, undefined, false);
     static group_columns = List(Choice(
@@ -480,8 +479,7 @@ class SiriGrammar extends Grammar {
                     SiriGrammar.k_version,
                     SiriGrammar.k_status,
                     SiriGrammar.k_reindex_progress,
-                    SiriGrammar.k_sync_progress,
-                    SiriGrammar.k_tee_pipe_name
+                    SiriGrammar.k_sync_progress
                 ),
                 SiriGrammar.str_operator,
                 SiriGrammar.string
@@ -852,9 +850,9 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_address,
         SiriGrammar.string
     );
-    static set_tee_pipe_name = Sequence(
+    static set_tee = Sequence(
         SiriGrammar.k_set,
-        SiriGrammar.k_tee_pipe_name,
+        SiriGrammar.k_tee,
         Choice(
             SiriGrammar.k_false,
             SiriGrammar.string
@@ -943,7 +941,8 @@ class SiriGrammar extends Grammar {
             SiriGrammar.set_select_points_limit,
             SiriGrammar.set_timezone,
             SiriGrammar.set_expiration_num,
-            SiriGrammar.set_expiration_log
+            SiriGrammar.set_expiration_log,
+            SiriGrammar.set_tee
         )
     );
     static alter_group = Sequence(
@@ -954,13 +953,19 @@ class SiriGrammar extends Grammar {
             SiriGrammar.set_name
         )
     );
+    static alter_tag = Sequence(
+        SiriGrammar.k_tag,
+        SiriGrammar.tag_name,
+        Choice(
+            SiriGrammar.set_name
+        )
+    );
     static alter_server = Sequence(
         SiriGrammar.k_server,
         SiriGrammar.uuid,
         Choice(
             SiriGrammar.set_log_level,
             SiriGrammar.set_backup_mode,
-            SiriGrammar.set_tee_pipe_name,
             SiriGrammar.set_address,
             SiriGrammar.set_port
         )
@@ -969,8 +974,7 @@ class SiriGrammar extends Grammar {
         SiriGrammar.k_servers,
         Optional(SiriGrammar.where_server),
         Choice(
-            SiriGrammar.set_log_level,
-            SiriGrammar.set_tee_pipe_name
+            SiriGrammar.set_log_level
         )
     );
     static alter_user = Sequence(
@@ -1129,6 +1133,7 @@ class SiriGrammar extends Grammar {
             SiriGrammar.alter_series,
             SiriGrammar.alter_user,
             SiriGrammar.alter_group,
+            SiriGrammar.alter_tag,
             SiriGrammar.alter_server,
             SiriGrammar.alter_servers,
             SiriGrammar.alter_database
@@ -1244,7 +1249,7 @@ class SiriGrammar extends Grammar {
             SiriGrammar.k_startup_time,
             SiriGrammar.k_status,
             SiriGrammar.k_sync_progress,
-            SiriGrammar.k_tee_pipe_name,
+            SiriGrammar.k_tee,
             SiriGrammar.k_time_precision,
             SiriGrammar.k_timezone,
             SiriGrammar.k_uptime,
