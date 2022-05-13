@@ -3,10 +3,10 @@
  * should be used with the `jsleri` JavaScript module.
  *
  * Source class: SiriGrammar
- * Created at: 2022-04-15 12:10:03
+ * Created at: 2022-05-05 15:08:05
  */
 
-import { Grammar, THIS, Ref, Keyword, List, Regex, Prio, Optional, Sequence, Token, Repeat, Choice, Tokens } from 'jsleri';
+import { Optional, Ref, Regex, Tokens, Token, Prio, Repeat, Keyword, Grammar, THIS, List, Sequence, Choice } from 'jsleri';
 
 class SiriGrammar extends Grammar {
     static r_float = Regex('^[-+]?[0-9]*\\.?[0-9]+');
@@ -30,9 +30,9 @@ class SiriGrammar extends Grammar {
     static k_as = Keyword('as');
     static k_backup_mode = Keyword('backup_mode');
     static k_before = Keyword('before');
-    static k_buffer_size = Keyword('buffer_size');
-    static k_buffer_path = Keyword('buffer_path');
     static k_between = Keyword('between');
+    static k_buffer_path = Keyword('buffer_path');
+    static k_buffer_size = Keyword('buffer_size');
     static k_count = Keyword('count');
     static k_create = Keyword('create');
     static k_critical = Keyword('critical');
@@ -62,6 +62,7 @@ class SiriGrammar extends Grammar {
     static k_grant = Keyword('grant');
     static k_group = Keyword('group');
     static k_groups = Keyword('groups');
+    static k_head = Keyword('head');
     static k_help = Choice(
         Keyword('help'),
         Token('?')
@@ -145,6 +146,7 @@ class SiriGrammar extends Grammar {
     static k_sync_progress = Keyword('sync_progress');
     static k_tag = Keyword('tag');
     static k_tags = Keyword('tags');
+    static k_tail = Keyword('tail');
     static k_tee = Keyword('tee');
     static k_time_precision = Keyword('time_precision');
     static k_timeit = Keyword('timeit');
@@ -655,6 +657,14 @@ class SiriGrammar extends Grammar {
         SiriGrammar.time_expr,
         SiriGrammar.k_and,
         SiriGrammar.time_expr
+    );
+    static head_expr = Sequence(
+        SiriGrammar.k_head,
+        SiriGrammar.int_expr
+    );
+    static tail_expr = Sequence(
+        SiriGrammar.k_tail,
+        SiriGrammar.int_expr
     );
     static access_expr = List(SiriGrammar.access_keywords, Token(','), 1, undefined, false);
     static prefix_expr = Sequence(
@@ -1212,7 +1222,9 @@ class SiriGrammar extends Grammar {
         Optional(Choice(
             SiriGrammar.after_expr,
             SiriGrammar.between_expr,
-            SiriGrammar.before_expr
+            SiriGrammar.before_expr,
+            SiriGrammar.tail_expr,
+            SiriGrammar.head_expr
         )),
         Optional(SiriGrammar.merge_as)
     );
