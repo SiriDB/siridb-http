@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,9 +12,9 @@ import (
 	"time"
 
 	siridb "github.com/SiriDB/go-siridb-connector"
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/astaxie/beego/session"
 	socketio "github.com/googollee/go-socket.io"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	ini "gopkg.in/ini.v1"
 )
 
@@ -423,9 +424,9 @@ key_file = certificate.key
 	go connect(conn)
 
 	if base.enableSio {
-		server, err := socketio.NewServer(nil)
-		if err != nil {
-			quit(err)
+		server := socketio.NewServer(nil)
+		if server != nil {
+			quit(errors.New("failed to create server"))
 		}
 
 		server.OnConnect("/", func(s socketio.Conn) error {
