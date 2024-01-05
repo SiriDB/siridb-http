@@ -2,7 +2,7 @@ repo_name: SiriDB/siridb-http
 report_id: ff13ed0e063d2e2f950704757bd6d353
 version: 0.1
 repo_type: Public
-timestamp: '2023-12-27T20:00:53+00:00'
+timestamp: '2024-01-05T08:35:12+00:00'
 requested_by: joente
 provider: github
 branch: master
@@ -18,6 +18,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/1005/O6AczwfV_400x400.png
+  detection_source_url: https://github.com/SiriDB/siridb-http
   detection_source: Repo Metadata
 - name: JavaScript
   description: Lightweight, interpreted, object-oriented language with first-class
@@ -28,6 +29,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/1209/javascript.jpeg
+  detection_source_url: https://github.com/SiriDB/siridb-http
   detection_source: Repo Metadata
 - name: Python
   description: A clear and powerful object-oriented programming language, comparable
@@ -38,6 +40,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/993/pUBY5pVj.png
+  detection_source_url: https://github.com/SiriDB/siridb-http
   detection_source: Repo Metadata
 - name: Bootstrap
   description: Simple and flexible HTML, CSS, and JS for popular UI components and
@@ -49,6 +52,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Front-End Frameworks
   image_url: https://img.stackshare.io/service/1101/C9QJ7V3X.png
+  detection_source_url: https://github.com/SiriDB/siridb-http/blob/master/src/package.json
   detection_source: src/package.json
   last_updated_by: Jeroen van der Heijden
   last_updated_on: 2021-03-24 15:21:22.000000000 Z
@@ -61,6 +65,7 @@ tools:
   category: Libraries
   sub_category: Charting Libraries
   image_url: https://img.stackshare.io/service/1491/HgKolWB5_400x400.jpg
+  detection_source_url: https://github.com/SiriDB/siridb-http/blob/master/src/package.json
   detection_source: src/package.json
   last_updated_by: Jeroen van der Heijden
   last_updated_on: 2017-02-03 11:28:24.000000000 Z
@@ -72,6 +77,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Serialization Frameworks
   image_url: https://img.stackshare.io/service/4393/ma2jqJKH_400x400.png
+  detection_source_url: https://github.com/SiriDB/siridb-http/blob/master/go.mod
   detection_source: go.mod
   last_updated_by: Jeroen van der Heijden
   last_updated_on: 2023-02-28 08:48:37.000000000 Z
@@ -112,6 +118,7 @@ tools:
   category: Data Stores
   sub_category: In-Memory Databases
   image_url: https://img.stackshare.io/service/1031/default_cbce472cd134adc6688572f999e9122b9657d4ba.png
+  detection_source_url: https://github.com/SiriDB/siridb-http/blob/master/go.mod
   detection_source: go.mod
   last_updated_by: Jeroen van der Heijden
   last_updated_on: 2021-03-24 14:56:53.000000000 Z
@@ -138,6 +145,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Virtual Machine Platforms & Containers
   image_url: https://img.stackshare.io/service/586/n4u37v9t_400x400.png
+  detection_source_url: https://github.com/SiriDB/siridb-http
   detection_source: Repo Metadata
 - name: ESLint
   description: The fully pluggable JavaScript code quality tool
@@ -148,6 +156,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Code Review
   image_url: https://img.stackshare.io/service/3337/Q4L7Jncy.jpg
+  detection_source_url: https://github.com/SiriDB/siridb-http/blob/master/src/package.json
   detection_source: src/package.json
   last_updated_by: Jeroen van der Heijden
   last_updated_on: 2017-02-03 11:28:24.000000000 Z
@@ -173,6 +182,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Version Control System
   image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/SiriDB/siridb-http
   detection_source: Repo Metadata
 - name: GitHub Actions
   description: Automate your workflow from idea to production
@@ -182,6 +192,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Continuous Integration
   image_url: https://img.stackshare.io/service/11563/actions.png
+  detection_source_url: https://github.com/SiriDB/siridb-http/blob/master/.github/workflows/ci.yml
   detection_source: ".github/workflows/ci.yml"
   last_updated_by: Jeroen van der Heijden
   last_updated_on: 2022-01-14 16:07:14.000000000 Z
@@ -207,6 +218,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Front End Package Manager
   image_url: https://img.stackshare.io/service/1120/lejvzrnlpb308aftn31u.png
+  detection_source_url: https://github.com/SiriDB/siridb-http/blob/master/src/package.json
   detection_source: src/package.json
   last_updated_by: Jeroen van der Heijden
   last_updated_on: 2017-02-03 11:28:24.000000000 Z
@@ -710,6 +722,7 @@ tools:
   category: Libraries
   sub_category: Go Modules Packages
   image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/SiriDB/siridb-http/blob/master/go.mod
   detection_source: go.mod
   last_updated_by: Jeroen van der Heijden
   last_updated_on: 2023-02-28 08:48:37.000000000 Z
